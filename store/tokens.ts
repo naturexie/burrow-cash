@@ -122,6 +122,10 @@ export const prepareAndExecuteTokenTransactions = async (
             {
               methodName: ChangeMethodsToken[ChangeMethodsToken.storage_deposit],
               attachedDeposit: new BN(expandToken(NEAR_STORAGE_DEPOSIT, NEAR_DECIMALS)),
+              args: {
+                account_id: account.accountId,
+                registration_only: true,
+              },
             },
           ],
         });
