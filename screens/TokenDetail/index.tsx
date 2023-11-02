@@ -360,7 +360,7 @@ function TokenOverviewMobile() {
             : ""
         }
       />
-      <LabelMobile title="Supply APY" value={format_apy(depositAPY)} />
+      <LabelMobileAPY title="Supply APY" tokenRow={tokenRow} />
       <LabelMobile
         title="Borrow APY"
         value={!tokenRow?.can_borrow ? "-" : format_apy(tokenRow?.borrowApy)}
@@ -547,7 +547,7 @@ function TokenSupplyChart({ tokenDetails, handlePeriodClick }) {
       {/* only mobile */}
       <div className="grid grid-cols-1 gap-y-4 lg:hidden">
         <LabelMobile title="Total Supplied" value={value} subValue={value_value} subMode="space" />
-        <LabelMobile title="APY" value={apy} />
+        <LabelMobileAPY title="APY" tokenRow={tokenRow} />
         <LabelMobile
           title="Rewards"
           value={
@@ -563,6 +563,7 @@ function TokenSupplyChart({ tokenDetails, handlePeriodClick }) {
       <HrLine />
       <div className="mt-8 xsm:-ml-5">
         <TokenBorrowSuppliesChart
+          tokenRow={tokenRow}
           data={tokenSupplyDays}
           xKey="dayDate"
           yKey="tokenSupplyApy"
@@ -631,8 +632,9 @@ function TokenRateModeChart({
   interestRates: Array<any>;
   tokenRow?: any;
 }) {
-  const fullRateDetail = interestRates?.find((d) => d.percent === 100);
-  const { borrowRate, supplyRate, currentUtilRate } = fullRateDetail || {};
+  const { currentUtilRate } = interestRates?.[0] || {};
+  const { borrowApy, supplyApy } = tokenRow || {};
+  // const { borrowRate, supplyRate } = fullRateDetail || {};
 
   return (
     <div className="lg:mb-1.5 lg:rounded-md lg:p-7 xsm:rounded-2xl bg-gray-800 xsm:p-4">
@@ -647,13 +649,13 @@ function TokenRateModeChart({
         {/* <LabelText left="Utilization Rate" right={fullRateDetail?.percentLabel || "-"} /> */}
         <LabelText
           left="Borrow Rate"
-          leftIcon={<div className="rounded-full mr-2 bg-primary h-[10px] w-[10px]" />}
-          right={borrowRate ? `${borrowRate.toFixed(2)}%` : "-"}
+          leftIcon={<div className="rounded-full mr-2 bg-danger h-[10px] w-[10px]" />}
+          right={borrowApy ? `${borrowApy.toFixed(2)}%` : "-"}
         />
         <LabelText
           left="Supply Rate"
-          leftIcon={<div className="rounded-full mr-2 bg-danger h-[10px] w-[10px]" />}
-          right={supplyRate ? `${supplyRate.toFixed(2)}%` : "-"}
+          leftIcon={<div className="rounded-full mr-2 bg-primary h-[10px] w-[10px]" />}
+          right={supplyApy ? `${supplyApy.toFixed(2)}%` : "-"}
         />
       </div>
       <HrLine />
@@ -1108,6 +1110,22 @@ function LabelMobile({
           ""
         )}
         {subValue && subMode !== "space" ? <span className="text-gray-300">/{subValue}</span> : ""}
+      </span>
+    </div>
+  );
+}
+function LabelMobileAPY({ tokenRow, title }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-sm text-gray-300">{title}</span>
+      <span className="text-sm text-white">
+        <APYCell
+          rewards={tokenRow.depositRewards}
+          baseAPY={tokenRow.supplyApy}
+          page="deposit"
+          tokenId={tokenRow.tokenId}
+          onlyMarket
+        />
       </span>
     </div>
   );
