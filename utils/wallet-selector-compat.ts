@@ -86,8 +86,11 @@ export const getWalletSelector = async ({ onAccountChange }: GetWalletSelectorAr
         gas: "300000000000000",
       }),
       setupNearMobileWallet({
-        logoUrl: walletIcons["near_mobile_wallet"],
-      } as any),
+        dAppMetadata: {
+          logoUrl: walletIcons["near_mobile_wallet"],
+          name: "NEAR Wallet Selector",
+        },
+      }),
     ],
     network: defaultNetwork,
     debug: !!isTestnet,
