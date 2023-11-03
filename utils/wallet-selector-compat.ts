@@ -16,6 +16,7 @@ import { Account } from "near-api-js/lib/account";
 import { BrowserLocalStorageKeyStore } from "near-api-js/lib/key_stores";
 import BN from "bn.js";
 import { map, distinctUntilChanged } from "rxjs";
+import { walletIcons } from "./walletIcons";
 
 import getConfig, {
   defaultNetwork,
@@ -84,7 +85,9 @@ export const getWalletSelector = async ({ onAccountChange }: GetWalletSelectorAr
         bundle: false,
         gas: "300000000000000",
       }),
-      setupNearMobileWallet(),
+      setupNearMobileWallet({
+        logoUrl: walletIcons["near_mobile_wallet"],
+      } as any),
     ],
     network: defaultNetwork,
     debug: !!isTestnet,
