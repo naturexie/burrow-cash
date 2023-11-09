@@ -87,8 +87,7 @@ export const getWalletSelector = async ({ onAccountChange }: GetWalletSelectorAr
       }),
       setupNearMobileWallet({
         dAppMetadata: {
-          logoUrl:
-            "https://ipfs.near.social/ipfs/bafkreigacuwjtcqecoxwy4n3lphxgdye7phrq6w6j7ffl7tx7iakbjv5ny",
+          logoUrl: "https://ref-finance-images.s3.amazonaws.com/images/burrowLogo.svg",
           name: "NEAR Wallet Selector",
         },
       }),
