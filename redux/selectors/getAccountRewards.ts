@@ -238,19 +238,22 @@ export const getAccountRewards = createSelector(
     const netLiquidityRewards = hasNetTvlFarm
       ? Object.entries(netTvl)
           .filter(([tokenId]) => assets.netTvlFarm[tokenId])
-          .map(computeNetLiquidityRewards)
+          .map((d) => computeNetLiquidityRewards(d))
       : [];
 
     let totalUnClaimUSD = 0;
-    const sumRewards = [...suppliedRewards, ...borrowedRewards].reduce((rewards, asset) => {
-      totalUnClaimUSD += asset.unclaimedAmountUSD;
-      if (!rewards[asset.tokenId]) return { ...rewards, [asset.tokenId]: asset };
-      const updatedAsset = rewards[asset.tokenId];
-      updatedAsset.unclaimedAmount += asset.unclaimedAmount;
-      updatedAsset.dailyAmount += asset.dailyAmount;
-      updatedAsset.newDailyAmount += asset.newDailyAmount;
-      return { ...rewards, [asset.tokenId]: updatedAsset };
-    }, {});
+    const sumRewards = [...suppliedRewards, ...borrowedRewards, ...netLiquidityRewards].reduce(
+      (rewards, asset) => {
+        totalUnClaimUSD += asset.unclaimedAmountUSD;
+        if (!rewards[asset.tokenId]) return { ...rewards, [asset.tokenId]: asset };
+        const updatedAsset = rewards[asset.tokenId];
+        updatedAsset.unclaimedAmount += asset.unclaimedAmount;
+        updatedAsset.dailyAmount += asset.dailyAmount;
+        updatedAsset.newDailyAmount += asset.newDailyAmount;
+        return { ...rewards, [asset.tokenId]: updatedAsset };
+      },
+      {},
+    );
 
     return {
       brrr: sumRewards[brrrTokenId] || {},
