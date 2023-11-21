@@ -2499,16 +2499,6 @@
     js-sha256 "0.9.0"
     rxjs "7.8.1"
 
-"@near-wallet-selector/core@8.7.1":
-  version "8.7.1"
-  resolved "https://registry.npmjs.org/@near-wallet-selector/core/-/core-8.7.1.tgz#99a8b50be0cd184febd3df503c871ae6758f0f98"
-  integrity sha512-CLtnLdxR5eftdV7OH7lEjJ/h2eQg+0DkzccIfINmLpVnNFeVbFuLQtpYIUzin1kQtKZV6i9Km7teGxhLRBfL6g==
-  dependencies:
-    borsh "0.7.0"
-    events "3.3.0"
-    js-sha256 "0.9.0"
-    rxjs "7.8.1"
-
 "@near-wallet-selector/core@8.8.0":
   version "8.8.0"
   resolved "https://registry.npmjs.org/@near-wallet-selector/core/-/core-8.8.0.tgz#f2fcd9b0bd40cdfd4c7af956a8fe6f3daf93997d"
@@ -2569,13 +2559,13 @@
     "@near-wallet-selector/core" "8.7.0"
     "@near-wallet-selector/wallet-utils" "8.7.0"
 
-"@near-wallet-selector/near-mobile-wallet@^8.7.1":
-  version "8.7.1"
-  resolved "https://registry.npmjs.org/@near-wallet-selector/near-mobile-wallet/-/near-mobile-wallet-8.7.1.tgz#73dda062c909603383b2ba11f7faeee76a81901e"
-  integrity sha512-fvdbhD91gi9D5PhPUlNIA9lDYwBaLlc0uu9wL4oo6QS71dIA69yzwz/H2iEcX8GJuBLXH5+30YDMbGeR/D8USg==
+"@near-wallet-selector/near-mobile-wallet@^8.8.0":
+  version "8.8.0"
+  resolved "https://registry.npmjs.org/@near-wallet-selector/near-mobile-wallet/-/near-mobile-wallet-8.8.0.tgz#510b002020fb32d51c34e9431c7b0a5d23f858b1"
+  integrity sha512-cVNZpkqE+UVbX8+LStwYIYSQqlWkpxY0HPNhHxkssjTI/TL1cmPQTaj9xfZyKjqREnOTcrryztsaiJwu0MHCxQ==
   dependencies:
-    "@near-wallet-selector/core" "8.7.1"
-    "@peersyst/near-mobile-signer" "1.0.9"
+    "@near-wallet-selector/core" "8.8.0"
+    "@peersyst/near-mobile-signer" "1.0.11"
 
 "@near-wallet-selector/near-wallet@^8.5.4":
   version "8.7.0"
@@ -3412,10 +3402,10 @@
     "@parcel/utils" "2.10.1"
     nullthrows "^1.1.1"
 
-"@peersyst/near-mobile-signer@1.0.9":
-  version "1.0.9"
-  resolved "https://registry.npmjs.org/@peersyst/near-mobile-signer/-/near-mobile-signer-1.0.9.tgz#96cedefaef262313f8283f024475003a9cfd5c91"
-  integrity sha512-56gqL9fEWdeOHq0wpYYD44G/IFVCuuCyWndIFmggs3q5RL0/Sq03egDk+HWqHcwQ3mhFWwErmYfvIMkMF+jKWw==
+"@peersyst/near-mobile-signer@1.0.11":
+  version "1.0.11"
+  resolved "https://registry.npmjs.org/@peersyst/near-mobile-signer/-/near-mobile-signer-1.0.11.tgz#b87c448d5bcfb9987c6ce8395fa5e601839e5525"
+  integrity sha512-9jU7rjMa9rEo0CYEeYNcu5Zzpe78ctgfxXuIRylpWK4MHuZ/N0ZmxRyUtGgqGQS9zW0aI6PHVURLSCAB5qsYlg==
   dependencies:
     bn.js "^5.2.1"
     js-sha256 "^0.9.0"
