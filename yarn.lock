@@ -1924,6 +1924,16 @@
     rxjs "6"
     semver "^7.3.5"
 
+"@ledgerhq/devices@^6.27.1":
+  version "6.27.1"
+  resolved "https://registry.npmjs.org/@ledgerhq/devices/-/devices-6.27.1.tgz#3b13ab1d1ba8201e9e74a08f390560483978c962"
+  integrity sha512-jX++oy89jtv7Dp2X6gwt3MMkoajel80JFWcdc0HCouwDsV1mVJ3SQdwl/bQU0zd8HI6KebvUP95QTwbQLLK/RQ==
+  dependencies:
+    "@ledgerhq/errors" "^6.10.0"
+    "@ledgerhq/logs" "^6.10.0"
+    rxjs "6"
+    semver "^7.3.5"
+
 "@ledgerhq/devices@^7.0.1":
   version "7.0.1"
   resolved "https://registry.npmjs.org/@ledgerhq/devices/-/devices-7.0.1.tgz"
@@ -1934,10 +1944,25 @@
     rxjs "6"
     semver "^7.3.5"
 
+"@ledgerhq/devices@^8.0.8":
+  version "8.0.8"
+  resolved "https://registry.npmjs.org/@ledgerhq/devices/-/devices-8.0.8.tgz#cd233eb54a044913160c9183be9fb22adae4e071"
+  integrity sha512-0j7E8DY2jeSSATc8IJk+tXDZ9u+Z7tXxB8I4TzXrfV/8A5exMh/K1IwX6Jt1zlw1wre4CT9MV4mzUs3M/TE7lg==
+  dependencies:
+    "@ledgerhq/errors" "^6.15.0"
+    "@ledgerhq/logs" "^6.11.0"
+    rxjs "^7.8.1"
+    semver "^7.3.5"
+
 "@ledgerhq/errors@^5.34.0", "@ledgerhq/errors@^5.50.0":
   version "5.50.0"
   resolved "https://registry.npmjs.org/@ledgerhq/errors/-/errors-5.50.0.tgz"
   integrity sha512-gu6aJ/BHuRlpU7kgVpy2vcYk6atjB4iauP2ymF7Gk0ez0Y/6VSMVSJvubeEQN+IV60+OBK0JgeIZG7OiHaw8ow==
+
+"@ledgerhq/errors@^6.10.0", "@ledgerhq/errors@^6.15.0":
+  version "6.15.0"
+  resolved "https://registry.npmjs.org/@ledgerhq/errors/-/errors-6.15.0.tgz#45cda73915f695cc072cb8a99650830bc5dc6668"
+  integrity sha512-6xaw5/mgoht62TnL3rXsaQYEFwpnXyNDk1AOSJksIjFHx9bHUnkyVmrnGQDj0JLzi+E7bHEgTrpCs8wpeDh9jA==
 
 "@ledgerhq/errors@^6.10.2":
   version "6.12.1"
@@ -1979,6 +2004,16 @@
     "@ledgerhq/logs" "^5.30.0"
     u2f-api "0.2.7"
 
+"@ledgerhq/hw-transport-webhid@6.27.1":
+  version "6.27.1"
+  resolved "https://registry.npmjs.org/@ledgerhq/hw-transport-webhid/-/hw-transport-webhid-6.27.1.tgz#8fd1710d23b6bd7cbe2382dd02054dfabe788447"
+  integrity sha512-u74rBYlibpbyGblSn74fRs2pMM19gEAkYhfVibq0RE1GNFjxDMFC1n7Sb+93Jqmz8flyfB4UFJsxs8/l1tm2Kw==
+  dependencies:
+    "@ledgerhq/devices" "^6.27.1"
+    "@ledgerhq/errors" "^6.10.0"
+    "@ledgerhq/hw-transport" "^6.27.1"
+    "@ledgerhq/logs" "^6.10.0"
+
 "@ledgerhq/hw-transport-webhid@^5.51.1":
   version "5.51.1"
   resolved "https://registry.npmjs.org/@ledgerhq/hw-transport-webhid/-/hw-transport-webhid-5.51.1.tgz"
@@ -1999,6 +2034,15 @@
     "@ledgerhq/hw-transport" "^5.51.1"
     "@ledgerhq/logs" "^5.50.0"
 
+"@ledgerhq/hw-transport@6.27.1":
+  version "6.27.1"
+  resolved "https://registry.npmjs.org/@ledgerhq/hw-transport/-/hw-transport-6.27.1.tgz#88072278f69c279cb6569352acd4ae2fec33ace3"
+  integrity sha512-hnE4/Fq1YzQI4PA1W0H8tCkI99R3UWDb3pJeZd6/Xs4Qw/q1uiQO+vNLC6KIPPhK0IajUfuI/P2jk0qWcMsuAQ==
+  dependencies:
+    "@ledgerhq/devices" "^6.27.1"
+    "@ledgerhq/errors" "^6.10.0"
+    events "^3.3.0"
+
 "@ledgerhq/hw-transport@^5.34.0", "@ledgerhq/hw-transport@^5.51.1":
   version "5.51.1"
   resolved "https://registry.npmjs.org/@ledgerhq/hw-transport/-/hw-transport-5.51.1.tgz"
@@ -2006,6 +2050,16 @@
   dependencies:
     "@ledgerhq/devices" "^5.51.1"
     "@ledgerhq/errors" "^5.50.0"
+    events "^3.3.0"
+
+"@ledgerhq/hw-transport@^6.27.1":
+  version "6.29.0"
+  resolved "https://registry.npmjs.org/@ledgerhq/hw-transport/-/hw-transport-6.29.0.tgz#2b85f39d90b093930f0c7bfc513b29eb47ba97fa"
+  integrity sha512-WQfzxt3EnnbOmzZVYiCgSmNsqafBOFQn40awvUPY2IZviJRs23/1ANPHAo76bzPV88+Qk0+1wZlcnIanGN6fFA==
+  dependencies:
+    "@ledgerhq/devices" "^8.0.8"
+    "@ledgerhq/errors" "^6.15.0"
+    "@ledgerhq/logs" "^6.11.0"
     events "^3.3.0"
 
 "@ledgerhq/hw-transport@^6.27.4":
@@ -2026,6 +2080,11 @@
   version "6.10.1"
   resolved "https://registry.npmjs.org/@ledgerhq/logs/-/logs-6.10.1.tgz"
   integrity sha512-z+ILK8Q3y+nfUl43ctCPuR4Y2bIxk/ooCQFwZxhtci1EhAtMDzMAx2W25qx8G1PPL9UUOdnUax19+F0OjXoj4w==
+
+"@ledgerhq/logs@^6.11.0":
+  version "6.11.0"
+  resolved "https://registry.npmjs.org/@ledgerhq/logs/-/logs-6.11.0.tgz#0d28e7edcf71548506f4304686cba480ba91bbcf"
+  integrity sha512-HHK9y4GGe4X7CXbRUCh7z8Mp+WggpJn1dmUjmuk1rNugESF6o8nAOnXA+BxwtRRNV3CgNJR3Wxdos4J9qV0Zsg==
 
 "@lezer/common@^1.0.0":
   version "1.1.0"
@@ -2450,6 +2509,16 @@
     js-sha256 "0.9.0"
     rxjs "7.8.1"
 
+"@near-wallet-selector/core@8.8.0":
+  version "8.8.0"
+  resolved "https://registry.npmjs.org/@near-wallet-selector/core/-/core-8.8.0.tgz#f2fcd9b0bd40cdfd4c7af956a8fe6f3daf93997d"
+  integrity sha512-mFga/YGvniEKUJlilKFBuLP5dc0HO8c5GGTt6nB/cBCwYZYSlMa+EgB35bTpAn4hdhsirArmGROte0flzsDNhg==
+  dependencies:
+    borsh "0.7.0"
+    events "3.3.0"
+    js-sha256 "0.9.0"
+    rxjs "7.8.1"
+
 "@near-wallet-selector/here-wallet@^8.5.4":
   version "8.7.0"
   resolved "https://registry.npmjs.org/@near-wallet-selector/here-wallet/-/here-wallet-8.7.0.tgz#be01991208baf5f18d19074da8f676cc07911813"
@@ -2458,6 +2527,19 @@
     "@here-wallet/core" "1.5.1"
     "@near-wallet-selector/core" "8.7.0"
     bn.js "5.2.1"
+
+"@near-wallet-selector/ledger@^8.5.4":
+  version "8.8.0"
+  resolved "https://registry.npmjs.org/@near-wallet-selector/ledger/-/ledger-8.8.0.tgz#a8d6e445288e270ed257dd0630929959a2858e0c"
+  integrity sha512-wGE2nlkjXdtsDFCR1MK1mYNTt/15nqI/cqjPsT9EAVISiW9btZkOwTzjdibDeJHnL55cDmVMR08co4ecBAn3mA==
+  dependencies:
+    "@ledgerhq/hw-transport" "6.27.1"
+    "@ledgerhq/hw-transport-webhid" "6.27.1"
+    "@near-wallet-selector/core" "8.8.0"
+    "@near-wallet-selector/wallet-utils" "8.8.0"
+    bn.js "5.2.1"
+    is-mobile "4.0.0"
+    ts-essentials "7.0.3"
 
 "@near-wallet-selector/meteor-wallet@^8.5.4":
   version "8.7.0"
@@ -2556,6 +2638,14 @@
   integrity sha512-iS/RYnsmih/lEbPt90hGld6h967Iq3KYC+CESyxDw4bPKeadLB7d6nqnN7r6WarYeTG1iwkkbHsM52/eQmSdoQ==
   dependencies:
     "@near-wallet-selector/core" "8.7.0"
+    bn.js "5.2.1"
+
+"@near-wallet-selector/wallet-utils@8.8.0":
+  version "8.8.0"
+  resolved "https://registry.npmjs.org/@near-wallet-selector/wallet-utils/-/wallet-utils-8.8.0.tgz#28f4f7ea62fe3e6895b85b3f759270a6cf5a21ed"
+  integrity sha512-qIMxOvs3eQSrBoiFOqTlM8dgpmuKZVCtjG0LtYwUHNG8En9fm/PRM7Wy944A0GvTP/E1U/b1w96zSvqT21jeKA==
+  dependencies:
+    "@near-wallet-selector/core" "8.8.0"
     bn.js "5.2.1"
 
 "@next/env@12.3.1":
@@ -11828,6 +11918,11 @@ ts-easing@^0.2.0:
   version "0.2.0"
   resolved "https://registry.npmjs.org/ts-easing/-/ts-easing-0.2.0.tgz"
   integrity sha512-Z86EW+fFFh/IFB1fqQ3/+7Zpf9t2ebOAxNI/V6Wo7r5gqiqtxmgTlQ1qbqQcjLKYeSHPTsEmvlJUDg/EuL0uHQ==
+
+ts-essentials@7.0.3:
+  version "7.0.3"
+  resolved "https://registry.npmjs.org/ts-essentials/-/ts-essentials-7.0.3.tgz#686fd155a02133eedcc5362dc8b5056cde3e5a38"
+  integrity sha512-8+gr5+lqO3G84KdiTSMRLtuyJ+nTBVRKuCrK4lidMPdVeEp0uqC875uE5NMcaA7YYMN7XsNiFQuMvasF8HT/xQ==
 
 ts-interface-checker@^0.1.9:
   version "0.1.13"
