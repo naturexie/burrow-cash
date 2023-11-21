@@ -11,6 +11,8 @@ export function useRewards() {
   const { brrr, totalUnClaimUSD } = assetRewards || {};
   const extra = Object.entries(assetRewards.extra);
   const net = Object.entries(assetRewards.net);
+  const borrowSupplyRewards = Object.entries(assetRewards.sumRewards);
+
   let totalUnClaimUSDDisplay;
   if (totalUnClaimUSD !== undefined) {
     const IGNORE_AMOUNT = 0.01;
@@ -23,25 +25,16 @@ export function useRewards() {
     }
   }
 
-  const all: Array<{
-    tokenId: string;
-    data: any;
-  }> = [
-    {
-      tokenId: brrr.tokenId,
-      data: {
-        ...brrr,
-        unclaimedAmountPool: brrr.unclaimedAmount,
-      },
-    },
-  ];
-  extra.forEach(([key, value]) => {
+  // borrow + supply reward
+  const all: Array<{ tokenId: string; data: any }> = [];
+  borrowSupplyRewards.forEach(([key, value]) => {
     all.push({
       tokenId: key,
       data: value,
     });
   });
 
+  // net reward
   net.forEach(([key, value]) => {
     const existIndex = all.findIndex((a) => a.tokenId === key);
     if (existIndex !== -1) {

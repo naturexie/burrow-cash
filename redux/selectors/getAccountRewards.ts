@@ -235,13 +235,16 @@ export const getAccountRewards = createSelector(
     const suppliedRewards = Object.entries(supplied).map(computePoolsRewards("supplied")).flat();
     const borrowedRewards = Object.entries(borrowed).map(computePoolsRewards("borrowed")).flat();
 
+    let totalUnClaimUSD = 0;
     const netLiquidityRewards = hasNetTvlFarm
       ? Object.entries(netTvl)
           .filter(([tokenId]) => assets.netTvlFarm[tokenId])
-          .map(computeNetLiquidityRewards)
+          .map((d) => {
+            const rewardObj = computeNetLiquidityRewards(d);
+            totalUnClaimUSD += rewardObj.unclaimedAmountUSD;
+            return rewardObj;
+          })
       : [];
-
-    let totalUnClaimUSD = 0;
     const sumRewards = [...suppliedRewards, ...borrowedRewards].reduce((rewards, asset) => {
       totalUnClaimUSD += asset.unclaimedAmountUSD;
       if (!rewards[asset.tokenId]) return { ...rewards, [asset.tokenId]: asset };
