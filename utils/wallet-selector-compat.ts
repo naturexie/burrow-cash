@@ -92,7 +92,7 @@ export const getWalletSelector = async ({ onAccountChange }: GetWalletSelectorAr
           name: "NEAR Wallet Selector",
         },
       }),
-      setupLedger(),
+      setupLedger({}),
     ],
     network: defaultNetwork,
     debug: !!isTestnet,
