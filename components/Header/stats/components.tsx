@@ -108,31 +108,33 @@ export const Stat = ({
                   key={`${firstData.text}${i}`}
                 >
                   <div
-                    className="flex items-center gap-2 h6 rounded-[21px] bg-dark-100 truncate"
+                    className="flex md:items-center gap-2 h6 rounded md:rounded-[21px] bg-dark-100 truncate"
                     style={{ padding: "3px 8px 5px" }}
                   >
                     <div style={firstData.textStyle} className="h6 text-gray-300">
                       {firstData.text}
                     </div>
-                    {row?.map((d) => {
-                      if (!d.value) {
-                        return null;
-                      }
-                      return (
-                        <div
-                          style={d.valueStyle}
-                          className="flex items-center gap-1"
-                          key={`${d.text}${d.value}`}
-                        >
-                          {d.icon && (
-                            <div>
-                              <TokenIcon width={15} height={15} icon={d.icon} />
-                            </div>
-                          )}
-                          {d.value}
-                        </div>
-                      );
-                    })}
+                    <div className="flex flex-col gap-1 md:flex-row">
+                      {row?.map((d) => {
+                        if (!d.value) {
+                          return null;
+                        }
+                        return (
+                          <div
+                            style={d.valueStyle}
+                            className="flex items-center gap-1"
+                            key={`${d.text}${d.value}`}
+                          >
+                            {d.icon && (
+                              <div>
+                                <TokenIcon width={15} height={15} icon={d.icon} />
+                              </div>
+                            )}
+                            {d.value}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               );
