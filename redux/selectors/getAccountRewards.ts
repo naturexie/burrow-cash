@@ -238,7 +238,7 @@ export const getAccountRewards = createSelector(
     const netLiquidityRewards = hasNetTvlFarm
       ? Object.entries(netTvl)
           .filter(([tokenId]) => assets.netTvlFarm[tokenId])
-          .map((d) => computeNetLiquidityRewards(d))
+          .map(computeNetLiquidityRewards)
       : [];
 
     let totalUnClaimUSD = 0;
