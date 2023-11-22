@@ -109,7 +109,7 @@ export const Stat = ({
                 >
                   <div
                     className="flex md:items-center gap-2 h6 rounded md:rounded-[21px] bg-dark-100 truncate"
-                    style={{ padding: "3px 8px 5px" }}
+                    style={{ padding: "3px 6px 5px" }}
                   >
                     <div style={firstData.textStyle} className="h6 text-gray-300">
                       {firstData.text}

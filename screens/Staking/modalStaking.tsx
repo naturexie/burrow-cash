@@ -52,7 +52,7 @@ const ModalStaking = ({ isOpen, onClose }) => {
     if (Number(value) > Number(total)) {
       value = total;
     }
-    setAmount(Number(value));
+    setAmount(value);
   };
 
   const handleSliderChange = (e) => {
