@@ -49,6 +49,12 @@ const ModalStaking = ({ isOpen, onClose }) => {
 
   const handleInputChange = (e) => {
     let { value } = e?.target || {};
+    const numRegex = /^([0-9]*\.?[0-9]*$)/;
+    if (!numRegex.test(value)) {
+      e.preventDefault();
+      return;
+    }
+
     if (Number(value) > Number(total)) {
       value = total;
     }
@@ -120,9 +126,9 @@ const ModalStaking = ({ isOpen, onClose }) => {
         <input
           value={inputAmount}
           type="number"
-          step="0.01"
+          step="any"
           onChange={handleInputChange}
-          onFocus={handleFocus}
+          className="noselect"
         />
         <div className="btn-sm cursor-pointer" onClick={handleMaxClick}>
           Max
