@@ -14,7 +14,6 @@ import type { WalletSelectorModal } from "@near-wallet-selector/modal-ui";
 import { Near } from "near-api-js/lib/near";
 import { Account } from "near-api-js/lib/account";
 import { BrowserLocalStorageKeyStore } from "near-api-js/lib/key_stores";
-import { setupLedger } from "@near-wallet-selector/ledger";
 import BN from "bn.js";
 import { map, distinctUntilChanged } from "rxjs";
 import { walletIcons } from "./walletIcons";
@@ -92,7 +91,6 @@ export const getWalletSelector = async ({ onAccountChange }: GetWalletSelectorAr
           name: "NEAR Wallet Selector",
         },
       }),
-      setupLedger({}),
     ],
     network: defaultNetwork,
     debug: !!isTestnet,
