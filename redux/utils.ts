@@ -136,13 +136,13 @@ export const transformAsset = (
     brrrBorrow: Number(
       shrinkToken(
         asset.farms.borrowed[brrrTokenId]?.["reward_per_day"] || "0",
-        assets[brrrTokenId].metadata.decimals,
+        assets[brrrTokenId]?.metadata.decimals,
       ),
     ),
     brrrSupply: Number(
       shrinkToken(
         asset.farms.supplied[brrrTokenId]?.["reward_per_day"] || "0",
-        assets[brrrTokenId].metadata.decimals,
+        assets[brrrTokenId]?.metadata.decimals,
       ),
     ),
     depositRewards: getRewards("supplied", asset, assets),

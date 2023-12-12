@@ -73,7 +73,7 @@ export const shrinkToken = (
   decimals: string | number,
   fixed?: number,
 ): string => {
-  return new Decimal(value).div(new Decimal(10).pow(decimals)).toFixed(fixed);
+  return new Decimal(value).div(new Decimal(10).pow(decimals || 0)).toFixed(fixed);
 };
 
 export const getContract = async (
