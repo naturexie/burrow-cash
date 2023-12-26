@@ -97,10 +97,9 @@ export const getWalletSelector = async ({ onAccountChange }: GetWalletSelectorAr
     debug: !!isTestnet,
     optimizeWalletOrder: false,
   });
-
-  const subscription = selector.store.observable
+  const subscription = (selector.store.observable as any)
     .pipe(
-      map((s) => s.accounts),
+      map((s: any) => s.accounts),
       distinctUntilChanged(),
     )
     .subscribe((nextAccounts) => {
