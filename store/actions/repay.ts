@@ -82,7 +82,7 @@ export async function repay({
             PositionRepay: {
               asset_amount: {
                 amount: !isMax
-                  ? expandedAmountToken.mul(extraDecimalMultiplier).toFixed(0)
+                  ? expandedAmountToken.mul(extraDecimalMultiplier).minus(1).toFixed(0)
                   : undefined,
                 token_id: tokenId,
               },
