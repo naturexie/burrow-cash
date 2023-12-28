@@ -11,7 +11,7 @@ import {
   IUnitLptAsset,
   IShadowRecordInfo,
 } from "./asset";
-import { IAccount, IAccountDetailed } from "./account";
+import { IAccount, IAccountDetailed, IAccountAllPositionsDetailed } from "./account";
 
 export interface IConfig {
   booster_decimals: number;
@@ -52,6 +52,7 @@ export interface IBurrow {
     | IUnitLptAsset
     | IShadowRecordInfo
     | IAccount[]
+    | IAccountAllPositionsDetailed
     | Balance
     | IConfig
     | NetTvlFarm

@@ -6,9 +6,9 @@ import { ChangeMethodsNearToken, ChangeMethodsToken } from "../../interfaces";
 import { getTokenContract, getMetadata, prepareAndExecuteTransactions } from "../tokens";
 import getBalance from "../../api/get-balance";
 import { FunctionCallOptions } from "../wallet";
-import { getAccountDetailed } from "../accounts";
 import { NEAR_STORAGE_DEPOSIT_DECIMAL, NEAR_DECIMALS } from "../constants";
-import { DEFAULT_POSITION } from "../../utils/config";
+import { DEFAULT_POSITION, lpTokenPrefix } from "../../utils/config";
+import getPortfolio from "../../api/get-portfolio";
 
 export async function repay({
   tokenId,
@@ -26,16 +26,15 @@ export async function repay({
   const { account, logicContract } = await getBurrow();
   const tokenContract = await getTokenContract(tokenId);
   const { decimals } = (await getMetadata(tokenId))!;
-  const detailedAccount = (await getAccountDetailed(account.accountId))!;
+  const detailedAccount = (await getPortfolio(account.accountId))!;
   const isNEAR = tokenId === nearTokenId;
   const functionCalls: FunctionCallOptions[] = [];
-
   const borrowedBalance = new Decimal(
-    detailedAccount.borrowed.find((a) => a.token_id === tokenId)?.balance || 0,
+    detailedAccount.positions[position]?.borrowed?.find((b) => b.token_id === tokenId)?.balance ||
+      0,
   );
 
   const extraDecimalMultiplier = expandTokenDecimal(1, extraDecimals);
-
   const tokenBorrowedBalance = borrowedBalance.divToInt(extraDecimalMultiplier);
 
   const tokenBalance = new Decimal(await getBalance(tokenId, account.accountId));
@@ -43,10 +42,8 @@ export async function repay({
     0,
     new Decimal((await account.getAccountBalance()).available).sub(NEAR_STORAGE_DEPOSIT_DECIMAL),
   );
-
   const maxAvailableBalance = isNEAR ? tokenBalance.add(accountBalance) : tokenBalance;
   const maxAmount = decimalMin(tokenBorrowedBalance, maxAvailableBalance);
-
   const expandedAmountToken = isMax
     ? maxAmount
     : decimalMin(maxAmount, expandTokenDecimal(amount, decimals));

@@ -1,7 +1,7 @@
-import { IAccountDetailed, ViewMethodsLogic } from "../interfaces";
+import { IAccountAllPositionsDetailed, ViewMethodsLogic } from "../interfaces";
 import { getBurrow } from "../utils";
 
-const getPortfolio = async (account_id: string): Promise<IAccountDetailed> => {
+const getPortfolio = async (account_id: string): Promise<IAccountAllPositionsDetailed> => {
   const { view, logicContract } = await getBurrow();
 
   const accountDetailed = (await view(
@@ -10,7 +10,7 @@ const getPortfolio = async (account_id: string): Promise<IAccountDetailed> => {
     {
       account_id,
     },
-  )) as IAccountDetailed;
+  )) as IAccountAllPositionsDetailed;
 
   return accountDetailed;
 };
