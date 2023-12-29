@@ -329,9 +329,9 @@ export function useBorrowTrigger(tokenId: string) {
   };
 }
 
-export function useRepayTrigger(tokenId: string) {
+export function useRepayTrigger(tokenId: string, position?: string) {
   const dispatch = useAppDispatch();
   return () => {
-    dispatch(showModal({ action: "Repay", tokenId, amount: "0" }));
+    dispatch(showModal({ action: "Repay", tokenId, amount: "0", position }));
   };
 }

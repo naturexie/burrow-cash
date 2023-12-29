@@ -129,6 +129,7 @@ export const getPortfolioAssets = createSelector(
         totalBorrowedUSD += borrowedUSD;
         return standardizeAsset({
           tokenId,
+          shadow_id: DEFAULT_POSITION,
           collateralType: CONST_COLLATERAL_TYPE.SINGLE_TOKEN,
           metadata: asset.metadata,
           symbol: asset.metadata.symbol,
@@ -170,6 +171,7 @@ export const getPortfolioAssets = createSelector(
           totalBorrowedUSD += borrowedUSD;
           return standardizeAsset({
             tokenId,
+            shadow_id,
             collateralType: CONST_COLLATERAL_TYPE.LP_TOKEN,
             metadata: asset.metadata,
             metadataLP: lpAsset.metadata,

@@ -197,6 +197,7 @@ type TableRowSelect = {
   data: {
     tokenId: string | null | undefined;
     canUseAsCollateral: boolean | undefined;
+    shadow_id?: string | null | undefined;
   } | null;
   index: number | null | undefined;
 };
@@ -377,7 +378,7 @@ const YourBorrowed = ({ borrowedRows, accountId, total }) => {
         actionRow={
           <div className="flex gap-2 pb-6 table-action-row">
             <MarketButton tokenId={selected?.data?.tokenId} />
-            <RepayButton tokenId={selected?.data?.tokenId} />
+            <RepayButton tokenId={selected?.data?.tokenId} position={selected?.data?.shadow_id} />
           </div>
         }
       />

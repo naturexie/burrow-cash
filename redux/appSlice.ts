@@ -149,6 +149,7 @@ export const appSlice = createSlice({
         action: TokenAction;
         amount: string;
         tokenId: string;
+        position?: string;
       }>,
     ) {
       state.selected = { ...state.selected, isMax: false, ...action.payload };

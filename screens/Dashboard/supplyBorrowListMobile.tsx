@@ -225,7 +225,7 @@ const BorrowItem = ({ data }) => {
         </ItemRow>
 
         <div className="">
-          <RepayButton tokenId={data?.tokenId} />
+          <RepayButton tokenId={data?.tokenId} position={data?.shadow_id} />
         </div>
       </div>
     </div>
