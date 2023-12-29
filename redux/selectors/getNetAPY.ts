@@ -16,41 +16,19 @@ export const getNetAPY = ({ isStaking = false }: { isStaking: boolean }) =>
       if (!hasAssets(assets)) return 0;
       // check if new data borrows/collaterals exist, could be remove in next patch
       const { borrows, collaterals } = account?.portfolio || {};
-      const isLog = !isStaking;
-      if (isLog) {
-        console.info(`=====getNetAPY====`);
-      }
-
       const [gainBorrowed, totalBorrowed] = borrows
-        ? getGainsArr(borrows, assets, false, isLog)
+        ? getGainsArr(borrows, assets)
         : getGains(account.portfolio, assets, "borrowed");
-      if (isLog) {
-        console.info(`gainBorrowed:${gainBorrowed}, totalBorrowed:${totalBorrowed}`);
-      }
       const [gainCollateral, totalCollateral] = collaterals
-        ? getGainsArr(collaterals, assets, false, isLog)
+        ? getGainsArr(collaterals, assets)
         : getGains(account.portfolio, assets, "collateral");
-      if (isLog) {
-        console.info(`gainCollateral:${gainCollateral}, totalCollateral:${totalCollateral}`);
-      }
       const [gainSupplied, totalSupplied] = getGains(account.portfolio, assets, "supplied");
-      if (isLog) {
-        console.info(`gainSupplied:${gainSupplied}, totalSupplied:${totalSupplied}`);
-      }
       const gainExtra = extraDaily * 365;
 
       const netGains = gainCollateral + gainSupplied + gainExtra - gainBorrowed;
       const netTotals = totalCollateral + totalSupplied - totalBorrowed;
       const netAPY = (netGains / netTotals) * 100;
-      if (isLog) {
-        console.info(
-          `> netGains:${netGains}=> gainCollateral:${gainCollateral} + gainSupplied:${gainSupplied} + gainExtra:${gainExtra}(extraDaily:${extraDaily}*365) - gainBorrowed:${gainBorrowed}`,
-        );
-        console.info(
-          `> netTotals:${netTotals}=> totalCollateral:${totalCollateral} + totalSupplied:${totalSupplied} - totalBorrowed:${totalBorrowed}`,
-        );
-        console.info(`> netAPY:${netAPY}=> netGains:${netGains}/${netTotals}*100`);
-      }
+
       return netAPY || 0;
     },
   );

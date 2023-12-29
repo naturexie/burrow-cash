@@ -64,41 +64,18 @@ export const getGains = (
   return result;
 };
 
-export const getGainsArr = (
-  tokens: any[],
-  assets: AssetsState,
-  withNetTvlMultiplier = false,
-  isLog = false,
-) => {
+export const getGainsArr = (tokens: any[], assets: AssetsState, withNetTvlMultiplier = false) => {
   const res = tokens.map((data) => {
     const asset = assets.data[data.token_id];
     const netTvlMultiplier = asset.config.net_tvl_multiplier / 10000;
     const { balance } = data;
     const apr = Number(data.apr);
     const balanceUSD = toUsd(balance, asset);
-    if (isLog) {
-      console.info(
-        ` | token:${data.token_id} balance:${
-          balanceUSD * (withNetTvlMultiplier ? netTvlMultiplier : 1)
-        }=> balanceUSD:${balanceUSD} * netTvlMultiplier:${
-          withNetTvlMultiplier ? netTvlMultiplier : 1
-        }, apr:${apr}`,
-      );
-    }
 
     return [balanceUSD * (withNetTvlMultiplier ? netTvlMultiplier : 1), apr];
   });
   const result = res.reduce(
-    ([gain, sum], [balance, apr]) => {
-      if (isLog) {
-        console.info(
-          `   | gain:${
-            gain + balance * apr
-          }(gain:${gain}+balance:${balance}*apr:${apr}) totalBalance:${sum + balance}`,
-        );
-      }
-      return [gain + balance * apr, sum + balance];
-    },
+    ([gain, sum], [balance, apr]) => [gain + balance * apr, sum + balance],
     [0, 0],
   );
   return result;
