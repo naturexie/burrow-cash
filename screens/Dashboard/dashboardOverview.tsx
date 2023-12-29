@@ -199,7 +199,7 @@ const DashboardOverview = ({ suppliedRows, borrowedRows }) => {
 
             <div className="relative flex xsm2:flex-col xsm:items-center items-end gap-4">
               <HealthFactor userHealth={userHealthCur} />
-              {userHealth?.allHealths ? (
+              {userHealth?.allHealths?.length > 1 ? (
                 <div className="lp-healths flex flex-col items-center gap-2 mt-4">
                   {userHealth.allHealths.map((value: any) => {
                     const isActive = value.id === userHealthCur?.id;
@@ -262,6 +262,7 @@ const HealthFactor = ({ userHealth }) => {
   const { data, healthFactor, lowHealthFactor, dangerHealthFactor } = userHealth || {};
   const isDanger = healthFactor !== -1 && healthFactor < dangerHealthFactor;
   const isWarning = healthFactor !== -1 && healthFactor < lowHealthFactor;
+  const healthFactorLabel = [-1, null].includes(healthFactor) ? "-%" : `${healthFactor}%`;
   const isMobile = isMobileDevice();
 
   let dangerTooltipStyles = {};
@@ -302,7 +303,7 @@ const HealthFactor = ({ userHealth }) => {
               <DangerIcon />
             </CustomTooltips>
           )}
-          {data?.valueLabel}
+          {healthFactorLabel}
         </div>
         <div className="h5 text-gray-300 flex gap-1 items-center justify-center">
           Health Factor

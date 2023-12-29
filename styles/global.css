@@ -778,6 +778,9 @@ options-list::-webkit-scrollbar {
                                   supported by Chrome, Edge, Opera and Firefox */
 }
 
+.health-tab{
+  border-radius: 4px;
+}
 .health-tab:hover, .health-tab-active{
   background: #2E304B;
 }
