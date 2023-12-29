@@ -18,6 +18,7 @@ export const getNetAPY = ({ isStaking = false }: { isStaking: boolean }) =>
       const { borrows, collaterals } = account?.portfolio || {};
       const isLog = !isStaking;
       if (isLog) {
+        console.info("=====portfolio=>", account?.portfolio);
         console.info(`=====getNetAPY====`);
       }
 
