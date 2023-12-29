@@ -212,7 +212,7 @@ const DashboardOverview = ({ suppliedRows, borrowedRows }) => {
                     let tokensName = value?.type;
                     value?.metadata?.tokens?.forEach((d, i) => {
                       const isLast = i === value.metadata.tokens.length - 1;
-                      tokensName += `${d.metadata.symbol}${!isLast ? "-" : ""}`;
+                      tokensName += `:${d.metadata.symbol}${!isLast ? "-" : ""}`;
                     });
                     return (
                       <div
