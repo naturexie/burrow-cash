@@ -163,9 +163,7 @@ export const computeNetLiquidityDailyAmount = (
   const newBoostedShares = shares * multiplier;
   const newTotalBoostedShares = totalBoostedShares + newBoostedShares - boostedShares;
   const newDailyAmount = (newBoostedShares / newTotalBoostedShares) * totalRewardsPerDay;
-  console.info(
-    ` | dailyAmount:${dailyAmount} boostedShares:${boostedShares}/totalBoostedShares:${totalBoostedShares}*totalRewardsPerDay:${totalRewardsPerDay}`,
-  );
+
   return { dailyAmount, newDailyAmount, multiplier, totalBoostedShares, shares };
 };
 
@@ -234,7 +232,6 @@ export const getAccountRewards = createSelector(
       const { icon, symbol, name } = rewardAsset.metadata;
       const unclaimedAmount = Number(shrinkToken(farmData.unclaimed_amount, rewardAssetDecimals));
 
-      console.info(`rewardTokenId:${rewardTokenId}`);
       const { dailyAmount, newDailyAmount, multiplier } = computeNetLiquidityDailyAmount(
         rewardAsset,
         xBRRRAmount,
@@ -262,9 +259,8 @@ export const getAccountRewards = createSelector(
     const hasNetTvlFarm = !!Object.entries(assets.netTvlFarm).length;
 
     const suppliedRewards = Object.entries(supplied).map(computePoolsRewards("supplied")).flat();
-    console.info("suppliedRewards", suppliedRewards);
     const borrowedRewards = Object.entries(borrowed).map(computePoolsRewards("borrowed")).flat();
-    console.info("borrowedRewards", borrowedRewards);
+
     const netLiquidityRewards = hasNetTvlFarm
       ? Object.entries(netTvl)
           .filter(([tokenId]) => assets.netTvlFarm[tokenId])
