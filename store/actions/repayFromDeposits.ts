@@ -37,72 +37,50 @@ export async function repayFromDeposits({
   );
 
   const transactions: Transaction[] = [];
-  if (!position || position === DEFAULT_POSITION) {
-    transactions.push({
-      receiverId: oracleContract.contractId,
-      functionCalls: [
-        {
-          methodName: ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
-          args: {
-            receiver_id: logicContract.contractId,
-            msg: JSON.stringify({
-              Execute: {
-                actions: [
-                  ...(decreaseCollateralAmount.gt(0)
-                    ? [
-                        {
-                          DecreaseCollateral: {
-                            token_id: tokenId,
-                            amount: decreaseCollateralAmount.toFixed(0),
-                          },
+  const repayTemplate =
+    !position || position === DEFAULT_POSITION
+      ? {
+          Repay: {
+            token_id: tokenId,
+            amount: expandedAmount.mul(extraDecimalMultiplier).toFixed(0),
+          },
+        }
+      : {
+          PositionRepay: {
+            asset_amount: {
+              amount: expandedAmount.mul(extraDecimalMultiplier).toFixed(0),
+              token_id: tokenId,
+            },
+            position,
+          },
+        };
+  transactions.push({
+    receiverId: oracleContract.contractId,
+    functionCalls: [
+      {
+        methodName: ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
+        args: {
+          receiver_id: logicContract.contractId,
+          msg: JSON.stringify({
+            Execute: {
+              actions: [
+                ...(decreaseCollateralAmount.gt(0)
+                  ? [
+                      {
+                        DecreaseCollateral: {
+                          token_id: tokenId,
+                          amount: decreaseCollateralAmount.toFixed(0),
                         },
-                      ]
-                    : []),
-                  {
-                    Repay: {
-                      token_id: tokenId,
-                      amount: expandedAmount.mul(extraDecimalMultiplier).toFixed(0),
-                    },
-                  },
-                ],
-              },
-            }),
-          },
-        },
-      ],
-    });
-  } else {
-    transactions.push({
-      receiverId: logicContract.contractId,
-      functionCalls: [
-        {
-          methodName: ChangeMethodsLogic[ChangeMethodsLogic.execute],
-          args: {
-            actions: [
-              ...(decreaseCollateralAmount.gt(0)
-                ? [
-                    {
-                      DecreaseCollateral: {
-                        token_id: tokenId,
-                        amount: decreaseCollateralAmount.toFixed(0),
                       },
-                    },
-                  ]
-                : []),
-              {
-                PositionRepay: {
-                  asset_amount: {
-                    amount: expandedAmount.mul(extraDecimalMultiplier).toFixed(0),
-                    token_id: tokenId,
-                  },
-                  position,
-                },
-              },
-            ],
-          },
+                    ]
+                  : []),
+                repayTemplate,
+              ],
+            },
+          }),
         },
-      ],
-    });
-  }
+      },
+    ],
+  });
   await prepareAndExecuteTransactions(transactions);
 }

@@ -778,19 +778,20 @@ options-list::-webkit-scrollbar {
                                   supported by Chrome, Edge, Opera and Firefox */
 }
 
-.health-tab{
+.health-tab {
   border-radius: 4px;
 }
-.health-tab:hover, .health-tab-active{
-  background: #2E304B;
+.health-tab:hover,
+.health-tab-active {
+  background: #2e304b;
 }
 
-.health-tab .arrow-left{
+.health-tab .arrow-left {
   position: absolute;
-  right:100%;
+  right: 100%;
   width: 0;
   height: 0;
   border-top: 16px solid transparent;
   border-bottom: 15px solid transparent;
-  border-right:10px solid #2E304B;
+  border-right: 10px solid #2e304b;
 }
