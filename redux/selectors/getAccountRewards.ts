@@ -125,9 +125,7 @@ export const computePoolsDailyAmount = (
   const newBoostedShares = shares * multiplier;
   const newTotalBoostedShares = totalBoostedShares + newBoostedShares - boostedShares;
   const newDailyAmount = (newBoostedShares / newTotalBoostedShares) * totalRewardsPerDay;
-  console.info(
-    `dailyAmount:${dailyAmount} ${boostedShares}/${totalBoostedShares}*${totalRewardsPerDay} (boostedShares / totalBoostedShares * totalRewardsPerDay)`,
-  );
+
   return { dailyAmount, newDailyAmount, multiplier, totalBoostedShares, shares };
 };
 
@@ -261,7 +259,6 @@ export const getAccountRewards = createSelector(
     };
 
     const { supplied, borrowed, netTvl } = account.portfolio.farms;
-    console.info("accountPortfolio", account.portfolio);
     const hasNetTvlFarm = !!Object.entries(assets.netTvlFarm).length;
 
     const suppliedRewards = Object.entries(supplied).map(computePoolsRewards("supplied")).flat();
