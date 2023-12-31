@@ -16,7 +16,7 @@ import { recomputeHealthFactorSupply } from "../../redux/selectors/recomputeHeal
 import { recomputeHealthFactorRepay } from "../../redux/selectors/recomputeHealthFactorRepay";
 import { recomputeHealthFactorRepayFromDeposits } from "../../redux/selectors/recomputeHealthFactorRepayFromDeposits";
 import { formatWithCommas_number } from "../../utils/uiNumber";
-import { DEFAULT_POSITION } from "../../utils/config";
+import { DEFAULT_POSITION, lpTokenPrefix } from "../../utils/config";
 import { Wrapper } from "./style";
 import { getModalData } from "./utils";
 import {
@@ -48,7 +48,6 @@ const Modal = () => {
   const dispatch = useAppDispatch();
   const { isRepayFromDeposits } = useDegenMode();
   const theme = useTheme();
-  const portfolioAssets = usePortfolioAssets();
   const [selectedCollateralType, setSelectedCollateralType] = useState(DEFAULT_POSITION);
 
   const { action = "Deposit", tokenId, position } = asset;
@@ -72,8 +71,14 @@ const Modal = () => {
   const maxBorrowAmountPositions = useAppSelector(getBorrowMaxAmount(tokenId));
   const maxWithdrawAmount = useAppSelector(getWithdrawMaxAmount(tokenId));
   const repayPositions = useAppSelector(getRepayPositions(tokenId));
+  const activePosition =
+    action === "Repay" || action === "Borrow"
+      ? selectedCollateralType
+      : tokenId.indexOf(lpTokenPrefix) > -1
+      ? tokenId
+      : DEFAULT_POSITION;
   const { maxBorrowAmount = 0, maxBorrowValue = 0 } =
-    maxBorrowAmountPositions[selectedCollateralType] || {};
+    maxBorrowAmountPositions[activePosition] || {};
   const repayAmount = repayPositions[selectedCollateralType];
   const {
     symbol,

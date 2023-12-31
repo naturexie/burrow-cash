@@ -31,7 +31,7 @@ export const computeBorrowMaxAmount = (tokenId: string, assets: Assets, account,
         Math.max(0, maxBorrowAmountTemp.toNumber()),
         uiAsset.availableLiquidity || 0,
       );
-      const maxBorrowPriced = adjustedCollateralSum.sub(adjustedBorrowedSum).mul(95).div(100);
+      const maxBorrowPriced = adjustedCollateralSum.sub(adjustedBorrowedSum);
       return {
         [position]: {
           maxBorrowAmount: Math.max(maxBorrowAmount.toNumber(), 0),
@@ -40,22 +40,6 @@ export const computeBorrowMaxAmount = (tokenId: string, assets: Assets, account,
       };
     })
     .reduce((acc, cur) => ({ ...acc, ...cur }), {});
-};
-export const computeBorrowMaxAmount2 = (tokenId: string, assets: Assets, portfolio: Portfolio) => {
-  const asset = assets[tokenId];
-  const adjustedCollateralSum = getAdjustedSum("collateral", portfolio, assets);
-  const adjustedBorrowedSum = getAdjustedSum("borrowed", portfolio, assets);
-  const volatiliyRatio = asset.config.volatility_ratio || 0;
-  const price = asset.price?.usd || Infinity;
-
-  const maxBorrowAmount = adjustedCollateralSum
-    .sub(adjustedBorrowedSum)
-    .mul(volatiliyRatio)
-    .div(MAX_RATIO)
-    .div(price)
-    .mul(95)
-    .div(100);
-  return maxBorrowAmount;
 };
 
 export const getBorrowMaxAmount = (tokenId: string) =>

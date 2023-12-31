@@ -53,20 +53,17 @@ export async function shadow_action_supply({
 }
 export async function shadow_action_withdraw({
   tokenId,
-  decimals,
-  amount,
+  expandAmount,
   isMax,
   decreaseCollateralAmount,
 }: {
   tokenId: string;
-  decimals: number;
-  amount: string;
+  expandAmount: string;
   isMax: boolean;
   decreaseCollateralAmount: Decimal;
 }): Promise<void> {
   const transactions: Transaction[] = [];
   const { refv1Contract, logicContract, oracleContract } = await getBurrow();
-  const expandAmount = expandTokenDecimal(amount, decimals).toFixed(0);
   const pool_id = +tokenId.split("-")[1];
   if (decreaseCollateralAmount.gt(0)) {
     transactions.push({
@@ -105,7 +102,7 @@ export async function shadow_action_withdraw({
         args: {
           action: "FromBurrowland",
           pool_id,
-          ...(isMax ? {} : { amount: expandAmount }),
+          amount: expandAmount,
           msg: "",
         },
       },

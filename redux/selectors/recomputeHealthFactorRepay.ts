@@ -46,7 +46,7 @@ export const recomputeHealthFactorRepay = (tokenId: string, amount: number, posi
         assets.data,
         position,
       );
-      const maxBorrowValue = adjustedCollateralSum.sub(adjustedBorrowedSum).mul(95).div(100);
+      const maxBorrowValue = adjustedCollateralSum.sub(adjustedBorrowedSum);
       const healthFactorTemp = adjustedCollateralSum.div(adjustedBorrowedSum).mul(100).toNumber();
       const healthFactor = healthFactorTemp < MAX_RATIO ? healthFactorTemp : MAX_RATIO;
       return { healthFactor, maxBorrowValue };

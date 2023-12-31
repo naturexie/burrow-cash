@@ -42,12 +42,11 @@ export async function withdraw({ tokenId, extraDecimals, amount, isMax }: Props)
     : decimalMin(maxAmount, expandTokenDecimal(amount, decimals + extraDecimals));
 
   const transactions: Transaction[] = [];
+  const decreaseCollateralAmount = decimalMax(expandedAmount.sub(suppliedBalance), 0);
   if (isLpToken) {
-    const decreaseCollateralAmount = decimalMax(expandedAmount.sub(suppliedBalance), 0);
     shadow_action_withdraw({
       tokenId,
-      decimals: decimals + extraDecimals,
-      amount,
+      expandAmount: expandedAmount.toFixed(0),
       isMax,
       decreaseCollateralAmount,
     });
@@ -103,9 +102,6 @@ export async function withdraw({ tokenId, extraDecimals, amount, isMax }: Props)
         max_amount: !isMax ? expandedAmount.toFixed(0) : undefined,
       },
     };
-
-    const decreaseCollateralAmount = decimalMax(expandedAmount.sub(suppliedBalance), 0);
-
     if (decreaseCollateralAmount.gt(0)) {
       transactions.push({
         receiverId: oracleContract.contractId,
