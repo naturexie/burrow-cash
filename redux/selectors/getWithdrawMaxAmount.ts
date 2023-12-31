@@ -22,11 +22,12 @@ export const getAdjustedSum = (
     const positionData = portfolio.positions[positionId][type][id];
     let pricedBalance;
     if (asset?.isLpToken) {
-      const assetSuppliedBorrow = asset[type === "collateral" ? "supplied" : "borrowed"];
-      const lpTokensBalance = new Decimal(assetSuppliedBorrow.balance)
-        .mul(positionData.shares)
-        .div(assetSuppliedBorrow.shares)
-        .round();
+      // const assetSuppliedBorrow = asset[type === "collateral" ? "supplied" : "borrowed"];
+      // const lpTokensBalance = new Decimal(assetSuppliedBorrow.balance)
+      //   .mul(positionData.shares)
+      //   .div(assetSuppliedBorrow.shares)
+      //   .round();
+      const lpTokensBalance = new Decimal(positionData.balance).round();
       const unitShare = new Decimal(10).pow(asset.metadata.decimals);
       pricedBalance = asset.metadata.tokens.reduce((sum, tokenValue) => {
         const tokenAsset = assets[tokenValue.token_id];
