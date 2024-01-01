@@ -19,12 +19,14 @@ import { getSelectedValues, getAssetData } from "../../redux/appSelectors";
 import { trackActionButton, trackUseAsCollateral } from "../../utils/telemetry";
 import { useDegenMode } from "../../hooks/hooks";
 import { SubmitButton, AlertWarning } from "./components";
+import { getAccountPortfolio } from "../../redux/accountSelectors";
 
 export default function Action({ maxBorrowAmount, healthFactor, collateralType }) {
   const [loading, setLoading] = useState(false);
   const { amount, useAsCollateral, isMax } = useAppSelector(getSelectedValues);
   const dispatch = useAppDispatch();
   const asset = useAppSelector(getAssetData);
+  const portfolio = useAppSelector(getAccountPortfolio);
   const { action = "Deposit", tokenId, isLpToken, decimals } = asset;
   const { isRepayFromDeposits } = useDegenMode();
 
@@ -59,12 +61,16 @@ export default function Action({ maxBorrowAmount, healthFactor, collateralType }
         if (tokenId === nearTokenId) {
           await deposit({ amount, useAsCollateral, isMax });
         } else if (isLpToken) {
+          const isRegistered = !!(
+            portfolio?.supplied?.[tokenId] || portfolio?.positions?.[tokenId]?.collateral?.[tokenId]
+          );
           await shadow_action_supply({
             tokenId,
             decimals: +(decimals || 0) + +extraDecimals,
             useAsCollateral,
             amount,
             isMax,
+            isRegistered,
           });
         } else {
           await supply({

@@ -13,12 +13,14 @@ export async function shadow_action_supply({
   useAsCollateral,
   amount,
   isMax,
+  isRegistered,
 }: {
   tokenId: string;
   decimals: number;
   useAsCollateral: boolean;
   amount: string;
   isMax: boolean;
+  isRegistered: boolean;
 }): Promise<void> {
   const transactions: Transaction[] = [];
   const { refv1Contract } = await getBurrow();
@@ -45,7 +47,7 @@ export async function shadow_action_supply({
           ...(isMax ? {} : { amount: expandAmount }),
           msg: useAsCollateral ? JSON.stringify({ Execute: collateralActions }) : "",
         },
-        attachedDeposit: new BN(1),
+        attachedDeposit: new BN(isRegistered ? 1 : expandToken(0.003, NEAR_DECIMALS)),
       },
     ],
   });
