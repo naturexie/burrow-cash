@@ -9,6 +9,7 @@ import { useAppSelector } from "../redux/hooks";
 import { shrinkToken } from "../store/helper";
 import { getNetTvlAPY, getTotalNetTvlAPY } from "../redux/selectors/getNetAPY";
 import { useNonFarmedAssets } from "./hooks";
+import { lpTokenPrefix, DEFAULT_POSITION } from "../utils/config";
 
 export function useExtraAPY({
   tokenId: assetId,
@@ -40,13 +41,17 @@ export function useExtraAPY({
 
   const assetDecimals = asset.metadata.decimals + asset.config.extra_decimals;
   const assetPrice = assets.data[assetId].price?.usd || 0;
-
+  const position = assetId.indexOf(lpTokenPrefix) > -1 ? assetId : DEFAULT_POSITION;
   const totalBorrowAssetUSD =
-    Number(shrinkToken(portfolio.borrowed?.[assetId]?.balance || 0, assetDecimals)) * assetPrice;
+    Number(
+      shrinkToken(portfolio.positions[position].borrowed?.[assetId]?.balance || 0, assetDecimals),
+    ) * assetPrice;
   const totalSupplyAssetUSD =
     Number(shrinkToken(portfolio.supplied[assetId]?.balance || 0, assetDecimals)) * assetPrice;
   const totalCollateralAssetUSD =
-    Number(shrinkToken(portfolio.collateral?.[assetId]?.balance || 0, assetDecimals)) * assetPrice;
+    Number(
+      shrinkToken(portfolio.positions[position].collateral?.[assetId]?.balance || 0, assetDecimals),
+    ) * assetPrice;
 
   const totalUserAssetUSD = isBorrow
     ? totalBorrowAssetUSD
@@ -87,7 +92,6 @@ export function useExtraAPY({
       ((totalDailyRewards * price * 365 * multiplier) /
         ((totalUserAssetUSD * totalBoostedShares) / shares)) *
       100;
-
     return apy || 0;
   };
 
