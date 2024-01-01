@@ -118,13 +118,13 @@ export const computePoolsDailyAmount = (
   );
   const collateralShares = Number(
     shrinkToken(
-      portfolio.positions[position].collateral?.[asset.token_id]?.shares || 0,
+      portfolio.positions[position]?.collateral?.[asset.token_id]?.shares || 0,
       assetDecimals,
     ),
   );
   const borrowedShares = Number(
     shrinkToken(
-      portfolio.positions[position].borrowed?.[asset.token_id]?.shares || 0,
+      portfolio.positions[position]?.borrowed?.[asset.token_id]?.shares || 0,
       assetDecimals,
     ),
   );
