@@ -58,7 +58,6 @@ import { IToken } from "../../interfaces/asset";
 import LPTokenCell from "./LPTokenCell";
 import AvailableBorrowCell from "./AvailableBorrowCell";
 import { useAppDispatch } from "../../redux/hooks";
-import { getRepayTemplate, getBorrowTemplate } from "../../components/Modal/actionTemplate";
 
 const DetailData = createContext(null) as any;
 const TokenDetail = () => {
@@ -140,7 +139,74 @@ function TokenDetailView({ tokenRow, assets }: { tokenRow: UIAsset; assets: UIAs
 
   const is_native = NATIVE_TOKENS?.includes(tokenRow.tokenId);
   const is_new = NEW_TOKENS?.includes(tokenRow.tokenId);
-
+  function getIcons() {
+    const { isLpToken, tokens } = tokenRow;
+    return (
+      <div className="flex items-center justify-center flex-wrap flex-shrink-0 xsm:w-[34px]">
+        {isLpToken ? (
+          tokens.map((token: IToken, index) => {
+            if (isMobile) {
+              return (
+                <img
+                  key={token.token_id}
+                  src={token.metadata?.icon}
+                  alt=""
+                  className={`w-5 h-5 rounded-full relative ${
+                    index !== 0 && index !== 2 ? "-ml-1.5" : ""
+                  } ${index > 1 ? "-mt-1.5" : "z-10"}`}
+                />
+              );
+            } else {
+              return (
+                <img
+                  key={token.token_id}
+                  src={token?.metadata?.icon}
+                  alt=""
+                  className={`w-6 h-6 rounded-full relative ${index !== 0 ? "-ml-1.5" : ""}`}
+                />
+              );
+            }
+          })
+        ) : (
+          <img src={tokenRow?.icon} className="w-9 h-9 xsm:w-7 xsm:h-7 rounded-full" alt="" />
+        )}
+      </div>
+    );
+  }
+  function getSymbols() {
+    const { isLpToken, tokens } = tokenRow;
+    return (
+      <div className="flex items-center flex-wrap flex-shrink-0 xsm:max-w-[146px] ml-2">
+        {isLpToken ? (
+          tokens.map((token: IToken, index) => {
+            return (
+              <span
+                className="lg:text-[20px] text-white font-bold xsm:text-sm"
+                key={token.token_id}
+              >
+                {token?.metadata?.symbol}
+                {index === tokens.length - 1 ? "" : "-"}
+                {index === tokens.length - 1 ? (
+                  <span className="text-gray-300 italic text-xs transform ml-1 -translate-y-0.5">
+                    LP token
+                  </span>
+                ) : null}
+              </span>
+            );
+          })
+        ) : (
+          <span className="text-[26px] text-white font-bold xsm:text-xl">
+            {tokenRow?.symbol}
+            {is_native ? (
+              <span className="text-gray-300 italic text-xs transform ml-1 -translate-y-0.5">
+                Native
+              </span>
+            ) : null}
+          </span>
+        )}
+      </div>
+    );
+  }
   return (
     <DetailData.Provider
       value={{
@@ -156,6 +222,8 @@ function TokenDetailView({ tokenRow, assets }: { tokenRow: UIAsset; assets: UIAs
         is_new,
         borrowedLp,
         assets,
+        getIcons,
+        getSymbols,
       }}
     >
       {isMobile ? (
@@ -168,7 +236,7 @@ function TokenDetailView({ tokenRow, assets }: { tokenRow: UIAsset; assets: UIAs
 }
 
 function DetailMobile({ tokenDetails, handlePeriodClick }) {
-  const { router, is_new, is_native, tokenRow } = useContext(DetailData) as any;
+  const { router, is_new, tokenRow, getIcons, getSymbols } = useContext(DetailData) as any;
   const [activeTab, setActiveTab] = useState<"market" | "your">("market");
   const [open, setOpen] = useState<boolean>(false);
 
@@ -179,7 +247,16 @@ function DetailMobile({ tokenDetails, handlePeriodClick }) {
   function openGetTokenModal() {
     setOpen(true);
   }
-
+  function getPositionSymbols() {
+    const { isLpToken, tokens } = tokenRow;
+    if (isLpToken) {
+      return tokens?.reduce((acc, token: IToken, index) => {
+        return `${acc}-${token?.metadata?.symbol}`;
+      }, "");
+    } else {
+      return tokenRow?.symbol;
+    }
+  }
   const isMarket = activeTab === "market";
   const isYour = activeTab === "your";
   return (
@@ -199,26 +276,23 @@ function DetailMobile({ tokenDetails, handlePeriodClick }) {
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <div className="relative">
-              <img src={tokenRow?.icon} className="w-[26px] h-[26px] rounded-full" alt="" />
+              {getIcons()}
               {is_new ? (
-                <NewTagIcon className="absolute -bottom-1.5 transform -translate-x-1" />
+                <NewTagIcon
+                  className={`absolute transform -translate-x-[1px] z-20 ${
+                    tokenRow?.isLpToken && tokenRow?.tokens.length > 2 ? "-bottom-2.5" : "-bottom-2"
+                  }`}
+                />
               ) : null}
             </div>
-            <div className="flex">
-              <span className="ml-2 text-xl text-white font-bold">{tokenRow?.symbol}</span>
-              {is_native ? (
-                <span className="text-gray-300 italic text-xs transform translate-y-2 ml-0.5">
-                  Native
-                </span>
-              ) : null}
-            </div>
+            <div className="flex">{getSymbols()}</div>
           </div>
-          <span
+          <div
             onClick={openGetTokenModal}
-            className="flex items-center h-6 px-2.5 bg-gray-800 rounded-md text-sm text-primary"
+            className="align-middle py-1 px-2.5 bg-gray-800 rounded-md text-sm text-primary max-w-[100px] overflow-hidden whitespace-nowrap text-ellipsis"
           >
-            Get {tokenRow?.symbol}
-          </span>
+            Get {getPositionSymbols()}
+          </div>
         </div>
         {/* Tab */}
         <div className="grid grid-cols-2 bg-gray-800 rounded-xl h-[42px] text-white text-base items-center justify-items-stretch mt-6 mb-6">
@@ -362,7 +436,7 @@ function DetailPc({ tokenDetails, handlePeriodClick }) {
 }
 
 function TokenOverviewMobile() {
-  const { tokenRow, depositAPY, suppliers_number, borrowers_number } = useContext(
+  const { tokenRow, suppliers_number, borrowers_number, getIcons, getSymbols } = useContext(
     DetailData,
   ) as any;
   return (
@@ -412,60 +486,17 @@ function TokenOverviewMobile() {
 }
 
 function TokenOverview() {
-  const { suppliers_number, borrowers_number, tokenRow, depositAPY, borrowAPY, is_native, is_new } =
-    useContext(DetailData) as any;
-  function getIcons() {
-    const { isLpToken, tokens } = tokenRow;
-    return (
-      <div className="flex items-center justify-center flex-wrap flex-shrink-0">
-        {isLpToken ? (
-          tokens.map((token: IToken, index) => {
-            return (
-              <img
-                key={token.token_id}
-                src={token?.metadata?.icon}
-                alt=""
-                className={`w-6 h-6 rounded-full relative ${index !== 0 ? "-ml-1.5" : ""}`}
-              />
-            );
-          })
-        ) : (
-          <img src={tokenRow?.icon} className="w-9 h-9 rounded-full" alt="" />
-        )}
-      </div>
-    );
-  }
-  function getSymbols() {
-    const { isLpToken, tokens } = tokenRow;
-    return (
-      <div className="flex items-center flex-wrap flex-shrink-0">
-        {isLpToken ? (
-          tokens.map((token: IToken, index) => {
-            return (
-              <span className="text-[20px] text-white font-bold" key={token.token_id}>
-                {token?.metadata?.symbol}
-                {index === tokens.length - 1 ? "" : "-"}
-                {index === tokens.length - 1 ? (
-                  <span className="text-gray-300 italic text-xs transform ml-1 -translate-y-0.5">
-                    LP token
-                  </span>
-                ) : null}
-              </span>
-            );
-          })
-        ) : (
-          <span className="text-[26px] text-white font-bold">
-            {tokenRow?.symbol}
-            {is_native ? (
-              <span className="text-gray-300 italic text-sm transform ml-1 -translate-y-0.5">
-                Native
-              </span>
-            ) : null}
-          </span>
-        )}
-      </div>
-    );
-  }
+  const {
+    suppliers_number,
+    borrowers_number,
+    tokenRow,
+    depositAPY,
+    borrowAPY,
+    is_native,
+    is_new,
+    getIcons,
+    getSymbols,
+  } = useContext(DetailData) as any;
   return (
     <Box className="mb-7">
       <div className="flex items-center">
@@ -638,7 +669,6 @@ function TokenSupplyChart({ tokenDetails, handlePeriodClick }) {
           disableControl={supplyAnimating}
           onPeriodClick={(v) => handlePeriodClick({ supplyPeriod: v })}
         />
-        {/* <span className="text-sm text-gray-300 text-opacity-50">Chart is coming soon</span> */}
       </div>
     </div>
   );

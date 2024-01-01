@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TableProps } from "../../components/Table";
 import { ArrowDownIcon, ArrowUpIcon, ArrowLineDownIcon, CheckIcon, NewTagIcon } from "./svg";
 import type { UIAsset } from "../../interfaces";
@@ -262,42 +262,6 @@ function TableRow({
   }, [Object.keys(borrowApyMap).length]);
   const is_native = NATIVE_TOKENS?.includes(row.tokenId);
   const is_new = NEW_TOKENS?.includes(row.tokenId);
-  return (
-    <div>
-      {isMobile ? (
-        <TableRowMobile
-          key={row.tokenId}
-          row={row}
-          lastRow={lastRow}
-          depositAPY={depositAPY}
-          borrowAPY={borrowAPY}
-          is_native={is_native}
-          is_new={is_new}
-        />
-      ) : (
-        <TableRowPc
-          key={row.tokenId}
-          row={row}
-          lastRow={lastRow}
-          is_native={is_native}
-          is_new={is_new}
-        />
-      )}
-    </div>
-  );
-}
-
-function TableRowPc({
-  row,
-  lastRow,
-  is_native,
-  is_new,
-}: {
-  row: UIAsset;
-  lastRow: boolean;
-  is_native: boolean;
-  is_new: boolean;
-}) {
   function getIcons() {
     const { isLpToken, tokens } = row;
     return (
@@ -316,7 +280,7 @@ function TableRowPc({
             );
           })
         ) : (
-          <img src={row.icon} alt="" className="w-[27px] h-[27px] rounded-full" />
+          <img src={row.icon} alt="" className="w-[26px] h-[26px] rounded-full" />
         )}
       </div>
     );
@@ -338,7 +302,7 @@ function TableRowPc({
             );
           })
         ) : (
-          <span className="text-sm text-white">
+          <span className="text-sm text-white xsm:text-base">
             {row.symbol}
             {is_native ? (
               <span className="text-gray-300 italic text-xs transform -translate-y-0.5 ml-0.5">
@@ -350,6 +314,50 @@ function TableRowPc({
       </div>
     );
   }
+  return (
+    <div>
+      {isMobile ? (
+        <TableRowMobile
+          key={row.tokenId}
+          row={row}
+          lastRow={lastRow}
+          depositAPY={depositAPY}
+          borrowAPY={borrowAPY}
+          is_native={is_native}
+          is_new={is_new}
+          getIcons={getIcons}
+          getSymbols={getSymbols}
+        />
+      ) : (
+        <TableRowPc
+          key={row.tokenId}
+          row={row}
+          lastRow={lastRow}
+          is_native={is_native}
+          is_new={is_new}
+          getIcons={getIcons}
+          getSymbols={getSymbols}
+        />
+      )}
+    </div>
+  );
+}
+
+function TableRowPc({
+  row,
+  lastRow,
+  is_native,
+  is_new,
+  getIcons,
+  getSymbols,
+}: {
+  row: UIAsset;
+  lastRow: boolean;
+  is_native: boolean;
+  is_new: boolean;
+  getIcons: () => React.ReactNode;
+  getSymbols: () => React.ReactNode;
+}) {
   return (
     <Link key={row.tokenId} href={`/tokenDetail/${row.tokenId}`}>
       <div
@@ -454,6 +462,8 @@ function TableRowMobile({
   borrowAPY,
   is_native,
   is_new,
+  getIcons,
+  getSymbols,
 }: {
   row: UIAsset;
   lastRow: boolean;
@@ -461,21 +471,22 @@ function TableRowMobile({
   borrowAPY: number;
   is_native: boolean;
   is_new: boolean;
+  getIcons: () => React.ReactNode;
+  getSymbols: () => React.ReactNode;
 }) {
   return (
     <Link key={row.tokenId} href={`/tokenDetail/${row.tokenId}`}>
       <div className={`bg-gray-800 rounded-xl p-3.5 ${lastRow ? "" : "mb-4"}`}>
-        <div className="relative flex items-center pb-4 border-b border-dark-950">
-          <img src={row.icon} alt="" className="w-[26px] h-[26px]  rounded-full" />
-          <div className="flex">
-            <span className="text-base text-white font-bold ml-2">{row.symbol}</span>
-            {is_native ? (
-              <span className="text-gray-300 italic text-xs transform translate-y-1.5 ml-0.5">
-                Native
-              </span>
-            ) : null}
-          </div>
-          {is_new ? <NewTagIcon className="absolute bottom-2 transform -translate-x-1" /> : null}
+        <div className="relative flex items-center pb-4 border-b border-dark-950 -ml-1">
+          {getIcons()}
+          <div className="flex ml-2">{getSymbols()}</div>
+          {is_new ? (
+            <NewTagIcon
+              className={`absolute transform -translate-x-[1px] z-20 ${
+                row.isLpToken && row?.tokens?.length > 2 ? "bottom-2" : "bottom-1"
+              }`}
+            />
+          ) : null}
         </div>
         <div className="grid grid-cols-2 gap-y-5 pt-4">
           <TemplateMobile
@@ -483,10 +494,6 @@ function TableRowMobile({
             value={toInternationalCurrencySystem_number(row.totalSupply)}
             subValue={toInternationalCurrencySystem_usd(row.totalSupplyMoney)}
           />
-          {/* <TemplateMobile
-            title="Supply APY"
-            value={row.can_deposit ? format_apy(depositAPY) : "-"}
-          /> */}
           <TemplateMobileAPY title="Supply APY" row={row} canShow={row.can_deposit} />
           <TemplateMobile
             title="Total Borrowed"

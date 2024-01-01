@@ -51,7 +51,7 @@ export function CollateralTypeSelectorBorrow({
             setShow(!show);
           }}
         >
-          <span className="text-sm text-gray-300 mr-2.5 whitespace-nowrap">
+          <span className="text-sm text-gray-300 mr-2.5 whitespace-nowrap xsm:max-w-[120px] overflow-hidden text-ellipsis">
             {getName(selectedCollateralType)}
           </span>
           <ArrowDownIcon className={`${show ? " transform rotate-180" : ""}`} />

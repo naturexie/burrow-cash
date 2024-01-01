@@ -230,7 +230,7 @@ function TokenList() {
     <>
       {rows.map((asset: IUIAsset) => (
         <GetBalance
-          key={asset.symbol}
+          key={asset.tokenId}
           asset={asset}
           updateAsset={updateAsset}
           setUpdateAsset={setUpdateAsset}

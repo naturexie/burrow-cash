@@ -4,6 +4,7 @@ import { ArrowDownIcon } from "./svg";
 import SelectToken, { IAssetType } from "../SelectToken";
 import { IToken } from "../../interfaces/asset";
 import { standardizeAsset } from "../../utils";
+import { isMobileDevice } from "../../helpers/helpers";
 
 export default function TokenBox({ asset, action }: { asset: UIAsset; action: string }) {
   const [open, setOpen] = useState<boolean>(false);
@@ -59,10 +60,12 @@ export default function TokenBox({ asset, action }: { asset: UIAsset; action: st
   }
   return (
     <div
-      className="relative"
+      className="relative flex-shrink-0"
       tabIndex={0}
       onBlur={() => {
-        setOpen(false);
+        if (!isMobileDevice()) {
+          setOpen(false);
+        }
       }}
     >
       <div

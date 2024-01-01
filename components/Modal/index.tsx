@@ -74,7 +74,7 @@ const Modal = () => {
   const activePosition =
     action === "Repay" || action === "Borrow"
       ? selectedCollateralType
-      : tokenId.indexOf(lpTokenPrefix) > -1
+      : tokenId?.indexOf(lpTokenPrefix) > -1
       ? tokenId
       : DEFAULT_POSITION;
   const { maxBorrowAmount = 0, maxBorrowValue = 0 } =
