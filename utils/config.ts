@@ -63,7 +63,7 @@ const getConfig = (env: string = defaultNetwork) => {
         ],
         NATIVE_TOKENS: ["usdc.fakes.testnet"],
         NEW_TOKENS: ["usdc.fakes.testnet", "shadow_ref_v1-0", "shadow_ref_v1-2"],
-        REF_FI_CONTRACT_ID: "dev-1702262174571-14898860791369",
+        REF_FI_CONTRACT_ID: "exchange.ref-dev.testnet",
       } as unknown as ConnectConfig & { REF_FI_CONTRACT_ID: string };
     case "betanet":
       return {
