@@ -11,7 +11,7 @@ const getAccount = async () => {
   if (accountId) {
     const assets = await getAssetsDetailed();
     const tokenIds = assets.map((asset) => asset.token_id);
-    const shadowRecords = await getShadowRecords(accountId);
+    const shadowRecords = await getShadowRecords();
     const accountBalance = (await account.getAccountBalance()).available;
     const balances = await Promise.all(
       tokenIds.map((id) => getBalance(id, accountId, shadowRecords)),
