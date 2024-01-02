@@ -176,7 +176,7 @@ function TokenDetailView({ tokenRow, assets }: { tokenRow: UIAsset; assets: UIAs
   function getSymbols() {
     const { isLpToken, tokens } = tokenRow;
     return (
-      <div className="flex items-center flex-wrap flex-shrink-0 xsm:max-w-[146px] ml-2">
+      <div className="flex items-center flex-wrap flex-shrink-0 xsm:max-w-[146px] xsm:ml-2">
         {isLpToken ? (
           tokens.map((token: IToken, index) => {
             return (
@@ -480,7 +480,7 @@ function TokenOverviewMobile() {
         title="# of borrowers"
         value={!tokenRow?.can_borrow ? "-" : formatWithCommas_number(borrowers_number, 0)}
       />
-      <LabelMobile title="Price" value={`$${tokenRow?.price}`} />
+      <LabelMobile title="Price" value={formatWithCommas_usd(tokenRow?.price)} />
     </div>
   );
 }
@@ -507,7 +507,7 @@ function TokenOverview() {
         <div className="flex flex-col ml-3">
           <div className="flex">{getSymbols()}</div>
           <span className="text-xs text-gray-300 transform -translate-y-1.5">
-            ${tokenRow?.price}
+            {formatWithCommas_usd(tokenRow?.price)}
           </span>
         </div>
       </div>
@@ -795,7 +795,9 @@ function TokenUserInfo() {
     );
   }
   function getUserLpUsd() {
-    return `$${digitalProcess(new Decimal(supplyBalance || 0).mul(price || 0).toFixed(), 2)}`;
+    return accountId
+      ? `$${digitalProcess(new Decimal(supplyBalance || 0).mul(price || 0).toFixed(), 2)}`
+      : "-";
   }
   const totalBorrowAmount = Object.values(maxBorrowAmountPositions)?.reduce(
     (acc, { maxBorrowAmount }) => acc + maxBorrowAmount,

@@ -6,12 +6,12 @@ import type { UIAsset } from "../../interfaces";
 import { isMobileDevice } from "../../helpers/helpers";
 import { useAPY } from "../../hooks/useAPY";
 import { IToken } from "../../interfaces/asset";
-import { standardizeAsset } from "../../utils";
 import {
   toInternationalCurrencySystem_number,
   toInternationalCurrencySystem_usd,
   format_apy,
   isInvalid,
+  formatWithCommas_usd,
 } from "../../utils/uiNumber";
 import { APYCell } from "./APYCell";
 import getConfig from "../../utils/config";
@@ -369,7 +369,7 @@ function TableRowPc({
           {getIcons()}
           <div className="flex flex-col items-start ml-3">
             <div className="flex items-end">{getSymbols()}</div>
-            <span className="text-xs text-gray-300">${row.price}</span>
+            <span className="text-xs text-gray-300">{formatWithCommas_usd(row?.price)}</span>
           </div>
           {is_new ? (
             <NewTagIcon
@@ -512,7 +512,7 @@ function TableRowMobile({
               row.can_borrow ? toInternationalCurrencySystem_usd(row.availableLiquidityMoney) : ""
             }
           />
-          <TemplateMobile title="Price" value={`$${row.price}`} />
+          <TemplateMobile title="Price" value={formatWithCommas_usd(row?.price)} />
         </div>
       </div>
     </Link>
