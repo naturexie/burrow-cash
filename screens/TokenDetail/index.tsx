@@ -828,7 +828,7 @@ function TokenUserInfo() {
         ) : (
           <>
             <span className="text-sm text-gray-300">Available to Borrow</span>
-            {accountId && tokenRow?.can_borrow ? (
+            {accountId && tokenRow?.can_borrow && Object.keys(maxBorrowAmountPositions).length ? (
               <div className="flex flex-col items-end gap-2">
                 {Object.entries(maxBorrowAmountPositions).map(([position, { maxBorrowAmount }]) => {
                   return (
@@ -842,7 +842,9 @@ function TokenUserInfo() {
               </div>
             ) : (
               <div className="flex items-center">
-                <span className="text-sm text-white mr-2.5">-</span>
+                <span className="text-sm text-white mr-2.5">
+                  {accountId && tokenRow?.can_borrow ? "0" : "-"}
+                </span>
                 <img src={tokenRow?.icon} className="w-5 h-5 rounded-full" alt="" />
               </div>
             )}
