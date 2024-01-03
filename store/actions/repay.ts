@@ -33,7 +33,6 @@ export async function repay({
     detailedAccount.positions[position]?.borrowed?.find((b) => b.token_id === tokenId)?.balance ||
       0,
   );
-
   const extraDecimalMultiplier = expandTokenDecimal(1, extraDecimals);
   const tokenBorrowedBalance = borrowedBalance.divToInt(extraDecimalMultiplier);
 
@@ -44,9 +43,9 @@ export async function repay({
   );
   const maxAvailableBalance = isNEAR ? tokenBalance.add(accountBalance) : tokenBalance;
   const maxAmount = decimalMin(tokenBorrowedBalance, maxAvailableBalance);
-  const expandedAmountToken = isMax
-    ? maxAmount
-    : decimalMin(maxAmount, expandTokenDecimal(amount, decimals));
+  const expandedAmountToken = (
+    isMax ? maxAmount : decimalMin(maxAmount, expandTokenDecimal(amount, decimals))
+  ).divToInt(1);
 
   if (isNEAR && expandedAmountToken.gt(tokenBalance)) {
     const toWrapAmount = expandedAmountToken.sub(tokenBalance);
