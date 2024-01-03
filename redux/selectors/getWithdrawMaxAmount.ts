@@ -6,7 +6,7 @@ import { shrinkToken, expandTokenDecimal, MAX_RATIO } from "../../store";
 import { decimalMax, decimalMin } from "../../utils";
 import { Assets } from "../assetState";
 import { Portfolio } from "../accountState";
-import { DEFAULT_POSITION } from "../../utils/config";
+import { DEFAULT_POSITION, lpTokenPrefix } from "../../utils/config";
 
 const sumReducerDecimal = (sum: Decimal, cur: Decimal) => sum.add(cur);
 
@@ -90,8 +90,22 @@ export const computeWithdrawMaxAmount = (tokenId: string, assets: Assets, portfo
     const adjustedPricedDiff = decimalMax(0, adjustedCollateralSum.sub(adjustedBorrowedSum));
     const safeAdjustedPricedDiff = adjustedPricedDiff.mul(999).div(1000);
 
-    const safePricedDiff = safeAdjustedPricedDiff.div(asset.config.volatility_ratio).mul(10000);
-
+    let safePricedDiff = safeAdjustedPricedDiff.div(asset.config.volatility_ratio).mul(10000);
+    if (tokenId.indexOf(lpTokenPrefix) > -1) {
+      // is Lp token
+      const pricedUnitShare = asset.metadata.tokens.reduce((sum, tokenValue) => {
+        const tokenAsset = assets[tokenValue.token_id];
+        const tokenPrice = tokenValue.price || tokenAsset.price;
+        const tokenUnitBalance = shrinkToken(tokenValue.amount, tokenAsset.metadata.decimals);
+        const tokenAssetVolatilitRatio = tokenAsset.config.volatility_ratio;
+        const priceViotility = new Decimal(tokenUnitBalance)
+          .mul(tokenPrice.usd || 0)
+          .mul(tokenAssetVolatilitRatio)
+          .div(MAX_RATIO);
+        return sum.add(priceViotility);
+      }, new Decimal(0));
+      safePricedDiff = safePricedDiff.div(pricedUnitShare);
+    }
     // const safeDiff = safePricedDiff
     //   .div(assetPrice)
     //   .mul(expandTokenDecimal(1, asset.config.extra_decimals))

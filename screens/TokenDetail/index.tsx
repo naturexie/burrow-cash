@@ -50,7 +50,7 @@ import { ConnectWalletButton } from "../../components/Header/WalletButton";
 import { OuterLinkConfig } from "./config";
 import { APYCell } from "../Market/APYCell";
 import { RewardsV2 } from "../../components/Rewards";
-import getConfig, { DEFAULT_POSITION } from "../../utils/config";
+import getConfig, { DEFAULT_POSITION, lpTokenPrefix } from "../../utils/config";
 import InterestRateChart, { LabelText } from "./interestRateChart";
 import TokenBorrowSuppliesChart from "./tokenBorrowSuppliesChart";
 import { useTokenDetails } from "../../hooks/useTokenDetails";
@@ -436,9 +436,11 @@ function DetailPc({ tokenDetails, handlePeriodClick }) {
 }
 
 function TokenOverviewMobile() {
-  const { tokenRow, suppliers_number, borrowers_number, getIcons, getSymbols } = useContext(
-    DetailData,
-  ) as any;
+  const { tokenRow, suppliers_number, borrowers_number, assets } = useContext(DetailData) as any;
+  let isLpToken = false;
+  if (tokenRow?.tokenId?.indexOf(lpTokenPrefix) > -1) {
+    isLpToken = true;
+  }
   return (
     <div className="grid grid-cols-1 gap-y-5 bg-gray-800 rounded-2xl p-4">
       <LabelMobile
@@ -456,11 +458,13 @@ function TokenOverviewMobile() {
             ? toInternationalCurrencySystem_usd(tokenRow?.totalBorrowedMoney)
             : ""
         }
+        hidden={isLpToken}
       />
       <LabelMobileAPY title="Supply APY" tokenRow={tokenRow} />
       <LabelMobile
         title="Borrow APY"
         value={!tokenRow?.can_borrow ? "-" : format_apy(tokenRow?.borrowApy)}
+        hidden={isLpToken}
       />
       <LabelMobile
         title="Available Liquidity"
@@ -474,13 +478,39 @@ function TokenOverviewMobile() {
             ? toInternationalCurrencySystem_usd(tokenRow?.availableLiquidityMoney)
             : ""
         }
+        hidden={isLpToken}
       />
       <LabelMobile title="# of suppliers" value={formatWithCommas_number(suppliers_number, 0)} />
       <LabelMobile
         title="# of borrowers"
         value={!tokenRow?.can_borrow ? "-" : formatWithCommas_number(borrowers_number, 0)}
+        hidden={isLpToken}
       />
       <LabelMobile title="Price" value={formatWithCommas_usd(tokenRow?.price)} />
+      {tokenRow?.tokens?.map((token) => {
+        const { token_id, price, amount, metadata } = token;
+        const asset = assets.find((a) => a.tokenId === token_id);
+        function getTotalSupply() {
+          return toInternationalCurrencySystem_number(
+            new Decimal(tokenRow?.totalSupply || 0).mul(shrinkToken(amount, metadata.decimals)),
+          );
+        }
+        function getTotalSupplyMoney() {
+          return toInternationalCurrencySystem_usd(
+            new Decimal(tokenRow?.totalSupply || 0)
+              .mul(shrinkToken(amount, metadata.decimals))
+              .mul(price.usd || 0),
+          );
+        }
+        return (
+          <LabelMobile
+            key={`mobile-${token_id}`}
+            title={asset?.symbol}
+            value={getTotalSupply()}
+            subValue={getTotalSupplyMoney()}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -490,13 +520,16 @@ function TokenOverview() {
     suppliers_number,
     borrowers_number,
     tokenRow,
-    depositAPY,
     borrowAPY,
-    is_native,
     is_new,
     getIcons,
     getSymbols,
+    assets,
   } = useContext(DetailData) as any;
+  let isLpToken = false;
+  if (tokenRow?.tokenId?.indexOf(lpTokenPrefix) > -1) {
+    isLpToken = true;
+  }
   return (
     <Box className="mb-7">
       <div className="flex items-center">
@@ -511,91 +544,163 @@ function TokenOverview() {
           </span>
         </div>
       </div>
-      <div className="grid grid-cols-3 mt-4 gap-x-10">
-        <div className="flex flex-col">
-          <span className="text-sm text-gray-300 whitespace-nowrap">Supply Cap</span>
-          <div className="flex items-center">
-            <span className="text-[26px] text-white font-bold">
-              {toInternationalCurrencySystem_number(tokenRow?.totalSupply)}
-            </span>
-            <span className="text-sm text-gray-300 ml-1 relative top-0.5">
-              {toInternationalCurrencySystem_usd(tokenRow?.totalSupplyMoney)}
-            </span>
-          </div>
-        </div>
-        <div className="flex flex-col ">
-          <span className="text-sm text-gray-300 whitespace-nowrap">Borrow Cap</span>
-          <div className="flex items-center">
-            {!tokenRow?.can_borrow ? (
-              "-"
-            ) : (
-              <>
+      {isLpToken ? (
+        <>
+          <div className="grid grid-cols-3 mt-4 gap-x-10">
+            <div className="flex flex-col">
+              <span className="text-sm text-gray-300 whitespace-nowrap">Supply Cap</span>
+              <div className="flex items-center">
                 <span className="text-[26px] text-white font-bold">
-                  {toInternationalCurrencySystem_number(tokenRow?.totalBorrowed)}
+                  {toInternationalCurrencySystem_number(tokenRow?.totalSupply)}
                 </span>
                 <span className="text-sm text-gray-300 ml-1 relative top-0.5">
-                  {toInternationalCurrencySystem_usd(tokenRow?.totalBorrowedMoney)}
+                  {toInternationalCurrencySystem_usd(tokenRow?.totalSupplyMoney)}
                 </span>
-              </>
-            )}
+              </div>
+            </div>
+            <div className="flex flex-col w-1/4">
+              <span className="text-sm text-gray-300 whitespace-nowrap">Supply APY</span>
+              <div className="flex items-center">
+                <APYCell
+                  rewards={tokenRow.depositRewards}
+                  baseAPY={tokenRow.supplyApy}
+                  page="deposit"
+                  tokenId={tokenRow.tokenId}
+                  onlyMarket
+                />
+              </div>
+            </div>
+            <div className="flex flex-col ">
+              <span className="text-sm text-gray-300 whitespace-nowrap"># of suppliers</span>
+              <div className="flex items-center">
+                <span className="text-lg text-white font-bold">
+                  {formatWithCommas_number(suppliers_number, 0)}
+                </span>
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="flex flex-col ">
-          <span className="text-sm text-gray-300 whitespace-nowrap">Available Liquidity</span>
-          <div className="flex items-center">
-            {tokenRow?.can_borrow ? (
-              <>
+          <div className="grid grid-cols-4 mt-5 gap-x-10">
+            {tokenRow?.tokens?.map((token) => {
+              const { token_id, price, amount, metadata } = token;
+              const asset = assets.find((a) => a.tokenId === token_id);
+              function getTotalSupply() {
+                return toInternationalCurrencySystem_number(
+                  new Decimal(tokenRow?.totalSupply || 0).mul(
+                    shrinkToken(amount, metadata.decimals),
+                  ),
+                );
+              }
+              function getTotalSupplyMoney() {
+                return toInternationalCurrencySystem_usd(
+                  new Decimal(tokenRow?.totalSupply || 0)
+                    .mul(shrinkToken(amount, metadata.decimals))
+                    .mul(price.usd || 0),
+                );
+              }
+
+              return (
+                <div key={token.token_id} className="flex flex-col">
+                  <span className="text-sm text-gray-300 whitespace-nowrap">{asset?.symbol}</span>
+                  <div className="flex items-center">
+                    <span className="text-[26px] text-white font-bold">{getTotalSupply()}</span>
+                    <span className="text-sm text-gray-300 ml-1 relative top-0.5">
+                      {getTotalSupplyMoney()}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="grid grid-cols-3 mt-4 gap-x-10">
+            <div className="flex flex-col">
+              <span className="text-sm text-gray-300 whitespace-nowrap">Supply Cap</span>
+              <div className="flex items-center">
                 <span className="text-[26px] text-white font-bold">
-                  {toInternationalCurrencySystem_number(tokenRow?.availableLiquidity)}
+                  {toInternationalCurrencySystem_number(tokenRow?.totalSupply)}
                 </span>
                 <span className="text-sm text-gray-300 ml-1 relative top-0.5">
-                  {toInternationalCurrencySystem_usd(tokenRow?.availableLiquidityMoney)}
+                  {toInternationalCurrencySystem_usd(tokenRow?.totalSupplyMoney)}
                 </span>
-              </>
-            ) : (
-              <>-</>
-            )}
+              </div>
+            </div>
+            <div className="flex flex-col ">
+              <span className="text-sm text-gray-300 whitespace-nowrap">Borrow Cap</span>
+              <div className="flex items-center">
+                {!tokenRow?.can_borrow ? (
+                  "-"
+                ) : (
+                  <>
+                    <span className="text-[26px] text-white font-bold">
+                      {toInternationalCurrencySystem_number(tokenRow?.totalBorrowed)}
+                    </span>
+                    <span className="text-sm text-gray-300 ml-1 relative top-0.5">
+                      {toInternationalCurrencySystem_usd(tokenRow?.totalBorrowedMoney)}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+            <div className="flex flex-col ">
+              <span className="text-sm text-gray-300 whitespace-nowrap">Available Liquidity</span>
+              <div className="flex items-center">
+                {tokenRow?.can_borrow ? (
+                  <>
+                    <span className="text-[26px] text-white font-bold">
+                      {toInternationalCurrencySystem_number(tokenRow?.availableLiquidity)}
+                    </span>
+                    <span className="text-sm text-gray-300 ml-1 relative top-0.5">
+                      {toInternationalCurrencySystem_usd(tokenRow?.availableLiquidityMoney)}
+                    </span>
+                  </>
+                ) : (
+                  <>-</>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      <div className="grid grid-cols-4 mt-5 gap-x-10">
-        <div className="flex flex-col w-1/4">
-          <span className="text-sm text-gray-300 whitespace-nowrap">Supply APY</span>
-          <div className="flex items-center">
-            <APYCell
-              rewards={tokenRow.depositRewards}
-              baseAPY={tokenRow.supplyApy}
-              page="deposit"
-              tokenId={tokenRow.tokenId}
-              onlyMarket
-            />
+          <div className="grid grid-cols-4 mt-5 gap-x-10">
+            <div className="flex flex-col w-1/4">
+              <span className="text-sm text-gray-300 whitespace-nowrap">Supply APY</span>
+              <div className="flex items-center">
+                <APYCell
+                  rewards={tokenRow.depositRewards}
+                  baseAPY={tokenRow.supplyApy}
+                  page="deposit"
+                  tokenId={tokenRow.tokenId}
+                  onlyMarket
+                />
+              </div>
+            </div>
+            <div className="flex flex-col w-1/4">
+              <span className="text-sm text-gray-300 whitespace-nowrap">Borrow APY</span>
+              <div className="flex items-center">
+                <span className="text-lg text-white font-bold">
+                  {!tokenRow?.can_borrow ? "-" : format_apy(borrowAPY)}
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-col ">
+              <span className="text-sm text-gray-300 whitespace-nowrap"># of suppliers</span>
+              <div className="flex items-center">
+                <span className="text-lg text-white font-bold">
+                  {formatWithCommas_number(suppliers_number, 0)}
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-col ">
+              <span className="text-sm text-gray-300 whitespace-nowrap"># of borrowers</span>
+              <div className="flex items-center">
+                <span className="text-lg text-white font-bold">
+                  {!tokenRow?.can_borrow ? "-" : formatWithCommas_number(borrowers_number, 0)}
+                </span>
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="flex flex-col w-1/4">
-          <span className="text-sm text-gray-300 whitespace-nowrap">Borrow APY</span>
-          <div className="flex items-center">
-            <span className="text-lg text-white font-bold">
-              {!tokenRow?.can_borrow ? "-" : format_apy(borrowAPY)}
-            </span>
-          </div>
-        </div>
-        <div className="flex flex-col ">
-          <span className="text-sm text-gray-300 whitespace-nowrap"># of suppliers</span>
-          <div className="flex items-center">
-            <span className="text-lg text-white font-bold">
-              {formatWithCommas_number(suppliers_number, 0)}
-            </span>
-          </div>
-        </div>
-        <div className="flex flex-col ">
-          <span className="text-sm text-gray-300 whitespace-nowrap"># of borrowers</span>
-          <div className="flex items-center">
-            <span className="text-lg text-white font-bold">
-              {!tokenRow?.can_borrow ? "-" : formatWithCommas_number(borrowers_number, 0)}
-            </span>
-          </div>
-        </div>
-      </div>
+        </>
+      )}
     </Box>
   );
 }
@@ -1330,12 +1435,15 @@ function LabelMobile({
   value,
   subValue,
   subMode,
+  hidden,
 }: {
   title: string;
   value: string | React.ReactNode;
   subValue?: string;
   subMode?: "line" | "space";
+  hidden?: boolean;
 }) {
+  if (hidden) return null;
   return (
     <div className="flex items-center justify-between">
       <span className="text-sm text-gray-300">{title}</span>
