@@ -35,10 +35,10 @@ const DashboardOverview = ({ suppliedRows, borrowedRows }) => {
   }, []);
 
   useEffect(() => {
-    if (userHealth?.allHealths?.length && !userHealthCur?.healthFactor) {
+    if (userHealth?.allHealths?.length) {
       handleHealthClick(userHealth.allHealths[0]);
     }
-  }, [userHealth?.allHealths]);
+  }, [JSON.stringify(userHealth)]);
 
   let totalSuppliedUSD = 0;
   suppliedRows?.forEach((d) => {
