@@ -52,7 +52,9 @@ export function useUserHealth() {
       : "Good";
 
   let allHealths: any[] = [];
-  if (![null].includes(healthFactor)) {
+  let hasBorrow = false;
+  if (![-1, null].includes(healthFactor)) {
+    hasBorrow = true;
     allHealths.push({
       id: `token${healthFactor}`,
       type: "Single Token",
@@ -62,6 +64,9 @@ export function useUserHealth() {
   }
   if (LPHealthFactor) {
     Object.entries(LPHealthFactor).forEach(([positionId, value]: [string, any]) => {
+      if (value?.borrowed && Object.keys(value?.borrowed)?.length) {
+        hasBorrow = true;
+      }
       allHealths.push({
         id: `lp${positionId}`,
         type: "LP",
@@ -86,6 +91,7 @@ export function useUserHealth() {
     toggleDigits,
     showDailyReturns,
     toggleDailyReturns,
+    hasBorrow,
     data: {
       valueLocale,
       valueLabel,
