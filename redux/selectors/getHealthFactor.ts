@@ -26,26 +26,16 @@ export const getLPHealthFactor = createSelector(
   (assets, portfolio) => {
     if (!hasAssets(assets)) return null;
     if (!portfolio) return null;
-    if (!Object.keys(portfolio.borrowed).length) return -1;
     const LPToken = {};
     Object.entries(portfolio?.positions).forEach(([key, value]) => {
       if (key !== DEFAULT_POSITION) {
         const asset = assets?.data?.[key];
         const healthFactor = calHealthFactor(portfolio, assets, key);
-        const isDanger = healthFactor !== -1 && healthFactor < DANGER_HEALTH_FACTOR;
-        const isWarning = healthFactor !== -1 && healthFactor < LOW_HEALTH_FACTOR;
-        let healthStatus = "good";
-        if (isWarning) {
-          healthStatus = "warning";
-        }
-        if (isDanger) {
-          healthStatus = "danger";
-        }
         LPToken[key] = {
           ...value,
           metadata: asset?.metadata,
           healthFactor: Math.trunc(healthFactor),
-          healthStatus,
+          healthStatus: getHealthStatus(healthFactor),
         };
       }
     });
@@ -58,4 +48,17 @@ const calHealthFactor = (portfolio: any, assets: any, positionId?: string) => {
   const adjustedBorrowedSum = getAdjustedSum("borrowed", portfolio, assets.data, positionId);
   const healthFactor = adjustedCollateralSum.div(adjustedBorrowedSum).mul(100).toNumber();
   return healthFactor < MAX_RATIO ? healthFactor : MAX_RATIO;
+};
+
+export const getHealthStatus = (healthFactor) => {
+  const isDanger = healthFactor !== -1 && healthFactor < DANGER_HEALTH_FACTOR;
+  const isWarning = healthFactor !== -1 && healthFactor < LOW_HEALTH_FACTOR;
+  let healthStatus = "good";
+  if (isWarning) {
+    healthStatus = "warning";
+  }
+  if (isDanger) {
+    healthStatus = "danger";
+  }
+  return healthStatus;
 };

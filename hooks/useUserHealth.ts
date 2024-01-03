@@ -6,6 +6,7 @@ import {
   LOW_HEALTH_FACTOR,
   getHealthFactor,
   getLPHealthFactor,
+  getHealthStatus,
 } from "../redux/selectors/getHealthFactor";
 import { getAppState } from "../redux/appSelectors";
 import { toggleShowDailyReturns } from "../redux/appSlice";
@@ -50,14 +51,15 @@ export function useUserHealth() {
       ? "Medium"
       : "Good";
 
-  let allHealths = [
-    {
+  let allHealths: any[] = [];
+  if (![-1, null].includes(healthFactor)) {
+    allHealths.push({
       id: `token${healthFactor}`,
       type: "Single Token",
       healthFactor: Math.floor(healthFactor),
-      healthStatus: label.toLowerCase(),
-    },
-  ];
+      healthStatus: getHealthStatus(healthFactor),
+    });
+  }
   if (LPHealthFactor) {
     Object.entries(LPHealthFactor).forEach(([positionId, value]: [string, any]) => {
       allHealths.push({
