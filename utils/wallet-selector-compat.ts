@@ -98,7 +98,8 @@ export const getWalletSelector = async ({ onAccountChange }: GetWalletSelectorAr
     debug: !!isTestnet,
     optimizeWalletOrder: false,
   });
-  const subscription = (selector.store.observable as any)
+  const { observable }: { observable: any } = selector.store;
+  const subscription = observable
     .pipe(
       map((s: any) => s.accounts),
       distinctUntilChanged(),
