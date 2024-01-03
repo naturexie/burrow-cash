@@ -602,7 +602,7 @@ function TokenOverview() {
                 <div key={token.token_id} className="flex flex-col">
                   <span className="text-sm text-gray-300 whitespace-nowrap">{asset?.symbol}</span>
                   <div className="flex items-center">
-                    <span className="text-[26px] text-white font-bold">{getTotalSupply()}</span>
+                    <span className="text-[18px] text-white font-bold">{getTotalSupply()}</span>
                     <span className="text-sm text-gray-300 ml-1 relative top-0.5">
                       {getTotalSupplyMoney()}
                     </span>
