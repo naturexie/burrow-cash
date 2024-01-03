@@ -31,7 +31,7 @@ const AvailableBorrowCell = ({
       onOpen={() => setShowTooltip(true)}
       onClose={() => setShowTooltip(false)}
       title={
-        <div className="flex flex-col">
+        <div className="flex flex-col" style={{ fontFamily: "work-sans" }}>
           <span className="text-xs text-gray-300">Collateral</span>
           <div>{getName(borrowData[0])}</div>
         </div>

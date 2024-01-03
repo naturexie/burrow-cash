@@ -296,7 +296,9 @@ function TableRow({
                 {token?.metadata?.symbol}
                 {index === tokens.length - 1 ? "" : "-"}
                 {index === tokens.length - 1 ? (
-                  <span className="text-gray-300 italic text-xs transform ml-1">LP token</span>
+                  <span className="text-gray-300 italic text-xs ml-1" style={{ zoom: 0.85 }}>
+                    LP token
+                  </span>
                 ) : null}
               </span>
             );
@@ -305,7 +307,10 @@ function TableRow({
           <span className="text-sm text-white xsm:text-base">
             {row.symbol}
             {is_native ? (
-              <span className="text-gray-300 italic text-xs transform -translate-y-0.5 ml-0.5">
+              <span
+                style={{ zoom: 0.85 }}
+                className="text-gray-300 italic text-xs transform -translate-y-0.5 ml-0.5"
+              >
                 Native
               </span>
             ) : null}

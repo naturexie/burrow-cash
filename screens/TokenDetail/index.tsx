@@ -187,7 +187,10 @@ function TokenDetailView({ tokenRow, assets }: { tokenRow: UIAsset; assets: UIAs
                 {token?.metadata?.symbol}
                 {index === tokens.length - 1 ? "" : "-"}
                 {index === tokens.length - 1 ? (
-                  <span className="text-gray-300 italic text-xs transform ml-1 -translate-y-0.5">
+                  <span
+                    style={{ zoom: 0.85 }}
+                    className="text-gray-300 italic text-xs transform ml-1 -translate-y-0.5"
+                  >
                     LP token
                   </span>
                 ) : null}
@@ -198,7 +201,10 @@ function TokenDetailView({ tokenRow, assets }: { tokenRow: UIAsset; assets: UIAs
           <span className="text-[26px] text-white font-bold xsm:text-xl">
             {tokenRow?.symbol}
             {is_native ? (
-              <span className="text-gray-300 italic text-xs transform ml-1 -translate-y-0.5">
+              <span
+                style={{ zoom: 0.85 }}
+                className="text-gray-300 italic text-xs transform ml-1 -translate-y-0.5"
+              >
                 Native
               </span>
             ) : null}
