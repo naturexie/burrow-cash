@@ -52,7 +52,7 @@ export function useUserHealth() {
       : "Good";
 
   let allHealths: any[] = [];
-  if (![-1, null].includes(healthFactor)) {
+  if (![null].includes(healthFactor)) {
     allHealths.push({
       id: `token${healthFactor}`,
       type: "Single Token",

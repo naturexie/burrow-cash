@@ -35,7 +35,7 @@ const DashboardOverview = ({ suppliedRows, borrowedRows }) => {
   }, []);
 
   useEffect(() => {
-    if (userHealth?.allHealths && !userHealthCur?.healthFactor) {
+    if (userHealth?.allHealths?.length && !userHealthCur?.healthFactor) {
       handleHealthClick(userHealth.allHealths[0]);
     }
   }, [userHealth?.allHealths]);
