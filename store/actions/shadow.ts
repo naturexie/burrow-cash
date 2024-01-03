@@ -47,7 +47,7 @@ export async function shadow_action_supply({
           ...(isMax ? {} : { amount: expandAmount }),
           msg: useAsCollateral ? JSON.stringify({ Execute: collateralActions }) : "",
         },
-        attachedDeposit: new BN(isRegistered ? 1 : expandToken(0.003, NEAR_DECIMALS)),
+        attachedDeposit: new BN(isRegistered ? 1 : expandToken(0.01, NEAR_DECIMALS)),
       },
     ],
   });
