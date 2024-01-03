@@ -19,7 +19,7 @@ export default function TokenBox({ asset, action }: { asset: UIAsset; action: st
   }
   function getIcons() {
     return (
-      <div className="flex items-center justify-center flex-wrap w-[34px] flex-shrink-0">
+      <div className="flex items-center justify-center flex-wrap flex-shrink-0">
         {isLpToken ? (
           tokens.map((token: IToken, index) => {
             return (
@@ -27,9 +27,9 @@ export default function TokenBox({ asset, action }: { asset: UIAsset; action: st
                 key={token.token_id}
                 src={token.metadata?.icon}
                 alt=""
-                className={`w-[18px] h-[18px] rounded-full relative ${
-                  index !== 0 && index !== 2 ? "-ml-1.5" : ""
-                } ${index > 1 ? "-mt-1.5" : "z-10"}`}
+                className={`w-[26px] h-[26px] rounded-full relative ${
+                  index !== 0 ? "-ml-1.5" : ""
+                }`}
               />
             );
           })
@@ -76,7 +76,7 @@ export default function TokenBox({ asset, action }: { asset: UIAsset; action: st
       >
         <div className="flex items-center gap-1.5">
           {getIcons()}
-          {getSymbols()}
+          {/* {getSymbols()} */}
         </div>
         <ArrowDownIcon className={`${is_select ? "" : "hidden"}`} />
       </div>

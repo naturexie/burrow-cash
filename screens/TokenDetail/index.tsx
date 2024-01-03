@@ -1117,14 +1117,14 @@ function YouBorrowed() {
     return Object.values(borrowedList).reduce((acc, b: any) => acc + b.borrowed || 0, 0);
   }, [Object.keys(borrowedList).length]) as number;
   function getName(position) {
-    if (position === DEFAULT_POSITION) return "(Single token)";
+    if (position === DEFAULT_POSITION) return "(Single token as collateral)";
     const a = assets.find((asset: UIAsset) => asset.tokenId === position);
     const symbols = a.tokens.reduce(
       (acc, cur, index) =>
         acc + (cur.metadata?.symbol || "") + (index !== a.tokens.length - 1 ? "-" : ""),
       "",
     );
-    return `(${symbols})`;
+    return `(${symbols} as collateral)`;
   }
   function getRewardsReactNode(position) {
     const b = borrowedList[position];
@@ -1179,7 +1179,8 @@ function YouBorrowed() {
           {Object.entries(borrowedList).map(([position, borrowedData]: [string, any]) => (
             <div key={position}>
               <Label
-                title={`Borrowed ${getName(position)}`}
+                title="Borrowed"
+                subTitle={`${getName(position)}`}
                 content={
                   <div className="flex items-center">
                     <span className="text-sm text-white mr-0.5">
@@ -1396,10 +1397,21 @@ function UserBox({
   );
 }
 
-function Label({ title, content }: { title: string; content: string | React.ReactNode }) {
+function Label({
+  title,
+  subTitle,
+  content,
+}: {
+  title: string;
+  subTitle?: string;
+  content: string | React.ReactNode;
+}) {
   return (
-    <div className="flex items-center justify-between mt-4">
-      <span className="text-sm text-gray-300">{title}</span>
+    <div className={`flex justify-between mt-4 ${subTitle ? "items-start" : "items-center"}`}>
+      <div className="flex flex-col">
+        <span className="text-sm text-gray-300">{title}</span>
+        {subTitle ? <span className="text-sm text-gray-300">{subTitle}</span> : null}
+      </div>
       <div className="flex items-center text-sm text-white">{content}</div>
     </div>
   );

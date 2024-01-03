@@ -15,6 +15,7 @@ import { YellowSolidSubmitButton, RedSolidSubmitButton } from "./button";
 import { getCollateralAmount } from "../../redux/selectors/getCollateralAmount";
 import { TipIcon, CloseIcon, WarnIcon, ArrowRight } from "./svg";
 import ReactToolTip from "../ToolTip";
+import { IToken } from "../../interfaces/asset";
 
 export const USNInfo = () => (
   <Box mt="1rem">
@@ -71,12 +72,31 @@ export const CloseButton = ({ onClose, ...props }) => (
 );
 
 export const ModalTitle = ({ asset, onClose }) => {
-  const { action, symbol } = asset;
+  const { action, symbol, isLpToken, tokens } = asset;
+  function getSymbols() {
+    return (
+      <div className="flex items-center flex-shrink-0">
+        {isLpToken ? (
+          tokens.map((token: IToken, index) => {
+            const { metadata } = token;
+            return (
+              <span className="text-base xsm:text-sm text-whit" key={token.token_id}>
+                {metadata?.symbol}
+                {index === tokens.length - 1 ? "" : "-"}
+              </span>
+            );
+          })
+        ) : (
+          <span className="text-base text-white">{symbol}</span>
+        )}
+      </div>
+    );
+  }
   return (
     <div className="mb-[20px]">
       <div className="flex items-center justify-between text-lg text-white">
         <div className="flex items-center">
-          {actionMapTitle[action]} <span className="ml-1.5">{symbol}</span>
+          {actionMapTitle[action]} <span className="ml-1.5">{getSymbols()}</span>
         </div>
         <CloseIcon onClick={onClose} />
       </div>
