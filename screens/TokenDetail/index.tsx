@@ -176,7 +176,7 @@ function TokenDetailView({ tokenRow, assets }: { tokenRow: UIAsset; assets: UIAs
   function getSymbols() {
     const { isLpToken, tokens } = tokenRow;
     return (
-      <div className="flex items-center flex-wrap flex-shrink-0 xsm:max-w-[146px] xsm:ml-2">
+      <div className="flex items-center flex-wrap flex-shrink-0 xsm:max-w-[160px] xsm:ml-2">
         {isLpToken ? (
           tokens.map((token: IToken, index) => {
             return (
@@ -256,9 +256,10 @@ function DetailMobile({ tokenDetails, handlePeriodClick }) {
   function getPositionSymbols() {
     const { isLpToken, tokens } = tokenRow;
     if (isLpToken) {
-      return tokens?.reduce((acc, token: IToken, index) => {
-        return `${acc}-${token?.metadata?.symbol}`;
-      }, "");
+      // return tokens?.reduce((acc, token: IToken, index) => {
+      //   return `${acc}-${token?.metadata?.symbol}`;
+      // }, "");
+      return "LP Token";
     } else {
       return tokenRow?.symbol;
     }
@@ -295,7 +296,7 @@ function DetailMobile({ tokenDetails, handlePeriodClick }) {
           </div>
           <div
             onClick={openGetTokenModal}
-            className="align-middle py-1 px-2.5 bg-gray-800 rounded-md text-sm text-primary max-w-[100px] overflow-hidden whitespace-nowrap text-ellipsis"
+            className="align-middle py-1 px-2.5 bg-gray-800 rounded-md text-sm text-primary"
           >
             Get {getPositionSymbols()}
           </div>
