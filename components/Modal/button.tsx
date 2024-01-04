@@ -21,7 +21,7 @@ function Button({ appearanceClass, children, disabled, className, ...rest }: IBu
       type="button"
       disabled={disabled}
       className={`h-[46px] rounded-md text-base font-bold px-6 w-full ${appearanceClass} ${
-        true ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:opacity-80"
+        disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:opacity-80"
       } ${className}`}
     >
       {children}

@@ -566,7 +566,7 @@ function TokenOverview() {
             </div>
             <div className="flex flex-col w-1/4">
               <span className="text-sm text-gray-300 whitespace-nowrap">Supply APY</span>
-              <div className="flex items-center">
+              <div className="flex items-center text-[26px]">
                 <APYCell
                   rewards={tokenRow.depositRewards}
                   baseAPY={tokenRow.supplyApy}
@@ -579,7 +579,7 @@ function TokenOverview() {
             <div className="flex flex-col ">
               <span className="text-sm text-gray-300 whitespace-nowrap"># of suppliers</span>
               <div className="flex items-center">
-                <span className="text-lg text-white font-bold">
+                <span className="text-[26px] text-white font-bold">
                   {formatWithCommas_number(suppliers_number, 0)}
                 </span>
               </div>
