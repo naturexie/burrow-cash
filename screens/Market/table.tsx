@@ -482,7 +482,7 @@ function TableRowMobile({
   return (
     <Link key={row.tokenId} href={`/tokenDetail/${row.tokenId}`}>
       <div className={`bg-gray-800 rounded-xl p-3.5 ${lastRow ? "" : "mb-4"}`}>
-        <div className="relative flex items-center pb-4 border-b border-dark-950 -ml-1">
+        <div className="flex items-center pb-4 border-b border-dark-950 -ml-1">
           {getIcons()}
           <div className="flex ml-2">{getSymbols()}</div>
           {is_new ? (

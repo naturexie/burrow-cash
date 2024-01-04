@@ -1122,7 +1122,7 @@ function YouBorrowed() {
   }
   const totalBorrowedAmount = useMemo(() => {
     return Object.values(borrowedList).reduce((acc, b: any) => acc + b.borrowed || 0, 0);
-  }, [Object.keys(borrowedList).length]) as number;
+  }, [borrowedList]) as number;
   function getName(position) {
     if (position === DEFAULT_POSITION) return "(Single token as collateral)";
     const a = assets.find((asset: UIAsset) => asset.tokenId === position);
