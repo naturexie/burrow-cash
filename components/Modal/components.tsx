@@ -95,8 +95,12 @@ export const ModalTitle = ({ asset, onClose }) => {
   return (
     <div className="mb-[20px]">
       <div className="flex items-center justify-between text-lg text-white">
-        <div className="flex items-center">
-          {actionMapTitle[action]} <span className="ml-1.5">{getSymbols()}</span>
+        <div
+          className={`flex items-center flex-wrap ${
+            tokens?.length > 2 && action === "Adjust" ? "" : "gap-1.5"
+          }`}
+        >
+          {actionMapTitle[action]} <span>{getSymbols()}</span>
         </div>
         <CloseIcon onClick={onClose} />
       </div>
@@ -296,7 +300,7 @@ export const Alerts = ({ data }) => {
           if (data[alert].severity === "warning") {
             return <AlertWarning className="-mt-2" key={alert} title={data[alert].title} />;
           } else {
-            return <AlertError className="pb-5 -mb-7" key={alert} title={data[alert].title} />;
+            return <AlertError className="pb-5 -mb-5" key={alert} title={data[alert].title} />;
           }
         })}
     </div>
