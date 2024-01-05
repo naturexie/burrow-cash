@@ -104,7 +104,8 @@ export const computeWithdrawMaxAmount = (tokenId: string, assets: Assets, portfo
           .div(MAX_RATIO);
         return sum.add(priceViotility);
       }, new Decimal(0));
-      safePricedDiff = safePricedDiff.div(pricedUnitShare);
+      const discount = pricedUnitShare.div(assetPrice);
+      safePricedDiff = safePricedDiff.div(discount);
     }
     // const safeDiff = safePricedDiff
     //   .div(assetPrice)
