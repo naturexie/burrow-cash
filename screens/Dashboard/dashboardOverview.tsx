@@ -114,6 +114,7 @@ const DashboardOverview = ({ suppliedRows, borrowedRows }) => {
     });
   };
 
+  const hasMultiHealths = userHealth?.allHealths?.length > 1 && userHealth?.hasBorrow;
   return (
     <>
       <div className="flex gap-2 justify-between items-center mb-4 lg3:hidden">
@@ -125,14 +126,15 @@ const DashboardOverview = ({ suppliedRows, borrowedRows }) => {
       </div>
       <ContentBox className="mb-8">
         <div className="lg3:flex lg3:justify-between">
-          <div className="mb-4 lg3:max-w-[640px] lg3:mb-0">
-            <div className="flex gap-2 justify-between lg3:gap-6 lg3:gap-8">
-              <div className="gap-6 flex flex-col flex-2">
+          <div className={`mb-4 lg3:mb-0 ${!hasMultiHealths && "lg3:max-w-[640px]"}`}>
+            {/* <div className="mb-4 lg3:max-w-[640px] lg3:mb-0"> */}
+            <div className="flex gap-6 lg3:justify-between lg3:gap-6 lg3:gap-8">
+              <div className="gap-6 flex flex-col">
                 <UserLiquidity />
                 <UserDailyRewards />
               </div>
 
-              <div className="gap-6 flex flex-col flex-1">
+              <div className="gap-6 flex flex-col">
                 <APY />
                 <div className="flex flex-col">
                   {/* <OverviewItem */}
@@ -199,7 +201,7 @@ const DashboardOverview = ({ suppliedRows, borrowedRows }) => {
 
             <div className="relative flex xsm2:flex-col xsm:items-center items-end gap-4">
               <HealthFactor userHealth={userHealthCur} />
-              {userHealth?.allHealths?.length > 1 && userHealth?.hasBorrow ? (
+              {hasMultiHealths ? (
                 <div className="lp-healths flex flex-col items-center gap-2 mt-4">
                   {userHealth.allHealths.map((value: any) => {
                     const isActive = value.id === userHealthCur?.id;

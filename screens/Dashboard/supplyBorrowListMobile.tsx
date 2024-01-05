@@ -125,7 +125,35 @@ const StyledTabActiveBall = styled.div`
 `;
 
 const SupplyItem = ({ data }) => {
-  const { canUseAsCollateral } = data || {};
+  const { canUseAsCollateral, metadata } = data || {};
+  const { icon, tokens, symbol } = metadata || {};
+  let iconImg;
+  let symbolNode = symbol;
+  if (icon) {
+    iconImg = <img src={icon} width={26} height={26} alt="token" className="rounded-full" />;
+  } else if (tokens?.length) {
+    symbolNode = "";
+    iconImg = (
+      <div className="grid" style={{ marginRight: 2, gridTemplateColumns: "15px 12px" }}>
+        {tokens?.map((d, i) => {
+          const isLast = i === tokens.length - 1;
+          symbolNode += `${d.metadata.symbol}${!isLast ? "-" : ""}`;
+          return (
+            <img
+              key={d.metadata.symbol}
+              src={d.metadata?.icon}
+              width={20}
+              height={20}
+              alt="token"
+              className="rounded-full w-[20px] h-[20px] -m-1"
+              style={{ maxWidth: "none" }}
+            />
+          );
+        })}
+      </div>
+    );
+  }
+
   return (
     <div>
       <div
@@ -133,9 +161,9 @@ const SupplyItem = ({ data }) => {
         style={{ padding: "16px", borderColor: "#31344C" }}
       >
         <div className="flex gap-2 items-center">
-          <img src={data?.icon} width={26} height={26} alt="token" className="rounded-full" />
+          {iconImg}
           <div className="flex flex-col">
-            <div className="truncate h4b">{data?.symbol}</div>
+            <div className="truncate h4b">{symbolNode}</div>
             {hiddenAssets.includes(data?.tokenId || "") ? null : (
               <MarketButton
                 tokenId={data?.tokenId}
@@ -183,6 +211,12 @@ const SupplyItem = ({ data }) => {
 };
 
 const BorrowItem = ({ data }) => {
+  const { metadataLP, collateralType } = data || {};
+  let tokenNames = "";
+  metadataLP?.tokens?.forEach((d, i) => {
+    const isLast = i === metadataLP.tokens.length - 1;
+    tokenNames += `${d.metadata.symbol}${!isLast ? "-" : ""}`;
+  });
   return (
     <div>
       <div
@@ -193,6 +227,11 @@ const BorrowItem = ({ data }) => {
           <img src={data?.icon} width={26} height={26} alt="token" className="rounded-full" />
           <div className="flex flex-col">
             <div className="truncate h4b">{data?.symbol}</div>
+            {tokenNames && (
+              <div className="text-gray-300" style={{ fontSize: 12 }}>
+                {tokenNames}
+              </div>
+            )}
             <MarketButton
               tokenId={data?.tokenId}
               style={{

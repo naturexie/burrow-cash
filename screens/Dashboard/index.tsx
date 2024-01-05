@@ -88,13 +88,13 @@ const StyledSupplyBorrow = styled.div`
 const yourSuppliedColumns = [
   {
     header: "Assets",
+    size: 160,
     cell: ({ originalData }) => {
       const { metadata } = originalData || {};
       const { icon, tokens, symbol } = metadata || {};
       let iconImg;
-      let symbolNode = "";
+      let symbolNode = symbol;
       if (icon) {
-        symbolNode = symbol;
         iconImg = (
           <img
             src={icon}
@@ -102,12 +102,16 @@ const yourSuppliedColumns = [
             height={26}
             alt="token"
             className="rounded-full w-[26px] h-[26px]"
-            style={{ marginRight: 3 }}
+            style={{ marginRight: 6, marginLeft: 3 }}
           />
         );
       } else if (tokens?.length) {
+        symbolNode = "";
         iconImg = (
-          <div className="grid" style={{ marginRight: 2, gridTemplateColumns: "15px 12px" }}>
+          <div
+            className="grid"
+            style={{ marginRight: 2, gridTemplateColumns: "15px 12px", paddingLeft: 5 }}
+          >
             {tokens?.map((d, i) => {
               const isLast = i === tokens.length - 1;
               symbolNode += `${d.metadata.symbol}${!isLast ? "-" : ""}`;
@@ -129,7 +133,12 @@ const yourSuppliedColumns = [
       return (
         <div className="flex gap-2 items-center">
           {iconImg}
-          <div className="truncate" title={symbolNode}>
+          <div
+            title={symbolNode}
+            style={{
+              whiteSpace: "normal",
+            }}
+          >
             {symbolNode}
           </div>
         </div>
@@ -244,11 +253,11 @@ const YourSupplied = ({ suppliedRows, accountId, total }) => {
 
 const StyledCustomTable = styled(CustomTable)`
   .custom-table-tbody {
-    margin: -2px -30px 0;
+    margin-top: -2px;
 
     .custom-table-row {
-      padding-left: 30px;
-      padding-right: 30px;
+      //padding-left: 20px;
+      //padding-right: 20px;
       cursor: pointer;
 
       .custom-table-action {
@@ -270,11 +279,21 @@ const StyledCustomTable = styled(CustomTable)`
       }
     }
   }
+
+  .custom-table-thead,
+  .custom-table-tbody {
+    margin: 0 -30px;
+  }
+  .custom-table-header-row,
+  .custom-table-row {
+    padding: 0 20px;
+  }
 `;
 
 const yourBorrowedColumns = [
   {
     header: "Assets",
+    size: 140,
     cell: ({ originalData }) => {
       return (
         <div className="flex gap-2 items-center">
@@ -292,7 +311,7 @@ const yourBorrowedColumns = [
   },
   {
     header: "Collateral Type",
-    size: 140,
+    size: 130,
     cell: ({ originalData }) => {
       const { collateralType, metadataLP } = originalData || {};
       let tokenNames = "";
