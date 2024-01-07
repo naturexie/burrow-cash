@@ -83,6 +83,17 @@ const columns = [
   {
     header: () => (
       <div style={{ whiteSpace: "normal" }}>
+        Collateral<div>Type</div>
+      </div>
+    ),
+    cell: ({ originalData }) => {
+      const { LiquidatedAssets } = originalData || {};
+      return <div>{LiquidatedAssets?.[0]?.data?.isLpToken ? "LP token" : "Single token"}</div>;
+    },
+  },
+  {
+    header: () => (
+      <div style={{ whiteSpace: "normal" }}>
         Health Factor<div>before Liquidate</div>
       </div>
     ),
@@ -92,7 +103,11 @@ const columns = [
     },
   },
   {
-    header: () => <div style={{ whiteSpace: "normal" }}>Repaid Assets Amount</div>,
+    header: () => (
+      <div style={{ whiteSpace: "normal" }}>
+        Repaid Assets <div>Amount</div>
+      </div>
+    ),
     cell: ({ originalData }) => {
       const { RepaidAssets } = originalData || {};
       const node = RepaidAssets?.map((d, i) => {
@@ -121,13 +136,26 @@ const columns = [
       const node = LiquidatedAssets?.map((d) => {
         const { metadata, config } = d.data || {};
         const { extra_decimals } = config || {};
-        const tokenSymbol = metadata?.symbol || d.token_id;
+        let tokenSymbol = "";
+        if (metadata?.tokens?.length) {
+          metadata?.tokens?.forEach((t, i) => {
+            const { symbol, token_id } = t.metadata || {};
+            tokenSymbol += `${i !== 0 ? "-" : ""}${symbol || token_id}`;
+          });
+        }
+        if (!tokenSymbol) {
+          tokenSymbol = metadata?.symbol || d.token_id;
+        }
+
         const tokenAmount = Number(
           shrinkToken(d.amount, (metadata?.decimals || 0) + (extra_decimals || 0)),
         );
         return (
-          <div key={d.token_id}>
-            {tokenAmount.toLocaleString(undefined, TOKEN_FORMAT)} {tokenSymbol}
+          <div key={d.token_id} className="truncate">
+            {tokenAmount.toLocaleString(undefined, TOKEN_FORMAT)}{" "}
+            <span className="h6 text-gray-300 truncate" title={tokenSymbol}>
+              {tokenSymbol}
+            </span>
           </div>
         );
       });

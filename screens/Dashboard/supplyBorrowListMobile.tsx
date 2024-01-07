@@ -227,11 +227,6 @@ const BorrowItem = ({ data }) => {
           <img src={data?.icon} width={26} height={26} alt="token" className="rounded-full" />
           <div className="flex flex-col">
             <div className="truncate h4b">{data?.symbol}</div>
-            {tokenNames && (
-              <div className="text-gray-300" style={{ fontSize: 12 }}>
-                {tokenNames}
-              </div>
-            )}
             <MarketButton
               tokenId={data?.tokenId}
               style={{
@@ -260,6 +255,12 @@ const BorrowItem = ({ data }) => {
           <div className="flex gap-2 items-center">
             <DashboardReward rewardList={data.rewards} />
             {/* <div className="h6 text-gray-300">{data.price}</div> */}
+          </div>
+        </ItemRow>
+
+        <ItemRow label="Collateral Type">
+          <div className="flex gap-2 items-center">
+            <div style={{ fontSize: 14 }}>{tokenNames || "Single token"}</div>
           </div>
         </ItemRow>
 

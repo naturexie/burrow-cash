@@ -168,7 +168,7 @@ const DashboardOverview = ({ suppliedRows, borrowedRows }) => {
                                   height={26}
                                   alt="token"
                                   className="rounded-full"
-                                  style={{ margin: -3 }}
+                                  style={{ margin: -3, maxWidth: "none" }}
                                 />
                               );
                             })
