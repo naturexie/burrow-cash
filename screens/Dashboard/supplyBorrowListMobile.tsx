@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { twMerge } from "tailwind-merge";
 import styled from "styled-components";
 import { ContentBox } from "../../components/ContentBox/ContentBox";
@@ -8,6 +8,7 @@ import { formatTokenValue, formatUSDValue, millifyNumber } from "../../helpers/h
 import { AdjustButton, MarketButton, RepayButton, WithdrawButton } from "./supplyBorrowButtons";
 import { NoDataMascot } from "../../components/Icons/Icons";
 import { hiddenAssets } from "../../utils/config";
+import CustomTooltips from "../../components/CustomTooltips/CustomTooltips";
 
 const SupplyBorrowListMobile = ({ suppliedRows, borrowedRows, accountId }) => {
   const [tabIndex, setTabIndex] = useState(0);
@@ -21,7 +22,7 @@ const SupplyBorrowListMobile = ({ suppliedRows, borrowedRows, accountId }) => {
 
   if (suppliedRows?.length) {
     supplyNode = suppliedRows?.map((d) => (
-      <ContentBox style={{ padding: 0, overflow: "hidden", marginBottom: 15 }} key={d.tokenId}>
+      <ContentBox style={{ padding: 0, marginBottom: 15 }} key={d.tokenId}>
         <SupplyItem data={d} key={d.tokenId} />
       </ContentBox>
     ));
@@ -133,11 +134,17 @@ const SupplyItem = ({ data }) => {
     iconImg = <img src={icon} width={26} height={26} alt="token" className="rounded-full" />;
   } else if (tokens?.length) {
     symbolNode = "";
+    let symbolTooltips = "";
     iconImg = (
       <div className="grid" style={{ marginRight: 2, gridTemplateColumns: "15px 12px" }}>
         {tokens?.map((d, i) => {
           const isLast = i === tokens.length - 1;
-          symbolNode += `${d.metadata.symbol}${!isLast ? "-" : ""}`;
+          if (tokens?.length > 3) {
+            symbolTooltips += `${d.metadata.symbol}${!isLast ? "-" : ""}`;
+          } else {
+            symbolNode += `${d.metadata.symbol}${!isLast ? "-" : ""}`;
+          }
+
           return (
             <img
               key={d.metadata.symbol}
@@ -152,6 +159,17 @@ const SupplyItem = ({ data }) => {
         })}
       </div>
     );
+
+    if (tokens?.length > 3) {
+      symbolNode = (
+        <CustomTooltips
+          text={symbolTooltips}
+          style={{ left: 0, right: "auto", maxWidth: "70vw", top: "100%", height: 26 }}
+        >
+          {tokens?.length} pool
+        </CustomTooltips>
+      );
+    }
   }
 
   return (
@@ -160,10 +178,10 @@ const SupplyItem = ({ data }) => {
         className="flex justify-between border-b"
         style={{ padding: "16px", borderColor: "#31344C" }}
       >
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-2 items-center pr-2">
           {iconImg}
           <div className="flex flex-col">
-            <div className="truncate h4b">{symbolNode}</div>
+            <div className="h4b">{symbolNode}</div>
             {hiddenAssets.includes(data?.tokenId || "") ? null : (
               <MarketButton
                 tokenId={data?.tokenId}
