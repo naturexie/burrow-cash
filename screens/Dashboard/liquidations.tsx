@@ -165,13 +165,15 @@ const columns = [
   },
   {
     header: () => (
-      <div style={{ whiteSpace: "normal" }}>
+      <div style={{ whiteSpace: "normal", textAlign: "right" }}>
         Health Factor<div>after Liquidate</div>
       </div>
     ),
     cell: ({ originalData }) => {
       const { healthFactor_after } = originalData || {};
-      return <div>{(Number(healthFactor_after) * 100).toFixed(2)}%</div>;
+      return (
+        <div style={{ textAlign: "right" }}>{(Number(healthFactor_after) * 100).toFixed(2)}%</div>
+      );
     },
   },
 ];
