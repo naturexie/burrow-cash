@@ -145,7 +145,10 @@ const DashboardOverview = ({ suppliedRows, borrowedRows }) => {
                   <div className="flex flex-col items-start lg3:flex-row lg3:items-center lg3:gap-4">
                     <div className="flex items-center gap-4 my-1">
                       <div className="h2">{rewardsObj?.data?.totalUnClaimUSDDisplay || "$0"}</div>
-                      <div className="flex" style={{ marginRight: 5 }}>
+                      <div
+                        className="flex flex-wrap"
+                        style={{ minWidth: rewardsObj?.extra?.length > 1 ? 45 : 20 }}
+                      >
                         {rewardsObj?.brrr?.icon ? (
                           <img
                             src={rewardsObj?.brrr?.icon}
