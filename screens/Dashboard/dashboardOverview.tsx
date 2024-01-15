@@ -126,10 +126,12 @@ const DashboardOverview = ({ suppliedRows, borrowedRows }) => {
       </div>
       <ContentBox className="mb-8">
         <div className="lg3:flex lg3:justify-between">
-          <div className={`mb-4 lg3:mb-0 ${!hasMultiHealths && "lg3:max-w-[640px]"}`}>
+          <div
+            className={`mb-4 lg3:mb-0 ${!hasMultiHealths && "lg3:max-w-[640px] lg3:basis-[530px]"}`}
+          >
             {/* <div className="mb-4 lg3:max-w-[640px] lg3:mb-0"> */}
-            <div className="flex gap-6 lg3:justify-between lg3:gap-6 lg3:gap-8">
-              <div className="gap-6 flex flex-col">
+            <div className="flex gap-6 lg3:justify-between lg3:gap-8">
+              <div className="gap-6 flex flex-col flex-1">
                 <UserLiquidity />
                 <UserDailyRewards />
               </div>
@@ -145,38 +147,6 @@ const DashboardOverview = ({ suppliedRows, borrowedRows }) => {
                   <div className="flex flex-col items-start lg3:flex-row lg3:items-center lg3:gap-4">
                     <div className="flex items-center gap-4 my-1">
                       <div className="h2">{rewardsObj?.data?.totalUnClaimUSDDisplay || "$0"}</div>
-                      <div
-                        className="flex flex-wrap"
-                        style={{ minWidth: rewardsObj?.extra?.length > 1 ? 45 : 20 }}
-                      >
-                        {rewardsObj?.brrr?.icon ? (
-                          <img
-                            src={rewardsObj?.brrr?.icon}
-                            width={26}
-                            height={26}
-                            alt="token"
-                            className="rounded-full"
-                            style={{ margin: -3 }}
-                          />
-                        ) : null}
-
-                        {rewardsObj?.extra?.length
-                          ? rewardsObj.extra.map((d, i) => {
-                              const extraData = d?.[1];
-                              return (
-                                <img
-                                  src={extraData?.icon}
-                                  width={26}
-                                  key={(extraData?.tokenId || "0") + i}
-                                  height={26}
-                                  alt="token"
-                                  className="rounded-full"
-                                  style={{ margin: -3, maxWidth: "none" }}
-                                />
-                              );
-                            })
-                          : null}
-                      </div>
                     </div>
 
                     {rewardsObj?.data?.totalUnClaimUSD > 0 && (
@@ -191,6 +161,39 @@ const DashboardOverview = ({ suppliedRows, borrowedRows }) => {
                         </CustomTooltips>
                       </div>
                     )}
+                  </div>
+
+                  <div
+                    className="flex flex-wrap mt-3 lg3:mt-1"
+                    style={{ minWidth: rewardsObj?.extra?.length > 1 ? 45 : 20 }}
+                  >
+                    {rewardsObj?.brrr?.icon ? (
+                      <img
+                        src={rewardsObj?.brrr?.icon}
+                        width={26}
+                        height={26}
+                        alt="token"
+                        className="rounded-full"
+                        style={{ margin: -3 }}
+                      />
+                    ) : null}
+
+                    {rewardsObj?.extra?.length
+                      ? rewardsObj.extra.map((d, i) => {
+                          const extraData = d?.[1];
+                          return (
+                            <img
+                              src={extraData?.icon}
+                              width={26}
+                              key={(extraData?.tokenId || "0") + i}
+                              height={26}
+                              alt="token"
+                              className="rounded-full"
+                              style={{ margin: -3, maxWidth: "none" }}
+                            />
+                          );
+                        })
+                      : null}
                   </div>
                 </div>
               </div>
