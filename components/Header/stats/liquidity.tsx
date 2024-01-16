@@ -1,5 +1,6 @@
 import { Typography } from "@mui/material";
 
+import Decimal from "decimal.js";
 import { useFullDigits } from "../../../hooks/useFullDigits";
 import { useAppSelector } from "../../../redux/hooks";
 import { getTotalAccountBalance } from "../../../redux/selectors/getTotalAccountBalance";
@@ -49,12 +50,9 @@ export const UserLiquidity = () => {
   const { fullDigits, setDigits } = useFullDigits();
   const userDeposited = useAppSelector(getTotalAccountBalance("supplied"));
   const userBorrowed = useAppSelector(getTotalAccountBalance("borrowed"));
-  const userNetLiquidity = userDeposited - userBorrowed;
+  const userNetLiquidity = new Decimal(userDeposited).minus(userBorrowed).toNumber();
   const weightedNetLiquidity = useAppSelector(getWeightedNetLiquidity);
-
-  const userNetLiquidityValue = fullDigits?.user
-    ? userNetLiquidity.toLocaleString(undefined, COMPACT_USD_FORMAT)
-    : `$${m(userNetLiquidity)}`;
+  const userNetLiquidityValue = `$${m(userNetLiquidity)}`;
 
   const userWeightedNetLiquidityValue =
     weightedNetLiquidity > 0 ? `$${m(weightedNetLiquidity)}` : "$0";

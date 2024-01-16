@@ -98,13 +98,13 @@ export const transformAsset = (
     const collateral = Number(
       shrinkToken(
         asset.isLpToken
-          ? account.portfolio.positions[tokenId]?.collateral?.[tokenId]?.balance || 0
+          ? account.portfolio.positions?.[tokenId]?.collateral?.[tokenId]?.balance || 0
           : account.portfolio.collateral?.[tokenId]?.balance || 0,
         decimals,
       ),
     );
     const borrowed = asset.isLpToken
-      ? account.portfolio.positions[tokenId]?.borrowed?.[tokenId]?.balance || 0
+      ? account.portfolio.positions?.[tokenId]?.borrowed?.[tokenId]?.balance || 0
       : account.portfolio.borrowed?.[tokenId]?.balance || 0;
     const available = account.balances[tokenId] || 0;
     const availableNEAR = account.balances["near"] || 0;

@@ -321,7 +321,10 @@ export const getWeightedNetLiquidity = createSelector(
       ? getGainsArr(account.portfolio.borrows, assets, true)
       : getGains(account.portfolio, assets, "borrowed", true);
 
-    const netLiquidity = totalCollateral + totalSupplied - totalBorrowed;
+    const netLiquidity = new Decimal(totalCollateral)
+      .plus(totalSupplied)
+      .minus(totalBorrowed)
+      .toNumber();
     return netLiquidity;
   },
 );

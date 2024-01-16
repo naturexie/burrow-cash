@@ -25,7 +25,7 @@ export const getLPHealthFactor = createSelector(
   (state: RootState) => state.account.portfolio,
   (assets, portfolio) => {
     if (!hasAssets(assets)) return null;
-    if (!portfolio) return null;
+    if (!portfolio?.positions) return null;
     const LPToken = {};
     Object.entries(portfolio?.positions).forEach(([key, value]) => {
       if (key !== DEFAULT_POSITION) {

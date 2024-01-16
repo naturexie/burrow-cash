@@ -44,14 +44,17 @@ export function useExtraAPY({
   const position = assetId.indexOf(lpTokenPrefix) > -1 ? assetId : DEFAULT_POSITION;
   const totalBorrowAssetUSD =
     Number(
-      shrinkToken(portfolio.positions[position]?.borrowed?.[assetId]?.balance || 0, assetDecimals),
+      shrinkToken(
+        portfolio.positions?.[position]?.borrowed?.[assetId]?.balance || 0,
+        assetDecimals,
+      ),
     ) * assetPrice;
   const totalSupplyAssetUSD =
     Number(shrinkToken(portfolio.supplied[assetId]?.balance || 0, assetDecimals)) * assetPrice;
   const totalCollateralAssetUSD =
     Number(
       shrinkToken(
-        portfolio.positions[position]?.collateral?.[assetId]?.balance || 0,
+        portfolio.positions?.[position]?.collateral?.[assetId]?.balance || 0,
         assetDecimals,
       ),
     ) * assetPrice;
