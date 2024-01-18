@@ -16,11 +16,13 @@ export async function repayFromDeposits({
   amount,
   extraDecimals,
   position,
+  isMax,
 }: {
   tokenId: string;
   amount: string;
   extraDecimals: number;
   position?: string;
+  isMax: boolean;
 }) {
   const { logicContract, oracleContract } = await getBurrow();
   const { decimals } = (await getMetadata(tokenId))!;
@@ -42,7 +44,7 @@ export async function repayFromDeposits({
       ? {
           Repay: {
             token_id: tokenId,
-            amount: expandedAmount.mul(extraDecimalMultiplier).toFixed(0),
+            amount: isMax ? undefined : expandedAmount.mul(extraDecimalMultiplier).toFixed(0),
           },
         }
       : {

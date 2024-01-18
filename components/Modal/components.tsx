@@ -13,7 +13,7 @@ import { toggleUseAsCollateral, hideModal, showModal } from "../../redux/appSlic
 import { isInvalid, formatWithCommas_usd } from "../../utils/uiNumber";
 import { YellowSolidSubmitButton, RedSolidSubmitButton } from "./button";
 import { getCollateralAmount } from "../../redux/selectors/getCollateralAmount";
-import { TipIcon, CloseIcon, WarnIcon, ArrowRight } from "./svg";
+import { TipIcon, CloseIcon, WarnIcon, JumpTipIcon, ArrowRight } from "./svg";
 import ReactToolTip from "../ToolTip";
 import { IToken } from "../../interfaces/asset";
 

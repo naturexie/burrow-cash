@@ -2,7 +2,7 @@ import Decimal from "decimal.js";
 import { USD_FORMAT, TOKEN_FORMAT, PERCENT_DIGITS, NEAR_STORAGE_DEPOSIT } from "../../store";
 import type { UIAsset } from "../../interfaces";
 import { formatWithCommas_number, toDecimal } from "../../utils/uiNumber";
-import { expandToken } from "../../store/helper";
+import { expandToken, shrinkToken } from "../../store/helper";
 import { decimalMax } from "../../utils";
 
 interface Alert {
@@ -51,6 +51,10 @@ export const getModalData = (asset): UIAsset & Props & { disabled: boolean } => 
     maxWithdrawAmount,
     isRepayFromDeposits,
     canUseAsCollateral,
+    tokenId,
+    poolAsset,
+    decimals,
+    extraDecimals,
   } = asset;
   const data: any = {
     apy: borrowApy,
@@ -117,16 +121,39 @@ export const getModalData = (asset): UIAsset & Props & { disabled: boolean } => 
       data.available = getAvailableWithdrawOrAdjust;
       data.rates = [];
       break;
-    case "Repay":
+    case "Repay": {
+      // TODO
+      let minRepay = "0";
+      if (poolAsset?.supplied?.shares) {
+        minRepay = shrinkToken(
+          new Decimal(poolAsset?.supplied?.balance)
+            .div(poolAsset?.supplied?.shares)
+            .mul(2)
+            .toFixed(0, 2),
+          decimals,
+        );
+      }
+      let interestChargedIn1min = "0";
+      if (borrowApy && price && borrowed) {
+        interestChargedIn1min = new Decimal(borrowApy)
+          .div(365 * 24 * 60)
+          .div(100)
+          .mul(borrowed)
+          .toFixed(decimals, 2);
+      }
+      const repayAmount = Decimal.max(
+        new Decimal(borrowed).plus(interestChargedIn1min),
+        minRepay,
+      ).toNumber();
       data.totalTitle = `Repay Borrow Amount`;
       data.available = toDecimal(
         isRepayFromDeposits
-          ? Math.min(maxWithdrawAmount, borrowed)
+          ? Math.min(maxWithdrawAmount, repayAmount)
           : Math.min(
               isWrappedNear
                 ? Number(Math.max(0, available + availableNEAR - NEAR_STORAGE_DEPOSIT))
                 : available,
-              borrowed,
+              repayAmount,
             ),
       );
       data.alerts = {};
@@ -146,7 +173,7 @@ export const getModalData = (asset): UIAsset & Props & { disabled: boolean } => 
         });
       }
       break;
-
+    }
     default:
   }
   if (

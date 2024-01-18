@@ -10,6 +10,7 @@ import {
 } from "../interfaces";
 import { getBurrow } from "../utils";
 import { DEFAULT_PRECISION } from "./constants";
+import { lpTokenPrefix } from "../utils/config";
 
 Decimal.set({ precision: DEFAULT_PRECISION });
 

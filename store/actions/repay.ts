@@ -16,12 +16,16 @@ export async function repay({
   extraDecimals,
   isMax,
   position,
+  minRepay,
+  interestChargedIn1min,
 }: {
   tokenId: string;
   amount: string;
   extraDecimals: number;
   isMax: boolean;
   position: string;
+  minRepay: string;
+  interestChargedIn1min: string;
 }) {
   const { account, logicContract } = await getBurrow();
   const tokenContract = await getTokenContract(tokenId);
@@ -34,7 +38,11 @@ export async function repay({
       0,
   );
   const extraDecimalMultiplier = expandTokenDecimal(1, extraDecimals);
-  const tokenBorrowedBalance = borrowedBalance.divToInt(extraDecimalMultiplier);
+  // TODO
+  const tokenBorrowedBalance = Decimal.max(
+    borrowedBalance.divToInt(extraDecimalMultiplier).plus(interestChargedIn1min),
+    minRepay,
+  );
 
   const tokenBalance = new Decimal(await getBalance(tokenId, account.accountId));
   const accountBalance = decimalMax(

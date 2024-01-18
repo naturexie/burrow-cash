@@ -45,6 +45,7 @@ const Modal = () => {
   const accountId = useAppSelector(getAccountId);
   const asset = useAppSelector(getAssetData);
   const { amount } = useAppSelector(getSelectedValues);
+  const assets = useAppSelector((state) => state.assets?.data || {});
   const dispatch = useAppDispatch();
   const { isRepayFromDeposits } = useDegenMode();
   const theme = useTheme();
@@ -98,6 +99,7 @@ const Modal = () => {
     healthFactor,
     amount,
     borrowed: repayAmount,
+    poolAsset: assets[tokenId],
   });
   const handleClose = () => dispatch(hideModal());
   useEffect(() => {
@@ -186,6 +188,7 @@ const Modal = () => {
               maxBorrowAmount={maxBorrowAmount}
               healthFactor={healthFactor}
               collateralType={selectedCollateralType}
+              poolAsset={assets[tokenId]}
             />
           </Box>
         </ModalContext.Provider>

@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Box, Typography, Switch, Tooltip, Alert, useTheme } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
-
+import Decimal from "decimal.js";
 import { FcInfo } from "@react-icons/all-files/fc/FcInfo";
 import { nearTokenId } from "../../utils";
 import { toggleUseAsCollateral, hideModal } from "../../redux/appSlice";
@@ -21,13 +21,14 @@ import { useDegenMode } from "../../hooks/hooks";
 import { SubmitButton, AlertWarning } from "./components";
 import { getAccountPortfolio } from "../../redux/accountSelectors";
 import getShadowRecords from "../../api/get-shadows";
+import { expandToken } from "../../store";
 
-export default function Action({ maxBorrowAmount, healthFactor, collateralType }) {
+export default function Action({ maxBorrowAmount, healthFactor, collateralType, poolAsset }) {
   const [loading, setLoading] = useState(false);
   const { amount, useAsCollateral, isMax } = useAppSelector(getSelectedValues);
   const dispatch = useAppDispatch();
   const asset = useAppSelector(getAssetData);
-  const { action = "Deposit", tokenId, isLpToken, decimals } = asset;
+  const { action = "Deposit", tokenId, isLpToken, decimals, borrowApy, price, borrowed } = asset;
   const { isRepayFromDeposits } = useDegenMode();
 
   const { available, canUseAsCollateral, extraDecimals, collateral, disabled } = getModalData({
@@ -102,13 +103,37 @@ export default function Action({ maxBorrowAmount, healthFactor, collateralType }
           isMax,
         });
         break;
-      case "Repay":
+      case "Repay": {
+        // TODO
+        let minRepay = "0";
+        let interestChargedIn1min = "0";
+        if (borrowApy && price && borrowed) {
+          interestChargedIn1min = expandToken(
+            new Decimal(borrowApy)
+              .div(365 * 24 * 60)
+              .div(100)
+              .mul(borrowed)
+              .toFixed(),
+            decimals || 0,
+            0,
+          );
+          if (+interestChargedIn1min === 0) {
+            interestChargedIn1min = "1";
+          }
+        }
+        if (poolAsset?.supplied?.shares) {
+          minRepay = new Decimal(poolAsset?.supplied?.balance)
+            .div(poolAsset?.supplied?.shares)
+            .mul(2)
+            .toFixed(0, 2);
+        }
         if (isRepayFromDeposits) {
           await repayFromDeposits({
             tokenId,
             amount,
             extraDecimals,
             position: collateralType,
+            isMax,
           });
         } else {
           await repay({
@@ -117,9 +142,12 @@ export default function Action({ maxBorrowAmount, healthFactor, collateralType }
             extraDecimals,
             isMax,
             position: collateralType,
+            minRepay,
+            interestChargedIn1min,
           });
         }
         break;
+      }
       default:
         break;
     }
