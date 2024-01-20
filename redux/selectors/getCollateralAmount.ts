@@ -4,6 +4,7 @@ import { shrinkToken, PERCENT_DIGITS } from "../../store";
 import { RootState } from "../store";
 import { hasAssets } from "../utils";
 import { toDecimal } from "../../utils/uiNumber";
+import { lpTokenPrefix, DEFAULT_POSITION } from "../../utils/config";
 
 export const getCollateralAmount = (tokenId: string) =>
   createSelector(
@@ -12,7 +13,8 @@ export const getCollateralAmount = (tokenId: string) =>
     (assets, account) => {
       if (!hasAssets(assets)) return "0";
       const { metadata, config } = assets.data[tokenId];
-      const collateral = account.portfolio.positions[tokenId]?.collateral?.[tokenId];
+      const position = tokenId.indexOf(lpTokenPrefix) > -1 ? tokenId : DEFAULT_POSITION;
+      const collateral = account.portfolio.positions[position]?.collateral?.[tokenId];
       if (!collateral) return "0";
       return toDecimal(
         shrinkToken(
