@@ -142,7 +142,7 @@ export const getModalData = (asset): UIAsset & Props & { disabled: boolean } => 
           .toFixed(decimals, 2);
       }
       const repayAmount = Decimal.max(
-        new Decimal(borrowed).plus(interestChargedIn1min),
+        new Decimal(borrowed || 0).plus(interestChargedIn1min),
         minRepay,
       ).toNumber();
       data.totalTitle = `Repay Borrow Amount`;
