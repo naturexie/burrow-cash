@@ -28,7 +28,6 @@ export async function repayFromDeposits({
   const { decimals } = (await getMetadata(tokenId))!;
   const account = await getAccount().then(transformAccount);
   if (!account) return;
-
   const extraDecimalMultiplier = expandTokenDecimal(1, extraDecimals);
   const expandedAmount = expandTokenDecimal(amount, decimals);
 
@@ -37,7 +36,7 @@ export async function repayFromDeposits({
     expandedAmount.mul(extraDecimalMultiplier).sub(suppliedBalance),
     0,
   );
-
+  // TODO
   const transactions: Transaction[] = [];
   const repayTemplate =
     !position || position === DEFAULT_POSITION
@@ -50,7 +49,7 @@ export async function repayFromDeposits({
       : {
           PositionRepay: {
             asset_amount: {
-              amount: expandedAmount.mul(extraDecimalMultiplier).toFixed(0),
+              amount: isMax ? undefined : expandedAmount.mul(extraDecimalMultiplier).toFixed(0),
               token_id: tokenId,
             },
             position,
