@@ -12,6 +12,17 @@ export const defaultNetwork = (process.env.NEXT_PUBLIC_DEFAULT_NETWORK ||
 
 const META_TOKEN = { testnet: undefined, mainnet: "meta-token.near" };
 const REF_TOKEN = { testnet: "ref.fakes.testnet", mainnet: "token.v2.ref-finance.near" };
+export const STABLE_POOL_IDS = [
+  "4179",
+  "3514",
+  "3515",
+  "1910",
+  "3020",
+  "3364",
+  "3688",
+  "3433",
+  "3689",
+];
 export const DEFAULT_POSITION = "REGULAR";
 export const BRRR_TOKEN = {
   testnet: "test_brrr.1638481328.burrow.testnet",

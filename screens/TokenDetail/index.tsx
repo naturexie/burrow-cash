@@ -50,7 +50,7 @@ import { ConnectWalletButton } from "../../components/Header/WalletButton";
 import { OuterLinkConfig } from "./config";
 import { APYCell } from "../Market/APYCell";
 import { RewardsV2 } from "../../components/Rewards";
-import getConfig, { DEFAULT_POSITION, lpTokenPrefix } from "../../utils/config";
+import getConfig, { DEFAULT_POSITION, lpTokenPrefix, STABLE_POOL_IDS } from "../../utils/config";
 import InterestRateChart, { LabelText } from "./interestRateChart";
 import TokenBorrowSuppliesChart from "./tokenBorrowSuppliesChart";
 import { useTokenDetails } from "../../hooks/useTokenDetails";
@@ -1268,9 +1268,12 @@ function OuterLink() {
                 className="lg:opacity-60 lg:hover:opacity-100"
                 onClick={() => {
                   const pool_id = tokenId.split("-")[1];
-                  // TODO need to judge is or not stable pool
-                  window.open(`https://app.ref.finance/pool/${pool_id}`);
-                  // window.open(`https://app.ref.finance/sauce/${pool_id}`);
+                  const is_stable_pool = STABLE_POOL_IDS.includes(pool_id);
+                  if (is_stable_pool) {
+                    window.open(`https://app.ref.finance/sauce/${pool_id}`);
+                  } else {
+                    window.open(`https://app.ref.finance/pool/${pool_id}`);
+                  }
                 }}
               />
             </LabelOuterLinkIcon>
