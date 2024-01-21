@@ -1,13 +1,12 @@
 import Decimal from "decimal.js";
 import BN from "bn.js";
-import { decimalMax, decimalMin, getBurrow, nearTokenId } from "../../utils";
+import { getBurrow, nearTokenId } from "../../utils";
 import { expandTokenDecimal, registerNearFnCall, expandToken } from "../helper";
 import { ChangeMethodsNearToken, ChangeMethodsToken } from "../../interfaces";
 import { getTokenContract, getMetadata, prepareAndExecuteTransactions } from "../tokens";
 import getBalance from "../../api/get-balance";
 import { FunctionCallOptions } from "../wallet";
-import { NEAR_STORAGE_DEPOSIT_DECIMAL, NEAR_DECIMALS } from "../constants";
-import { DEFAULT_POSITION, lpTokenPrefix } from "../../utils/config";
+import { DEFAULT_POSITION } from "../../utils/config";
 import getPortfolio from "../../api/get-portfolio";
 
 export async function repay({
@@ -16,17 +15,14 @@ export async function repay({
   extraDecimals,
   isMax,
   position,
-  minRepay,
-  interestChargedIn1min,
 }: {
   tokenId: string;
   amount: string;
   extraDecimals: number;
   isMax: boolean;
   position: string;
-  minRepay: string;
-  interestChargedIn1min: string;
 }) {
+  // TODO repay from wallet
   const { account, logicContract } = await getBurrow();
   const tokenContract = await getTokenContract(tokenId);
   const { decimals } = (await getMetadata(tokenId))!;
@@ -38,23 +34,14 @@ export async function repay({
       0,
   );
   const extraDecimalMultiplier = expandTokenDecimal(1, extraDecimals);
-  // TODO
-  const tokenBorrowedBalance = Decimal.max(
-    borrowedBalance.divToInt(extraDecimalMultiplier).plus(interestChargedIn1min),
-    minRepay,
-  );
-
+  // borrowed balance
+  const tokenBorrowedBalance = borrowedBalance.divToInt(extraDecimalMultiplier);
+  // wallet balance
   const tokenBalance = new Decimal(await getBalance(tokenId, account.accountId));
-  const accountBalance = decimalMax(
-    0,
-    new Decimal((await account.getAccountBalance()).available).sub(NEAR_STORAGE_DEPOSIT_DECIMAL),
-  );
-  const maxAvailableBalance = isNEAR ? tokenBalance.add(accountBalance) : tokenBalance;
-  const maxAmount = decimalMin(tokenBorrowedBalance, maxAvailableBalance);
-  const expandedAmountToken = (
-    isMax ? maxAmount : decimalMin(maxAmount, expandTokenDecimal(amount, decimals))
-  ).divToInt(1);
-
+  // repay amount
+  const expandedAmountToken = expandTokenDecimal(amount, decimals);
+  // is max
+  const treatAsMax = isMax || new Decimal(expandedAmountToken).gte(tokenBorrowedBalance);
   if (isNEAR && expandedAmountToken.gt(tokenBalance)) {
     const toWrapAmount = expandedAmountToken.sub(tokenBalance);
     functionCalls.push(...(await registerNearFnCall(account.accountId, tokenContract)));
@@ -72,7 +59,7 @@ export async function repay({
         actions: [
           {
             Repay: {
-              max_amount: !isMax
+              max_amount: !treatAsMax
                 ? expandedAmountToken.mul(extraDecimalMultiplier).toFixed(0)
                 : undefined,
               token_id: tokenId,
@@ -88,7 +75,7 @@ export async function repay({
           {
             PositionRepay: {
               asset_amount: {
-                amount: !isMax
+                amount: !treatAsMax
                   ? expandedAmountToken.mul(extraDecimalMultiplier).minus(1).toFixed(0)
                   : undefined,
                 token_id: tokenId,

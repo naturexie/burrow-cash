@@ -23,12 +23,12 @@ import { getAccountPortfolio } from "../../redux/accountSelectors";
 import getShadowRecords from "../../api/get-shadows";
 import { expandToken } from "../../store";
 
-export default function Action({ maxBorrowAmount, healthFactor, collateralType, poolAsset }) {
+export default function Action({ maxBorrowAmount, healthFactor, collateralType }) {
   const [loading, setLoading] = useState(false);
   const { amount, useAsCollateral, isMax } = useAppSelector(getSelectedValues);
   const dispatch = useAppDispatch();
   const asset = useAppSelector(getAssetData);
-  const { action = "Deposit", tokenId, isLpToken, decimals, borrowApy, price, borrowed } = asset;
+  const { action = "Deposit", tokenId, isLpToken, decimals } = asset;
   const { isRepayFromDeposits } = useDegenMode();
 
   const { available, canUseAsCollateral, extraDecimals, collateral, disabled } = getModalData({
@@ -104,29 +104,6 @@ export default function Action({ maxBorrowAmount, healthFactor, collateralType, 
         });
         break;
       case "Repay": {
-        // TODO
-        let minRepay = "0";
-        let interestChargedIn1min = "0";
-        if (borrowApy && price && borrowed) {
-          interestChargedIn1min = expandToken(
-            new Decimal(borrowApy)
-              .div(365 * 24 * 60)
-              .div(100)
-              .mul(borrowed)
-              .toFixed(),
-            decimals || 0,
-            0,
-          );
-          if (+interestChargedIn1min === 0) {
-            interestChargedIn1min = "1";
-          }
-        }
-        if (poolAsset?.supplied?.shares) {
-          minRepay = new Decimal(poolAsset?.supplied?.balance)
-            .div(poolAsset?.supplied?.shares)
-            .mul(2)
-            .toFixed(0, 2);
-        }
         if (isRepayFromDeposits) {
           await repayFromDeposits({
             tokenId,
@@ -140,10 +117,8 @@ export default function Action({ maxBorrowAmount, healthFactor, collateralType, 
             tokenId,
             amount,
             extraDecimals,
-            isMax,
             position: collateralType,
-            minRepay,
-            interestChargedIn1min,
+            isMax,
           });
         }
         break;
