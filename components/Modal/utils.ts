@@ -160,8 +160,8 @@ export const getModalData = (asset): UIAsset & Props & { disabled: boolean } => 
       data.rates = [
         {
           label: "Remaining Borrow",
-          value: (borrowed - amount).toFixed(PERCENT_DIGITS),
-          value$: new Decimal(borrowed - amount).mul(price).toFixed(),
+          value: decimalMax(0, (borrowed - amount).toFixed(PERCENT_DIGITS)).toFixed(PERCENT_DIGITS),
+          value$: decimalMax(0, new Decimal(borrowed - amount).mul(price)).toFixed(),
         },
       ];
       if (isRepayFromDeposits) {
