@@ -2,7 +2,7 @@ import { Contract } from "near-api-js";
 import BN from "bn.js";
 import Decimal from "decimal.js";
 
-import { defaultNetwork, LOGIC_CONTRACT_NAME, REFV1_CONTRACT_NAME } from "./config";
+import { defaultNetwork, LOGIC_CONTRACT_NAME } from "./config";
 import { nearMetadata, wooMetadata } from "../components/Assets";
 
 import {
@@ -139,13 +139,6 @@ export const getBurrow = async ({
     ViewMethodsLogic,
     ChangeMethodsLogic,
   );
-  const refv1Contract: Contract = await getContract(
-    account,
-    REFV1_CONTRACT_NAME,
-    ViewMethodsREFV1,
-    ChangeMethodsREFV1,
-  );
-
   // get oracle address from
   const config = (await view(
     logicContract,
@@ -157,6 +150,12 @@ export const getBurrow = async ({
     config.oracle_account_id,
     ViewMethodsOracle,
     ChangeMethodsOracle,
+  );
+  const refv1Contract: Contract = await getContract(
+    account,
+    config.ref_exchange_id,
+    ViewMethodsREFV1,
+    ChangeMethodsREFV1,
   );
 
   if (localStorage.getItem("near-wallet-selector:selectedWalletId") == null) {
