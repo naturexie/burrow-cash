@@ -126,6 +126,7 @@ export const initialState: AppState = {
     maximum_staleness_duration_sec: 0,
     minimum_staking_duration_sec: 0,
     oracle_account_id: "",
+    ref_exchange_id: "",
     owner_id: "",
     x_booster_multiplier_at_maximum_staking_duration: 0,
   },
