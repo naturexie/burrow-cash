@@ -122,7 +122,7 @@ function HeadMobile({ sorting }) {
       <div className="flex items-center">
         <span className="text-gray-300 text-sm mr-2.5">Sort by</span>
         {/* eslint-disable-next-line jsx-a11y/tabindex-no-positive */}
-        <div className="relative" onBlur={closeSelectBox} tabIndex={1}>
+        <div className="relative z-10" onBlur={closeSelectBox} tabIndex={1}>
           <div
             onClick={handleSelectBox}
             className="flex gap-2.5 items-center justify-center bg-gray-800 border border-dark-50 rounded-md px-2.5 py-1.5 text-sm text-white"
