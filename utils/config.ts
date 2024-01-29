@@ -55,6 +55,7 @@ const getConfig = (env: string = defaultNetwork) => {
         NEW_TOKENS: [
           "usdt.tether-token.near",
           "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1",
+          "shadow_ref_v1-4179",
         ],
         REF_FI_CONTRACT_ID: "v2.ref-finance.near",
       } as unknown as ConnectConfig & { REF_FI_CONTRACT_ID: string };
