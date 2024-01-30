@@ -11,6 +11,8 @@ type columnType = {
   accessorKey?: string;
   cell?: any;
   size?: number;
+  minSize?: number;
+  maxSize?: number;
 };
 
 interface Props {
@@ -132,16 +134,22 @@ const CustomTable = ({
     } else {
       text = d.header;
     }
-    return { text, size: d.size };
+    return { text, size: d.size, minSize: d.minSize, maxSize: d.maxSize };
   });
 
   const headersWidth = headersRef.current.map((d) => d.getBoundingClientRect().width);
   const headerNode = (
     <div className="custom-table-tr custom-table-header-row">
       {headers?.map((d, i) => {
-        const styles: { flex?: string } = {};
+        const styles: { flex?: string; maxWidth?: string; minWidth?: string } = {};
         if (d.size) {
           styles.flex = `0 0 ${d.size}px`;
+        }
+        if (d.minSize) {
+          styles.minWidth = `${d.minSize}px`;
+        }
+        if (d.maxSize) {
+          styles.maxWidth = `${d.maxSize}px`;
         }
         const keyId = typeof d.text === "string" ? d.text : i;
 
