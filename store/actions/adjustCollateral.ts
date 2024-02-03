@@ -68,7 +68,7 @@ export async function adjustCollateral({
         receiverId: logicContract.contractId,
         functionCalls: [
           {
-            methodName: ChangeMethodsLogic[ChangeMethodsLogic.execute],
+            methodName: ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth],
             gas: new BN("100000000000000"),
             args: {
               actions: [increaseCollateralTemplate],
@@ -103,18 +103,23 @@ export async function adjustCollateral({
     }
     await prepareAndExecuteTransactions([
       {
-        receiverId: oracleContract.contractId,
+        // receiverId: oracleContract.contractId,
+        receiverId: logicContract.contractId,
         functionCalls: [
           {
-            methodName: ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
+            // methodName: ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
+            methodName: ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth],
             gas: new BN("100000000000000"),
+            // args: {
+            //   receiver_id: logicContract.contractId,
+            //   msg: JSON.stringify({
+            //     Execute: {
+            //       actions: [decreaseCollateralTemplate],
+            //     },
+            //   }),
+            // },
             args: {
-              receiver_id: logicContract.contractId,
-              msg: JSON.stringify({
-                Execute: {
-                  actions: [decreaseCollateralTemplate],
-                },
-              }),
+              actions: [decreaseCollateralTemplate],
             },
           },
         ],

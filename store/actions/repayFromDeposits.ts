@@ -66,29 +66,46 @@ export async function repayFromDeposits({
           },
         };
   transactions.push({
-    receiverId: oracleContract.contractId,
+    // receiverId: oracleContract.contractId,
+    receiverId: logicContract.contractId,
     functionCalls: [
       {
-        methodName: ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
+        // methodName: ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
+        methodName: ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth],
+        // args: {
+        //   receiver_id: logicContract.contractId,
+        //   msg: JSON.stringify({
+        //     Execute: {
+        //       actions: [
+        //         ...(decreaseCollateralAmount.gt(0)
+        //           ? [
+        //               {
+        //                 DecreaseCollateral: {
+        //                   token_id: tokenId,
+        //                   amount: decreaseCollateralAmount.toFixed(0),
+        //                 },
+        //               },
+        //             ]
+        //           : []),
+        //         repayTemplate,
+        //       ],
+        //     },
+        //   }),
+        // },
         args: {
-          receiver_id: logicContract.contractId,
-          msg: JSON.stringify({
-            Execute: {
-              actions: [
-                ...(decreaseCollateralAmount.gt(0)
-                  ? [
-                      {
-                        DecreaseCollateral: {
-                          token_id: tokenId,
-                          amount: decreaseCollateralAmount.toFixed(0),
-                        },
-                      },
-                    ]
-                  : []),
-                repayTemplate,
-              ],
-            },
-          }),
+          actions: [
+            ...(decreaseCollateralAmount.gt(0)
+              ? [
+                  {
+                    DecreaseCollateral: {
+                      token_id: tokenId,
+                      amount: decreaseCollateralAmount.toFixed(0),
+                    },
+                  },
+                ]
+              : []),
+            repayTemplate,
+          ],
         },
       },
     ],

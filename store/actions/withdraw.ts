@@ -104,26 +104,39 @@ export async function withdraw({ tokenId, extraDecimals, amount, isMax }: Props)
     };
     if (decreaseCollateralAmount.gt(0)) {
       transactions.push({
-        receiverId: oracleContract.contractId,
+        // receiverId: oracleContract.contractId,
+        receiverId: logicContract.contractId,
         functionCalls: [
           {
-            methodName: ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
+            // methodName: ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
+            methodName: ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth],
             gas: new BN("100000000000000"),
+            // args: {
+            //   receiver_id: logicContract.contractId,
+            //   msg: JSON.stringify({
+            //     Execute: {
+            //       actions: [
+            //         {
+            //           DecreaseCollateral: {
+            //             token_id: tokenId,
+            //             amount: decreaseCollateralAmount.toFixed(0),
+            //           },
+            //         },
+            //         withdrawAction,
+            //       ],
+            //     },
+            //   }),
+            // },
             args: {
-              receiver_id: logicContract.contractId,
-              msg: JSON.stringify({
-                Execute: {
-                  actions: [
-                    {
-                      DecreaseCollateral: {
-                        token_id: tokenId,
-                        amount: decreaseCollateralAmount.toFixed(0),
-                      },
-                    },
-                    withdrawAction,
-                  ],
+              actions: [
+                {
+                  DecreaseCollateral: {
+                    token_id: tokenId,
+                    amount: decreaseCollateralAmount.toFixed(0),
+                  },
                 },
-              }),
+                withdrawAction,
+              ],
             },
           },
         ],
@@ -133,7 +146,7 @@ export async function withdraw({ tokenId, extraDecimals, amount, isMax }: Props)
         receiverId: logicContract.contractId,
         functionCalls: [
           {
-            methodName: ChangeMethodsLogic[ChangeMethodsLogic.execute],
+            methodName: ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth],
             args: {
               actions: [withdrawAction],
             },

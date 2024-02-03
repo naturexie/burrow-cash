@@ -59,7 +59,7 @@ const getConfig = (env: string = defaultNetwork) => {
         ],
         REF_FI_CONTRACT_ID: "v2.ref-finance.near",
         PYTH_ORACLE_CONTRACT_ID: "pyth-oracle.near",
-        PRICE_SWITCH: "pyth",
+        PRICE_SWITCH: process.env.NEXT_PUBLIC_PRICE_SWITCH || "pyth",
       } as unknown as ConnectConfig & {
         REF_FI_CONTRACT_ID: string;
         PYTH_ORACLE_CONTRACT_ID: string;
@@ -83,7 +83,7 @@ const getConfig = (env: string = defaultNetwork) => {
         NEW_TOKENS: ["usdc.fakes.testnet", "shadow_ref_v1-0", "shadow_ref_v1-2"],
         REF_FI_CONTRACT_ID: "exchange.ref-dev.testnet",
         PYTH_ORACLE_CONTRACT_ID: "pyth-oracle.testnet",
-        PRICE_SWITCH: "pyth",
+        PRICE_SWITCH: process.env.NEXT_PUBLIC_PRICE_SWITCH || "pyth",
       } as unknown as ConnectConfig & {
         REF_FI_CONTRACT_ID: string;
         PYTH_ORACLE_CONTRACT_ID: string;

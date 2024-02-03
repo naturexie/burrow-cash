@@ -19,7 +19,6 @@ import { IBurrow, IConfig } from "../interfaces/burrow";
 import { getContract } from "../store";
 
 import { getWalletSelector, getAccount, functionCall } from "./wallet-selector-compat";
-import { UIAsset } from "../interfaces";
 
 export const getViewAs = () => {
   const url = new URL(window.location.href.replace("/#", ""));

@@ -2,7 +2,12 @@ import BN from "bn.js";
 
 import { getBurrow, nearTokenId } from "../../utils";
 import { expandToken, expandTokenDecimal } from "../helper";
-import { ChangeMethodsNearToken, ChangeMethodsOracle, ChangeMethodsToken } from "../../interfaces";
+import {
+  ChangeMethodsLogic,
+  ChangeMethodsNearToken,
+  ChangeMethodsOracle,
+  ChangeMethodsToken,
+} from "../../interfaces";
 import { Transaction, isRegistered, isRegisteredNew } from "../wallet";
 import { prepareAndExecuteTransactions, getMetadata, getTokenContract } from "../tokens";
 import { NEAR_DECIMALS, NO_STORAGE_DEPOSIT_CONTRACTS, NEAR_STORAGE_DEPOSIT } from "../constants";
@@ -116,14 +121,19 @@ export async function borrow({
   }
 
   transactions.push({
-    receiverId: oracleContract.contractId,
+    // receiverId: oracleContract.contractId,
+    receiverId: logicContract.contractId,
     functionCalls: [
       {
-        methodName: ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
+        // methodName: ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
+        methodName: ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth],
         gas: new BN("100000000000000"),
+        // args: {
+        //   receiver_id: logicContract.contractId,
+        //   msg: JSON.stringify(borrowTemplate),
+        // },
         args: {
-          receiver_id: logicContract.contractId,
-          msg: JSON.stringify(borrowTemplate),
+          actions: borrowTemplate.Execute.actions,
         },
       },
     ],

@@ -5,7 +5,7 @@ import { expandTokenDecimal, expandToken } from "../helper";
 import { prepareAndExecuteTransactions } from "../tokens";
 import { Transaction } from "../wallet";
 import { NEAR_DECIMALS } from "../constants";
-import { ChangeMethodsREFV1, ChangeMethodsOracle } from "../../interfaces";
+import { ChangeMethodsREFV1, ChangeMethodsOracle, ChangeMethodsLogic } from "../../interfaces";
 
 export async function shadow_action_supply({
   tokenId,
@@ -70,28 +70,43 @@ export async function shadow_action_withdraw({
   const pool_id = +tokenId.split("-")[1];
   if (decreaseCollateralAmount.gt(0)) {
     transactions.push({
-      receiverId: oracleContract.contractId,
+      // receiverId: oracleContract.contractId,
+      receiverId: logicContract.contractId,
       functionCalls: [
         {
-          methodName: ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
+          // methodName: ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
+          methodName: ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth],
           gas: new BN("100000000000000"),
+          // args: {
+          //   receiver_id: logicContract.contractId,
+          //   msg: JSON.stringify({
+          //     Execute: {
+          //       actions: [
+          //         {
+          //           PositionDecreaseCollateral: {
+          //             position: tokenId,
+          //             asset_amount: {
+          //               token_id: tokenId,
+          //               amount: decreaseCollateralAmount.toFixed(0),
+          //             },
+          //           },
+          //         },
+          //       ],
+          //     },
+          //   }),
+          // },
           args: {
-            receiver_id: logicContract.contractId,
-            msg: JSON.stringify({
-              Execute: {
-                actions: [
-                  {
-                    PositionDecreaseCollateral: {
-                      position: tokenId,
-                      asset_amount: {
-                        token_id: tokenId,
-                        amount: decreaseCollateralAmount.toFixed(0),
-                      },
-                    },
+            actions: [
+              {
+                PositionDecreaseCollateral: {
+                  position: tokenId,
+                  asset_amount: {
+                    token_id: tokenId,
+                    amount: decreaseCollateralAmount.toFixed(0),
                   },
-                ],
+                },
               },
-            }),
+            ],
           },
         },
       ],

@@ -22,6 +22,7 @@ export enum ChangeMethodsLogic {
   // init
   new,
   execute,
+  execute_with_pyth,
   // register
   storage_deposit,
   // config
