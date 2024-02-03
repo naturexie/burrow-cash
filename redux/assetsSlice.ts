@@ -45,7 +45,7 @@ export const assetSlice = createSlice({
           state.data[missingTokenId]["price"] = {
             decimals: action.payload[missingToken.mainnet].decimal,
             usd: Number(action.payload[missingToken.mainnet].price),
-            multiplier: "1",
+            multiplier: action.payload[missingToken.mainnet].price,
           };
         }
       });

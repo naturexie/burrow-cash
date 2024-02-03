@@ -1,6 +1,3 @@
-// eslint-disable-next-line import/no-cycle
-import { IPositions } from "../redux/accountState";
-
 interface IFarmId {
   Supplied?: string;
   Borrowed?: string;

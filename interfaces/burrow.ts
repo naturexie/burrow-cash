@@ -1,7 +1,7 @@
 import { Account, Contract } from "near-api-js";
 import type { WalletSelector } from "@near-wallet-selector/core";
 
-import { IPrices } from "./oracle";
+import { IPrices, IPythPrice } from "./oracle";
 import {
   IMetadata,
   AssetEntry,
@@ -39,6 +39,7 @@ export interface IBurrow {
   logicContract: Contract;
   oracleContract: Contract;
   refv1Contract: Contract;
+  pythContract: Contract;
   config: IConfig;
   view: (
     contract: Contract,
@@ -46,6 +47,7 @@ export interface IBurrow {
     args?: any,
   ) => Promise<
     | IPrices
+    | IPythPrice
     | IMetadata
     | AssetEntry[]
     | IAssetDetailed

@@ -2,7 +2,7 @@ import { Contract } from "near-api-js";
 import BN from "bn.js";
 import Decimal from "decimal.js";
 
-import { defaultNetwork, LOGIC_CONTRACT_NAME } from "./config";
+import getConfig, { defaultNetwork, LOGIC_CONTRACT_NAME } from "./config";
 import { nearMetadata, wooMetadata } from "../components/Assets";
 
 import {
@@ -12,6 +12,8 @@ import {
   ViewMethodsOracle,
   ViewMethodsREFV1,
   ChangeMethodsREFV1,
+  ViewMethodsPyth,
+  ChangeMethodsPyth,
 } from "../interfaces/contract-methods";
 import { IBurrow, IConfig } from "../interfaces/burrow";
 import { getContract } from "../store";
@@ -157,6 +159,12 @@ export const getBurrow = async ({
     ViewMethodsREFV1,
     ChangeMethodsREFV1,
   );
+  const pythContract: Contract = await getContract(
+    account,
+    getConfig().PYTH_ORACLE_CONTRACT_ID,
+    ViewMethodsPyth,
+    ChangeMethodsPyth,
+  );
 
   if (localStorage.getItem("near-wallet-selector:selectedWalletId") == null) {
     if (
@@ -178,6 +186,7 @@ export const getBurrow = async ({
     logicContract,
     oracleContract,
     refv1Contract,
+    pythContract,
     view,
     call,
     config,

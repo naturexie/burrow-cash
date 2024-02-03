@@ -58,7 +58,13 @@ const getConfig = (env: string = defaultNetwork) => {
           "shadow_ref_v1-4179",
         ],
         REF_FI_CONTRACT_ID: "v2.ref-finance.near",
-      } as unknown as ConnectConfig & { REF_FI_CONTRACT_ID: string };
+        PYTH_ORACLE_CONTRACT_ID: "pyth-oracle.near",
+        PRICE_SWITCH: "pyth",
+      } as unknown as ConnectConfig & {
+        REF_FI_CONTRACT_ID: string;
+        PYTH_ORACLE_CONTRACT_ID: string;
+        PRICE_SWITCH: string;
+      };
 
     case "development":
     case "testnet":
@@ -76,7 +82,13 @@ const getConfig = (env: string = defaultNetwork) => {
         NATIVE_TOKENS: ["usdc.fakes.testnet"],
         NEW_TOKENS: ["usdc.fakes.testnet", "shadow_ref_v1-0", "shadow_ref_v1-2"],
         REF_FI_CONTRACT_ID: "exchange.ref-dev.testnet",
-      } as unknown as ConnectConfig & { REF_FI_CONTRACT_ID: string };
+        PYTH_ORACLE_CONTRACT_ID: "pyth-oracle.testnet",
+        PRICE_SWITCH: "pyth",
+      } as unknown as ConnectConfig & {
+        REF_FI_CONTRACT_ID: string;
+        PYTH_ORACLE_CONTRACT_ID: string;
+        PRICE_SWITCH: string;
+      };
     case "betanet":
       return {
         networkId: "betanet",
@@ -85,27 +97,43 @@ const getConfig = (env: string = defaultNetwork) => {
         helperUrl: "https://helper.betanet.near.org",
         explorerUrl: "https://explorer.betanet.near.org",
         SPECIAL_REGISTRATION_TOKEN_IDS: [],
-      } as unknown as ConnectConfig & { REF_FI_CONTRACT_ID: string };
+      } as unknown as ConnectConfig & {
+        REF_FI_CONTRACT_ID: string;
+        PYTH_ORACLE_CONTRACT_ID: string;
+        PRICE_SWITCH: string;
+      };
     case "local":
       return {
         networkId: "local",
         nodeUrl: "http://localhost:3030",
         keyPath: `${process.env.HOME}/.near/validator_key.json`,
         walletUrl: "http://localhost:4000/wallet",
-      } as ConnectConfig & { REF_FI_CONTRACT_ID: string };
+      } as ConnectConfig & {
+        REF_FI_CONTRACT_ID: string;
+        PYTH_ORACLE_CONTRACT_ID: string;
+        PRICE_SWITCH: string;
+      };
     case "test":
     case "ci":
       return {
         networkId: "shared-test",
         nodeUrl: "https://rpc.ci-testnet.near.org",
         masterAccount: "test.near",
-      } as ConnectConfig & { REF_FI_CONTRACT_ID: string };
+      } as ConnectConfig & {
+        REF_FI_CONTRACT_ID: string;
+        PYTH_ORACLE_CONTRACT_ID: string;
+        PRICE_SWITCH: string;
+      };
     case "ci-betanet":
       return {
         networkId: "shared-test-staging",
         nodeUrl: "https://rpc.ci-betanet.near.org",
         masterAccount: "test.near",
-      } as ConnectConfig & { REF_FI_CONTRACT_ID: string };
+      } as ConnectConfig & {
+        REF_FI_CONTRACT_ID: string;
+        PYTH_ORACLE_CONTRACT_ID: string;
+        PRICE_SWITCH: string;
+      };
     default:
       throw Error(`Unconfigured environment '${env}'. Can be configured in src/config.js.`);
   }
