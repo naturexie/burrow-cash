@@ -19,11 +19,13 @@ export async function borrow({
   extraDecimals,
   amount,
   collateralType,
+  enable_pyth_oracle,
 }: {
   tokenId: string;
   extraDecimals: number;
   amount: string;
   collateralType: string;
+  enable_pyth_oracle: boolean;
 }) {
   const { oracleContract, logicContract, account } = await getBurrow();
   const { decimals } = (await getMetadata(tokenId))!;
@@ -121,20 +123,21 @@ export async function borrow({
   }
 
   transactions.push({
-    // receiverId: oracleContract.contractId,
-    receiverId: logicContract.contractId,
+    receiverId: enable_pyth_oracle ? logicContract.contractId : oracleContract.contractId,
     functionCalls: [
       {
-        // methodName: ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
-        methodName: ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth],
+        methodName: enable_pyth_oracle
+          ? ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth]
+          : ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
         gas: new BN("100000000000000"),
-        // args: {
-        //   receiver_id: logicContract.contractId,
-        //   msg: JSON.stringify(borrowTemplate),
-        // },
-        args: {
-          actions: borrowTemplate.Execute.actions,
-        },
+        args: enable_pyth_oracle
+          ? {
+              actions: borrowTemplate.Execute.actions,
+            }
+          : {
+              receiver_id: logicContract.contractId,
+              msg: JSON.stringify(borrowTemplate),
+            },
       },
     ],
   });

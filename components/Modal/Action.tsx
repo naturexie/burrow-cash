@@ -1,8 +1,4 @@
 import { useState, useMemo, useEffect } from "react";
-import { Box, Typography, Switch, Tooltip, Alert, useTheme } from "@mui/material";
-import LoadingButton from "@mui/lab/LoadingButton";
-import Decimal from "decimal.js";
-import { FcInfo } from "@react-icons/all-files/fc/FcInfo";
 import { nearTokenId } from "../../utils";
 import { toggleUseAsCollateral, hideModal } from "../../redux/appSlice";
 import { getModalData } from "./utils";
@@ -15,22 +11,22 @@ import { withdraw } from "../../store/actions/withdraw";
 import { shadow_action_supply } from "../../store/actions/shadow";
 import { adjustCollateral } from "../../store/actions/adjustCollateral";
 import { useAppSelector, useAppDispatch } from "../../redux/hooks";
-import { getSelectedValues, getAssetData } from "../../redux/appSelectors";
-import { trackActionButton, trackUseAsCollateral } from "../../utils/telemetry";
+import { getSelectedValues, getAssetData, getConfig } from "../../redux/appSelectors";
+import { trackActionButton } from "../../utils/telemetry";
 import { useDegenMode } from "../../hooks/hooks";
-import { SubmitButton, AlertWarning } from "./components";
-import { getAccountPortfolio } from "../../redux/accountSelectors";
+import { SubmitButton } from "./components";
 import getShadowRecords from "../../api/get-shadows";
-import { expandToken } from "../../store";
+import getFrontEndConfig from "../../utils/config";
 
 export default function Action({ maxBorrowAmount, healthFactor, collateralType }) {
   const [loading, setLoading] = useState(false);
   const { amount, useAsCollateral, isMax } = useAppSelector(getSelectedValues);
+  // const enable_pyth_oracle = getFrontEndConfig().PRICE_SWITCH === "pyth";
+  const { enable_pyth_oracle } = useAppSelector(getConfig);
   const dispatch = useAppDispatch();
   const asset = useAppSelector(getAssetData);
   const { action = "Deposit", tokenId, isLpToken, decimals } = asset;
   const { isRepayFromDeposits } = useDegenMode();
-
   const { available, canUseAsCollateral, extraDecimals, collateral, disabled } = getModalData({
     ...asset,
     maxBorrowAmount,
@@ -83,7 +79,7 @@ export default function Action({ maxBorrowAmount, healthFactor, collateralType }
         }
         break;
       case "Borrow": {
-        await borrow({ tokenId, extraDecimals, amount, collateralType });
+        await borrow({ tokenId, extraDecimals, amount, collateralType, enable_pyth_oracle });
         break;
       }
       case "Withdraw": {
@@ -92,6 +88,7 @@ export default function Action({ maxBorrowAmount, healthFactor, collateralType }
           extraDecimals,
           amount,
           isMax,
+          enable_pyth_oracle,
         });
         break;
       }
@@ -101,6 +98,7 @@ export default function Action({ maxBorrowAmount, healthFactor, collateralType }
           extraDecimals,
           amount,
           isMax,
+          enable_pyth_oracle,
         });
         break;
       case "Repay": {
@@ -111,6 +109,7 @@ export default function Action({ maxBorrowAmount, healthFactor, collateralType }
             extraDecimals,
             position: collateralType,
             isMax,
+            enable_pyth_oracle,
           });
         } else {
           await repay({

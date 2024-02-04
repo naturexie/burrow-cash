@@ -4,7 +4,7 @@ import { Account, Contract } from "near-api-js";
 
 import { DEFAULT_PRECISION, NANOS_PER_YEAR, NEAR_DECIMALS } from "./constants";
 import { getBurrow, nearTokenId } from "../utils";
-import getConfig from "../utils/config";
+import getFrontEndConfig from "../utils/config";
 import {
   ViewMethodsOracle,
   IAssetPrice,
@@ -13,6 +13,8 @@ import {
   ViewMethodsPyth,
   IPythPrice,
   ViewMethodsToken,
+  ViewMethodsLogic,
+  IConfig,
 } from "../interfaces";
 import { isRegistered } from "./wallet";
 import {
@@ -44,7 +46,14 @@ export const rateToApr = (rate: string): string => {
 };
 
 export const getPrices = async (): Promise<IPrices | undefined> => {
-  if (getConfig().PRICE_SWITCH === "pyth") {
+  const { view, logicContract } = await getBurrow();
+  const config = (await view(
+    logicContract,
+    ViewMethodsLogic[ViewMethodsLogic.get_config],
+  )) as IConfig;
+  // const enable_pyth_oracle = getFrontEndConfig().PRICE_SWITCH === "pyth";
+  const { enable_pyth_oracle } = config;
+  if (enable_pyth_oracle) {
     const pythResponse = await getPythPrices();
     return pythResponse;
   } else {
@@ -53,12 +62,17 @@ export const getPrices = async (): Promise<IPrices | undefined> => {
   }
 };
 const getPythPrices = async () => {
-  const { view, pythContract } = await getBurrow();
+  const { view, pythContract, logicContract } = await getBurrow();
+  // const COINList = COINS;
+  const COINList = await view(
+    logicContract,
+    ViewMethodsLogic[ViewMethodsLogic.get_all_token_pyth_infos],
+  );
   try {
-    const array_coins = Object.entries(COINS) as any[];
+    const array_coins = Object.entries(COINList) as any[];
     const allRequest = array_coins.map(([, coin]) => {
       return view(pythContract, ViewMethodsPyth[ViewMethodsPyth.get_price], {
-        price_identifier: coin.priceFeedId,
+        price_identifier: coin.price_identifier,
       });
     });
     let near_pyth_price_obj: IPythPrice = {
@@ -75,13 +89,13 @@ const getPythPrices = async () => {
       if (coin[0] === nearTokenId) {
         near_pyth_price_obj = priceObject;
       }
-      coin[1].fractionDigits = coin[1].fractionDigits || FRACTION_DIGITS;
-      const discrepancy_denominator = new Decimal(10).pow(coin[1].fractionDigits).toNumber();
+      coin[1].fraction_digits = coin[1].fraction_digits || FRACTION_DIGITS;
+      const discrepancy_denominator = new Decimal(10).pow(coin[1].fraction_digits).toNumber();
       const object = {
         asset_id: coin[0],
         price: {
           multiplier: new Decimal(p).mul(discrepancy_denominator).toFixed(0),
-          decimals: coin[1].decimals + coin[1].fractionDigits,
+          decimals: coin[1].decimals + coin[1].fraction_digits,
         },
       };
       return object;

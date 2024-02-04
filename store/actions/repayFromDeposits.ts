@@ -15,12 +15,14 @@ export async function repayFromDeposits({
   extraDecimals,
   position,
   isMax,
+  enable_pyth_oracle,
 }: {
   tokenId: string;
   amount: string;
   extraDecimals: number;
   position: string;
   isMax: boolean;
+  enable_pyth_oracle: boolean;
 }) {
   // TODO repay from supplied
   const { logicContract, oracleContract } = await getBurrow();
@@ -66,47 +68,48 @@ export async function repayFromDeposits({
           },
         };
   transactions.push({
-    // receiverId: oracleContract.contractId,
-    receiverId: logicContract.contractId,
+    receiverId: enable_pyth_oracle ? logicContract.contractId : oracleContract.contractId,
     functionCalls: [
       {
-        // methodName: ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
-        methodName: ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth],
-        // args: {
-        //   receiver_id: logicContract.contractId,
-        //   msg: JSON.stringify({
-        //     Execute: {
-        //       actions: [
-        //         ...(decreaseCollateralAmount.gt(0)
-        //           ? [
-        //               {
-        //                 DecreaseCollateral: {
-        //                   token_id: tokenId,
-        //                   amount: decreaseCollateralAmount.toFixed(0),
-        //                 },
-        //               },
-        //             ]
-        //           : []),
-        //         repayTemplate,
-        //       ],
-        //     },
-        //   }),
-        // },
-        args: {
-          actions: [
-            ...(decreaseCollateralAmount.gt(0)
-              ? [
-                  {
-                    DecreaseCollateral: {
-                      token_id: tokenId,
-                      amount: decreaseCollateralAmount.toFixed(0),
-                    },
-                  },
-                ]
-              : []),
-            repayTemplate,
-          ],
-        },
+        methodName: enable_pyth_oracle
+          ? ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth]
+          : ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
+        args: enable_pyth_oracle
+          ? {
+              actions: [
+                ...(decreaseCollateralAmount.gt(0)
+                  ? [
+                      {
+                        DecreaseCollateral: {
+                          token_id: tokenId,
+                          amount: decreaseCollateralAmount.toFixed(0),
+                        },
+                      },
+                    ]
+                  : []),
+                repayTemplate,
+              ],
+            }
+          : {
+              receiver_id: logicContract.contractId,
+              msg: JSON.stringify({
+                Execute: {
+                  actions: [
+                    ...(decreaseCollateralAmount.gt(0)
+                      ? [
+                          {
+                            DecreaseCollateral: {
+                              token_id: tokenId,
+                              amount: decreaseCollateralAmount.toFixed(0),
+                            },
+                          },
+                        ]
+                      : []),
+                    repayTemplate,
+                  ],
+                },
+              }),
+            },
       },
     ],
   });

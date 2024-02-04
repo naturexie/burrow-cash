@@ -59,55 +59,58 @@ export async function shadow_action_withdraw({
   expandAmount,
   isMax,
   decreaseCollateralAmount,
+  enable_pyth_oracle,
 }: {
   tokenId: string;
   expandAmount: string;
   isMax: boolean;
   decreaseCollateralAmount: Decimal;
+  enable_pyth_oracle: boolean;
 }): Promise<void> {
   const transactions: Transaction[] = [];
   const { refv1Contract, logicContract, oracleContract } = await getBurrow();
   const pool_id = +tokenId.split("-")[1];
   if (decreaseCollateralAmount.gt(0)) {
     transactions.push({
-      // receiverId: oracleContract.contractId,
-      receiverId: logicContract.contractId,
+      receiverId: enable_pyth_oracle ? logicContract.contractId : oracleContract.contractId,
       functionCalls: [
         {
-          // methodName: ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
-          methodName: ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth],
+          methodName: enable_pyth_oracle
+            ? ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth]
+            : ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
           gas: new BN("100000000000000"),
-          // args: {
-          //   receiver_id: logicContract.contractId,
-          //   msg: JSON.stringify({
-          //     Execute: {
-          //       actions: [
-          //         {
-          //           PositionDecreaseCollateral: {
-          //             position: tokenId,
-          //             asset_amount: {
-          //               token_id: tokenId,
-          //               amount: decreaseCollateralAmount.toFixed(0),
-          //             },
-          //           },
-          //         },
-          //       ],
-          //     },
-          //   }),
-          // },
-          args: {
-            actions: [
-              {
-                PositionDecreaseCollateral: {
-                  position: tokenId,
-                  asset_amount: {
-                    token_id: tokenId,
-                    amount: decreaseCollateralAmount.toFixed(0),
+          args: enable_pyth_oracle
+            ? {
+                actions: [
+                  {
+                    PositionDecreaseCollateral: {
+                      position: tokenId,
+                      asset_amount: {
+                        token_id: tokenId,
+                        amount: decreaseCollateralAmount.toFixed(0),
+                      },
+                    },
                   },
-                },
+                ],
+              }
+            : {
+                receiver_id: logicContract.contractId,
+                msg: JSON.stringify({
+                  Execute: {
+                    actions: [
+                      {
+                        PositionDecreaseCollateral: {
+                          position: tokenId,
+                          asset_amount: {
+                            token_id: tokenId,
+                            amount: decreaseCollateralAmount.toFixed(0),
+                          },
+                        },
+                      },
+                    ],
+                  },
+                }),
               },
-            ],
-          },
         },
       ],
     });

@@ -15,6 +15,7 @@ export enum ViewMethodsLogic {
   get_asset_farms_paged,
   storage_balance_of,
   check_registration,
+  get_all_token_pyth_infos,
 }
 
 // Change methods can modify the state. But you don't receive the returned value when called.

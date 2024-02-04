@@ -26,6 +26,8 @@ export interface IConfig {
   ref_exchange_id: string;
   owner_id: string;
   x_booster_multiplier_at_maximum_staking_duration: number;
+  enable_price_oracle: boolean;
+  enable_pyth_oracle: boolean;
 }
 
 export interface IBurrow {

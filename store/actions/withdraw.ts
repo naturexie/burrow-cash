@@ -22,9 +22,16 @@ interface Props {
   extraDecimals: number;
   amount: string;
   isMax: boolean;
+  enable_pyth_oracle: boolean;
 }
 
-export async function withdraw({ tokenId, extraDecimals, amount, isMax }: Props) {
+export async function withdraw({
+  tokenId,
+  extraDecimals,
+  amount,
+  isMax,
+  enable_pyth_oracle,
+}: Props) {
   const assets = await getAssets().then(transformAssets);
   const account = await getAccount().then(transformAccount);
   if (!account) return;
@@ -49,6 +56,7 @@ export async function withdraw({ tokenId, extraDecimals, amount, isMax }: Props)
       expandAmount: expandedAmount.toFixed(0),
       isMax,
       decreaseCollateralAmount,
+      enable_pyth_oracle,
     });
   } else {
     const tokenContract = await getTokenContract(tokenId);
@@ -104,40 +112,41 @@ export async function withdraw({ tokenId, extraDecimals, amount, isMax }: Props)
     };
     if (decreaseCollateralAmount.gt(0)) {
       transactions.push({
-        // receiverId: oracleContract.contractId,
-        receiverId: logicContract.contractId,
+        receiverId: enable_pyth_oracle ? logicContract.contractId : oracleContract.contractId,
         functionCalls: [
           {
-            // methodName: ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
-            methodName: ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth],
+            methodName: enable_pyth_oracle
+              ? ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth]
+              : ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
             gas: new BN("100000000000000"),
-            // args: {
-            //   receiver_id: logicContract.contractId,
-            //   msg: JSON.stringify({
-            //     Execute: {
-            //       actions: [
-            //         {
-            //           DecreaseCollateral: {
-            //             token_id: tokenId,
-            //             amount: decreaseCollateralAmount.toFixed(0),
-            //           },
-            //         },
-            //         withdrawAction,
-            //       ],
-            //     },
-            //   }),
-            // },
-            args: {
-              actions: [
-                {
-                  DecreaseCollateral: {
-                    token_id: tokenId,
-                    amount: decreaseCollateralAmount.toFixed(0),
-                  },
+            args: enable_pyth_oracle
+              ? {
+                  actions: [
+                    {
+                      DecreaseCollateral: {
+                        token_id: tokenId,
+                        amount: decreaseCollateralAmount.toFixed(0),
+                      },
+                    },
+                    withdrawAction,
+                  ],
+                }
+              : {
+                  receiver_id: logicContract.contractId,
+                  msg: JSON.stringify({
+                    Execute: {
+                      actions: [
+                        {
+                          DecreaseCollateral: {
+                            token_id: tokenId,
+                            amount: decreaseCollateralAmount.toFixed(0),
+                          },
+                        },
+                        withdrawAction,
+                      ],
+                    },
+                  }),
                 },
-                withdrawAction,
-              ],
-            },
           },
         ],
       });
@@ -146,7 +155,9 @@ export async function withdraw({ tokenId, extraDecimals, amount, isMax }: Props)
         receiverId: logicContract.contractId,
         functionCalls: [
           {
-            methodName: ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth],
+            methodName: enable_pyth_oracle
+              ? ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth]
+              : ChangeMethodsLogic[ChangeMethodsLogic.execute],
             args: {
               actions: [withdrawAction],
             },

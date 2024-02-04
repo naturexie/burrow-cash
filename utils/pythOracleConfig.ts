@@ -4,49 +4,49 @@ const FRACTION_DIGITS = 4;
 const TestnetCoins = {
   "wrap.testnet": {
     decimals: 24,
-    priceFeedId: "27e867f0f4f61076456d1a73b14c7edc1cf5cef4f4d6193a33424288f11bd0f4",
+    price_identifier: "27e867f0f4f61076456d1a73b14c7edc1cf5cef4f4d6193a33424288f11bd0f4",
   },
   aurora: {
     decimals: 18,
-    fractionDigits: 2,
-    priceFeedId: "ca80ba6dc32e08d06f1aa886011eed1d77c77be9eb761cc10d72b7d0a2fd57a6",
+    fraction_digits: 2,
+    price_identifier: "ca80ba6dc32e08d06f1aa886011eed1d77c77be9eb761cc10d72b7d0a2fd57a6",
   },
   "usdt.fakes.testnet": {
     decimals: 6,
-    priceFeedId: "1fc18861232290221461220bd4e2acd1dcdfbc89c84092c93c18bdc7756c1588",
+    price_identifier: "1fc18861232290221461220bd4e2acd1dcdfbc89c84092c93c18bdc7756c1588",
   },
   "usdc.fakes.testnet": {
     decimals: 6,
-    priceFeedId: "41f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722",
+    price_identifier: "41f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722",
   },
   "dai.fakes.testnet": {
     decimals: 18,
-    priceFeedId: "87a67534df591d2dd5ec577ab3c75668a8e3d35e92e27bf29d9e2e52df8de412",
+    price_identifier: "87a67534df591d2dd5ec577ab3c75668a8e3d35e92e27bf29d9e2e52df8de412",
   },
   "wbtc.fakes.testnet": {
     decimals: 8,
-    fractionDigits: 2,
-    priceFeedId: "ea0459ab2954676022baaceadb472c1acc97888062864aa23e9771bae3ff36ed",
+    fraction_digits: 2,
+    price_identifier: "ea0459ab2954676022baaceadb472c1acc97888062864aa23e9771bae3ff36ed",
   },
   "aurora.fakes.testnet": {
     decimals: 18,
-    fractionDigits: 5,
-    priceFeedId: "eb00e1f858549e12034ff880b7592456a71b4237aaf4aeb16e63cd9b68ba4d7e",
+    fraction_digits: 5,
+    price_identifier: "eb00e1f858549e12034ff880b7592456a71b4237aaf4aeb16e63cd9b68ba4d7e",
   },
   "woo.orderly.testnet": {
     decimals: 18,
-    fractionDigits: 6,
-    priceFeedId: "bf517e0f7ccfc307f0b2fa93b99a737641933989af6af769c928725989c21e66",
+    fraction_digits: 6,
+    price_identifier: "bf517e0f7ccfc307f0b2fa93b99a737641933989af6af769c928725989c21e66",
   },
 };
 const MainnetCoins = {
   "wrap.near": {
     decimals: 24,
-    priceFeedId: "c415de8d2eba7db216527dff4b60e8f3a5311c740dadb233e13e12547e226750",
+    price_identifier: "c415de8d2eba7db216527dff4b60e8f3a5311c740dadb233e13e12547e226750",
   },
   aurora: {
     decimals: 18,
-    fractionDigits: 2,
+    fraction_digits: 2,
   },
   "dac17f958d2ee523a2206206994597c13d831ec7.factory.bridge.near": {
     decimals: 6,
@@ -59,15 +59,15 @@ const MainnetCoins = {
   },
   "2260fac5e5542a773aa44fbcfedf7c193bc2c599.factory.bridge.near": {
     decimals: 8,
-    fractionDigits: 2,
+    fraction_digits: 2,
   },
   "aaaaaa20d9e0e2461697782ef11675f668207961.factory.bridge.near": {
     decimals: 18,
-    fractionDigits: 5,
+    fraction_digits: 5,
   },
   "4691937a7508860f876c9c0a2a617e7d9e945d4b.factory.bridge.near": {
     decimals: 18,
-    fractionDigits: 6,
+    fraction_digits: 6,
   },
 };
 const COINS_ENV = {

@@ -5,8 +5,7 @@ import { decimalMin, getBurrow } from "../../utils";
 import { expandTokenDecimal } from "../helper";
 import { ChangeMethodsLogic, ChangeMethodsOracle } from "../../interfaces";
 import { Transaction } from "../wallet";
-import { getMetadata, prepareAndExecuteTransactions } from "../tokens";
-import { getAccountDetailed } from "../accounts";
+import { prepareAndExecuteTransactions } from "../tokens";
 import getAssets from "../../api/get-assets";
 import { transformAssets } from "../../transformers/asstets";
 import getAccount from "../../api/get-account";
@@ -17,11 +16,13 @@ export async function adjustCollateral({
   extraDecimals,
   amount,
   isMax,
+  enable_pyth_oracle,
 }: {
   tokenId: string;
   extraDecimals: number;
   amount: string;
   isMax: boolean;
+  enable_pyth_oracle: boolean;
 }) {
   const { oracleContract, logicContract } = await getBurrow();
   const assets = await getAssets().then(transformAssets);
@@ -29,7 +30,6 @@ export async function adjustCollateral({
   const { decimals } = asset.metadata;
   const account = await getAccount().then(transformAccount);
   if (!account) return;
-
   const suppliedBalance = new Decimal(account.portfolio?.supplied[tokenId]?.balance || 0);
   const collateralBalance = new Decimal(
     asset.isLpToken
@@ -68,7 +68,9 @@ export async function adjustCollateral({
         receiverId: logicContract.contractId,
         functionCalls: [
           {
-            methodName: ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth],
+            methodName: enable_pyth_oracle
+              ? ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth]
+              : ChangeMethodsLogic[ChangeMethodsLogic.execute],
             gas: new BN("100000000000000"),
             args: {
               actions: [increaseCollateralTemplate],
@@ -103,24 +105,25 @@ export async function adjustCollateral({
     }
     await prepareAndExecuteTransactions([
       {
-        // receiverId: oracleContract.contractId,
-        receiverId: logicContract.contractId,
+        receiverId: enable_pyth_oracle ? logicContract.contractId : oracleContract.contractId,
         functionCalls: [
           {
-            // methodName: ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
-            methodName: ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth],
+            methodName: enable_pyth_oracle
+              ? ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth]
+              : ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
             gas: new BN("100000000000000"),
-            // args: {
-            //   receiver_id: logicContract.contractId,
-            //   msg: JSON.stringify({
-            //     Execute: {
-            //       actions: [decreaseCollateralTemplate],
-            //     },
-            //   }),
-            // },
-            args: {
-              actions: [decreaseCollateralTemplate],
-            },
+            args: enable_pyth_oracle
+              ? {
+                  actions: [decreaseCollateralTemplate],
+                }
+              : {
+                  receiver_id: logicContract.contractId,
+                  msg: JSON.stringify({
+                    Execute: {
+                      actions: [decreaseCollateralTemplate],
+                    },
+                  }),
+                },
           },
         ],
       } as Transaction,
