@@ -69,7 +69,6 @@ const getPythPrices = async () => {
     logicContract,
     ViewMethodsLogic[ViewMethodsLogic.get_all_token_pyth_infos],
   );
-  debugger;
   try {
     const array_coins = Object.entries(COINList) as any[];
     const allRequest = array_coins.map(([, coin]) => {
@@ -90,7 +89,7 @@ const getPythPrices = async () => {
         if (coin[1].default_price) {
           return {
             asset_id: coin[0],
-            price: coin[1].default_price,
+            price: coin[1].default_price as IPrice,
           };
         }
         return {
@@ -172,7 +171,7 @@ const getPythPrices = async () => {
       };
     }
     return {
-      prices: Object.values(format_price_map),
+      prices: Object.values(format_price_map) as IAssetPrice[],
       recency_duration_sec: 0,
       timestamp: "0",
     };
