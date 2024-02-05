@@ -83,9 +83,17 @@ const getPythPrices = async () => {
     };
     const price_array = (await Promise.all(allRequest)) as IPythPrice[];
     const format_price: IAssetPrice[] = price_array.map((priceObject: IPythPrice, index) => {
+      const coin = array_coins[index];
+      if (!priceObject)
+        return {
+          asset_id: coin[0],
+          price: {
+            multiplier: "0",
+            decimals: coin[1].decimals + coin[1].fraction_digits,
+          },
+        };
       const { price, expo } = priceObject;
       const p = new Decimal(10).pow(expo).mul(price).toNumber();
-      const coin = array_coins[index];
       if (coin[0] === nearTokenId) {
         near_pyth_price_obj = priceObject;
       }
