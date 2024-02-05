@@ -15,6 +15,7 @@ import {
   ViewMethodsToken,
   ViewMethodsLogic,
   IConfig,
+  IPrice,
 } from "../interfaces";
 import { isRegistered } from "./wallet";
 import {
@@ -68,6 +69,7 @@ const getPythPrices = async () => {
     logicContract,
     ViewMethodsLogic[ViewMethodsLogic.get_all_token_pyth_infos],
   );
+  debugger;
   try {
     const array_coins = Object.entries(COINList) as any[];
     const allRequest = array_coins.map(([, coin]) => {
@@ -84,7 +86,13 @@ const getPythPrices = async () => {
     const price_array = (await Promise.all(allRequest)) as IPythPrice[];
     const format_price: IAssetPrice[] = price_array.map((priceObject: IPythPrice, index) => {
       const coin = array_coins[index];
-      if (!priceObject)
+      if (!priceObject) {
+        if (coin[1].default_price) {
+          return {
+            asset_id: coin[0],
+            price: coin[1].default_price,
+          };
+        }
         return {
           asset_id: coin[0],
           price: {
@@ -92,6 +100,7 @@ const getPythPrices = async () => {
             decimals: coin[1].decimals + coin[1].fraction_digits,
           },
         };
+      }
       const { price, expo } = priceObject;
       const p = new Decimal(10).pow(expo).mul(price).toNumber();
       if (coin[0] === nearTokenId) {
@@ -108,6 +117,10 @@ const getPythPrices = async () => {
       };
       return object;
     });
+    const format_price_map = format_price.reduce(
+      (acc, p: IAssetPrice) => ({ ...acc, [p.asset_id]: p }),
+      {},
+    );
     if (near_pyth_price_obj) {
       const near_price = new Decimal(10)
         .pow(near_pyth_price_obj.expo)
@@ -136,32 +149,30 @@ const getPythPrices = async () => {
       const linear_price = new Decimal(near_price)
         .mul(linear_proportion)
         .div(new Decimal(10).pow(24));
-      format_price.push(
-        {
-          asset_id: NEARX_TOKEN,
-          price: {
-            multiplier: nearx_price.mul(new Decimal(10).pow(FRACTION_DIGITS)).toFixed(0),
-            decimals: 24 + FRACTION_DIGITS,
-          },
+      format_price_map[NEARX_TOKEN] = {
+        asset_id: NEARX_TOKEN,
+        price: {
+          multiplier: nearx_price.mul(new Decimal(10).pow(FRACTION_DIGITS)).toFixed(0),
+          decimals: 24 + FRACTION_DIGITS,
         },
-        {
-          asset_id: STNEAR_TOKEN,
-          price: {
-            multiplier: stnear_price.mul(new Decimal(10).pow(FRACTION_DIGITS)).toFixed(0),
-            decimals: 24 + FRACTION_DIGITS,
-          },
+      };
+      format_price_map[STNEAR_TOKEN] = {
+        asset_id: STNEAR_TOKEN,
+        price: {
+          multiplier: stnear_price.mul(new Decimal(10).pow(FRACTION_DIGITS)).toFixed(0),
+          decimals: 24 + FRACTION_DIGITS,
         },
-        {
-          asset_id: LINEAR_TOKEN,
-          price: {
-            multiplier: linear_price.mul(new Decimal(10).pow(FRACTION_DIGITS)).toFixed(0),
-            decimals: 24 + FRACTION_DIGITS,
-          },
+      };
+      format_price_map[LINEAR_TOKEN] = {
+        asset_id: LINEAR_TOKEN,
+        price: {
+          multiplier: linear_price.mul(new Decimal(10).pow(FRACTION_DIGITS)).toFixed(0),
+          decimals: 24 + FRACTION_DIGITS,
         },
-      );
+      };
     }
     return {
-      prices: format_price,
+      prices: Object.values(format_price_map),
       recency_duration_sec: 0,
       timestamp: "0",
     };
