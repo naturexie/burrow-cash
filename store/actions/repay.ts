@@ -47,7 +47,7 @@ export async function repay({
     functionCalls.push(...(await registerNearFnCall(account.accountId, tokenContract)));
     functionCalls.push({
       methodName: ChangeMethodsNearToken[ChangeMethodsNearToken.near_deposit],
-      gas: new BN("10000000000000"),
+      gas: new BN("100000000000000"),
       attachedDeposit: new BN(toWrapAmount.toFixed(0)),
     });
   }

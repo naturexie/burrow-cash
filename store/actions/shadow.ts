@@ -78,7 +78,7 @@ export async function shadow_action_withdraw({
           methodName: enable_pyth_oracle
             ? ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth]
             : ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
-          gas: new BN("100000000000000"),
+          gas: new BN("300000000000000"),
           args: enable_pyth_oracle
             ? {
                 actions: [
