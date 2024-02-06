@@ -1,4 +1,5 @@
 import Decimal from "decimal.js";
+import BN from "bn.js";
 import { decimalMax, getBurrow } from "../../utils";
 import { expandTokenDecimal, expandToken } from "../helper";
 import { ChangeMethodsOracle, ChangeMethodsLogic } from "../../interfaces";
@@ -110,6 +111,7 @@ export async function repayFromDeposits({
                 },
               }),
             },
+        gas: new BN("300000000000000"),
       },
     ],
   });
