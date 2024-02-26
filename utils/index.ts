@@ -3,7 +3,7 @@ import BN from "bn.js";
 import Decimal from "decimal.js";
 
 import getConfig, { defaultNetwork, LOGIC_CONTRACT_NAME } from "./config";
-import { nearMetadata, wooMetadata } from "../components/Assets";
+import { nearMetadata, wooMetadata, sfraxMetadata, fraxMetadata } from "../components/Assets";
 
 import {
   ChangeMethodsLogic,
@@ -244,6 +244,18 @@ export function standardizeAsset(asset) {
   }
   if (serializationAsset.metadata?.symbol === "WOO") {
     serializationAsset.metadata.icon = wooMetadata.icon;
+  }
+  if (serializationAsset.symbol === "sFRAX") {
+    serializationAsset.icon = sfraxMetadata.icon;
+  }
+  if (serializationAsset.metadata?.symbol === "sFRAX") {
+    serializationAsset.metadata.icon = sfraxMetadata.icon;
+  }
+  if (serializationAsset.symbol === "FRAX") {
+    serializationAsset.icon = fraxMetadata.icon;
+  }
+  if (serializationAsset.metadata?.symbol === "FRAX") {
+    serializationAsset.metadata.icon = fraxMetadata.icon;
   }
   return serializationAsset;
 }
