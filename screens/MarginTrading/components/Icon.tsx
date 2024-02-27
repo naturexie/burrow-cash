@@ -34,6 +34,54 @@ export function ArrowDownIcon({ fill, ...props }) {
   );
 }
 
+export function AddCollateral({ ...props }) {
+  return (
+    <svg
+      {...props}
+      width="18"
+      height="18"
+      viewBox="0 0 18 18"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect
+        opacity="0.5"
+        x="1"
+        y="1"
+        width="16"
+        height="16"
+        rx="4"
+        stroke="#D2FF3A"
+        strokeWidth="1.2"
+      />
+      <path
+        d="M8.22533 12.8756V9.68961H5.11133V8.28561H8.22533V5.09961H9.77333V8.28561H12.8873V9.68961H9.77333V12.8756H8.22533Z"
+        fill="#D2FF3A"
+      />
+    </svg>
+  );
+}
+
+export function Export({ ...props }) {
+  return (
+    <svg
+      {...props}
+      width="11"
+      height="11"
+      viewBox="0 0 11 11"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M4.31579 1H1V10H10V6.85"
+        stroke="#C0C4E9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function TestNearIcon({ ...props }) {
   return (
     <svg

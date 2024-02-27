@@ -2,19 +2,10 @@ import React from "react";
 import Link from "next/link";
 import { ArrowDownIcon, ArrowUpIcon, TestNearIcon } from "./Icon";
 
-const DataItem = ({ title, value }) => (
-  <div className="flex flex-1 justify-center">
-    <div>
-      <p className="text-gray-300 text-sm">{title}</p>
-      <h2 className="text-h2">{value}</h2>
-    </div>
-  </div>
-);
-
 const MarketMarginTrading = () => {
   return (
     <div className="flex flex-col items-center justify-center w-full">
-      <div className="flex justify-between items-center w-full h-[100px] border border-dark-50 bg-gray-800 rounded-xl mb-8">
+      <div className="flex justify-between items-center w-full h-[100px] border border-dark-50 bg-gray-800 rounded-md mb-8">
         <DataItem title="Total Volume" value="$16.96M" />
         <DataItem title="24H Volume" value="$3.85K" />
         <DataItem title="Long Open Interest" value="$12.91M" />
@@ -25,6 +16,15 @@ const MarketMarginTrading = () => {
     </div>
   );
 };
+
+const DataItem = ({ title, value }) => (
+  <div className="flex flex-1 justify-center">
+    <div>
+      <p className="text-gray-300 text-sm">{title}</p>
+      <h2 className="text-h2">{value}</h2>
+    </div>
+  </div>
+);
 
 function SortButton({ sort, color }: { sort?: "asc" | "desc"; color: string }) {
   return (

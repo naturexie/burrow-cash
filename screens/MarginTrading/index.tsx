@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useAppDispatch } from "../../redux/hooks";
 import { LayoutBox } from "../../components/LayoutContainer/LayoutContainer";
-import MyMarginTrading from "./components/My";
-import MarketMarginTrading from "./components/Market";
+import MyMarginTrading from "./components/MyTrading";
+import MarketMarginTrading from "./components/MarketTrading";
 
 const MarginTrading = () => {
   const dispatch = useAppDispatch();

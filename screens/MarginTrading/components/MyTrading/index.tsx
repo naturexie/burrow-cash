@@ -3,7 +3,7 @@ import { useAccountId, usePortfolioAssets } from "../../../../hooks/hooks";
 import { isMobileDevice } from "../../../../helpers/helpers";
 import { ConnectWalletButton } from "../../../../components/Header/WalletButton";
 import BookTokenSvg from "../../../../public/svg/Group 74.svg";
-import MyMarginTradingPage from "./MyPage";
+import MyMarginTradingPage from "./MyTradingPage";
 
 const MyMarginTrading = () => {
   const accountId = useAccountId();
