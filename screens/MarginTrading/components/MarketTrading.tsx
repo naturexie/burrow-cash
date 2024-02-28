@@ -75,7 +75,7 @@ function TableHead() {
 function TableBody() {
   return (
     <>
-      <Link href="https://burrow.finance/">
+      <Link href="/trading">
         <div className="w-full grid grid-cols-5 bg-gray-800 hover:bg-dark-100 cursor-pointer mt-0.5 h-[60px]">
           <div className="relative col-span-1 flex items-center justify-self-start pl-14">
             <TestNearIcon />
@@ -110,7 +110,7 @@ function TableBody() {
           </div>
         </div>
       </Link>
-      <Link href="https://burrow.finance/">
+      <Link href="/trading">
         <div className="w-full grid grid-cols-5 bg-gray-800 hover:bg-dark-100 cursor-pointer mt-0.5 h-[60px]">
           <div className="relative col-span-1 flex items-center justify-self-start pl-14">
             <TestNearIcon />

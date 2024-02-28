@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
-import { AddCollateral, Export } from "../Icon";
+import { AddCollateral, Export } from "../../MarginTrading/components/Icon";
 
-const MyMarginTradingPage = () => {
+const TradingTable = () => {
   const [selectedTab, setSelectedTab] = useState("positions");
 
   const handleTabClick = (tabNumber) => {
@@ -10,32 +10,6 @@ const MyMarginTradingPage = () => {
   };
   return (
     <div className="flex flex-col items-center justify-center w-full">
-      <div className="flex justify-between items-center w-full h-[100px] border border-dark-50 bg-gray-800 rounded-md mb-7">
-        <div className="flex flex-1 justify-center">
-          <div>
-            <p className="text-gray-300 text-sm">Long Open Interest</p>
-            <h2 className="text-h2">$298.70</h2>
-          </div>
-        </div>
-        <div className="flex flex-1 justify-center">
-          <div>
-            <p className="text-gray-300 text-sm">Short Open Interest</p>
-            <h2 className="text-h2">$100.05</h2>
-          </div>
-        </div>
-        <div className="flex flex-1 justify-center">
-          <div>
-            <p className="text-gray-300 text-sm">Collateral</p>
-            <h2 className="text-h2 border-b border-dashed border-dark-800">$200</h2>
-          </div>
-        </div>
-        <div className="flex flex-1 justify-center">
-          <div>
-            <p className="text-gray-300 text-sm">PLN</p>
-            <h2 className="text-h2">+$0.16</h2>
-          </div>
-        </div>
-      </div>
       <div className="w-full border border-dark-50 bg-gray-800 rounded-md">
         <div className="w-full border-b border-dark-50 flex">
           <Tab
@@ -66,7 +40,7 @@ const MyMarginTradingPage = () => {
                 </tr>
               </thead>
               <tbody>
-                <Link href="/trading">
+                <Link href="https://burrow.finance/">
                   <tr className="text-base hover:bg-dark-100 cursor-pointer font-normal">
                     <td className="py-5 pl-5 ">
                       NEAR/USDC.e <span className="text-primary text-xs">Long 1.5X</span>
@@ -140,7 +114,7 @@ const MyMarginTradingPage = () => {
                 </tr>
               </thead>
               <tbody>
-                <Link href="/trading">
+                <Link href="https://burrow.finance/">
                   <tr className="text-base hover:bg-dark-100 cursor-pointer font-normal">
                     <td className="py-5 pl-5 ">NEAR/USDC.e</td>
                     <td>Open Short</td>
@@ -191,4 +165,4 @@ const Tab = ({ tabName, isSelected, onClick }) => (
   </div>
 );
 
-export default MyMarginTradingPage;
+export default TradingTable;

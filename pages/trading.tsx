@@ -1,3 +1,3 @@
-import TradingPage from "../screens/TradingDetail";
+import TradingPage from "../screens/Trading";
 
 export default TradingPage;
