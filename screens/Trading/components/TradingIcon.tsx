@@ -110,3 +110,55 @@ export function TokenThinArrow({ ...props }) {
     </svg>
   );
 }
+
+export function TokenSelected({ ...props }) {
+  return (
+    <svg
+      {...props}
+      width="15"
+      height="11"
+      viewBox="0 0 15 11"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M1 3.94737L6.05263 9L14.0526 1" stroke="#D2FF3A" strokeWidth="2" />
+    </svg>
+  );
+}
+
+export function RefLogoIcon({ ...props }) {
+  return (
+    <svg
+      {...props}
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M7.15625 11.2463H11.2458L7.15625 7.15674V11.2463Z" fill="white" />
+      <path
+        d="M11.2461 0.000193119L8.86054 0.00019291L11.2461 2.38574L11.2461 0.000193119Z"
+        fill="#00C6A2"
+      />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M7.3275 7.15671C7.27005 7.15671 7.21296 7.15521 7.15625 7.15226V4.59286L9.94058 2.00741C10.3332 2.54314 10.565 3.20408 10.565 3.91918C10.565 5.70722 9.11554 7.15671 7.3275 7.15671ZM9.21348 1.28739L7.15625 3.19768V0.686092C7.21296 0.683137 7.27005 0.681641 7.3275 0.681641C8.03116 0.681641 8.68239 0.906127 9.21348 1.28739Z"
+        fill="white"
+      />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M6.81714 0.680176H3.75V3.70609L5.12668 5.08277L6.81714 3.51306V0.680176ZM6.81714 4.90824L5.1004 6.50235L3.75 5.15195V11.2448H6.81714V4.90824Z"
+        fill="white"
+      />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M3.40793 0.680664H0V5.07017L2.55616 2.51402L3.40793 3.36579V0.680664ZM3.40793 4.81165L2.55616 3.95988L0 6.51603V11.2452H3.40793V4.81165Z"
+        fill="white"
+      />
+    </svg>
+  );
+}
