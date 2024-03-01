@@ -1,12 +1,21 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { AddCollateral, Export } from "../../MarginTrading/components/Icon";
+import ClosePositionMobile from "./ClosePositionMobile";
+import ChangeCollateralMobile from "./ChangeCollateralMobile";
 
 const TradingTable = () => {
   const [selectedTab, setSelectedTab] = useState("positions");
-
+  const [isClosePositionModalOpen, setIsClosePositionMobileOpen] = useState(false);
+  const [isChangeCollateralMobileOpen, setIsChangeCollateralMobileOpen] = useState(false);
   const handleTabClick = (tabNumber) => {
     setSelectedTab(tabNumber);
+  };
+  const handleClosePositionButtonClick = () => {
+    setIsClosePositionMobileOpen(true);
+  };
+  const handleChangeCollateralButtonClick = () => {
+    setIsChangeCollateralMobileOpen(true);
   };
   return (
     <div className="flex flex-col items-center justify-center w-full">
@@ -40,7 +49,7 @@ const TradingTable = () => {
                 </tr>
               </thead>
               <tbody>
-                <Link href="https://burrow.finance/">
+                <Link href="/trading">
                   <tr className="text-base hover:bg-dark-100 cursor-pointer font-normal">
                     <td className="py-5 pl-5 ">
                       NEAR/USDC.e <span className="text-primary text-xs">Long 1.5X</span>
@@ -50,7 +59,15 @@ const TradingTable = () => {
                     <td>
                       <div className="flex items-center">
                         <p className="mr-2.5"> 100 USDC.e </p>
-                        <AddCollateral />
+                        <div
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleChangeCollateralButtonClick();
+                          }}
+                        >
+                          <AddCollateral />
+                        </div>
                       </div>
                     </td>
                     <td>$3.25</td>
@@ -63,12 +80,40 @@ const TradingTable = () => {
                       </div>
                     </td>
                     <td className="pr-5">
-                      <div className="text-gray-300 text-sm border border-dark-300 text-center h-6 rounded flex justify-center items-center">
+                      <div
+                        className="text-gray-300 text-sm border border-dark-300 text-center h-6 rounded flex justify-center items-center"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleClosePositionButtonClick();
+                        }}
+                      >
                         Close
                       </div>
                     </td>
                   </tr>
                 </Link>
+                {isChangeCollateralMobileOpen && (
+                  <ChangeCollateralMobile
+                    open={isChangeCollateralMobileOpen}
+                    onClose={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setIsChangeCollateralMobileOpen(false);
+                    }}
+                  />
+                )}
+                {isClosePositionModalOpen && (
+                  <ClosePositionMobile
+                    open={isClosePositionModalOpen}
+                    onClose={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setIsClosePositionMobileOpen(false);
+                    }}
+                    action="Long"
+                  />
+                )}
                 {/* <tr className="text-base hover:bg-dark-100 cursor-pointer font-normal">
                   <td className="py-5 pl-5 ">
                     NEAR/USDC.e <span className="text-red-50 text-xs">Short 1.5X</span>
@@ -114,7 +159,7 @@ const TradingTable = () => {
                 </tr>
               </thead>
               <tbody>
-                <Link href="https://burrow.finance/">
+                <Link href="/trading">
                   <tr className="text-base hover:bg-dark-100 cursor-pointer font-normal">
                     <td className="py-5 pl-5 ">NEAR/USDC.e</td>
                     <td>Open Short</td>

@@ -150,7 +150,13 @@ const TradingOperate = () => {
               >
                 <div className="flex-grow">Long NEAR 1.5x</div>
               </div>
-              {isConfirmModalOpen && <ConfirmMobile />}
+              {isConfirmModalOpen && (
+                <ConfirmMobile
+                  open={isConfirmModalOpen}
+                  onClose={() => setIsConfirmModalOpen(false)}
+                  action="Long"
+                />
+              )}
             </div>
           </>
         )}
