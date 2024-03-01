@@ -39,7 +39,9 @@ const TradingToken = () => {
         className="flex items-center justify-center hover:bg-gray-1050  p-1.5 rounded-md "
         onMouseEnter={handleMouseEnter}
       >
-        <TestNearIcon />
+        <div className="w-6 h-6">
+          <TestNearIcon />
+        </div>
         <div className="mx-1.5 text-base">{selectedItem || "NEAR"}</div>
         <TokenThinArrow />
       </div>

@@ -7,9 +7,6 @@ import MyMarginTradingPage from "./MyTradingPage";
 
 const MyMarginTrading = () => {
   const accountId = useAccountId();
-  const [suppliedRows, borrowedRows, totalSuppliedUSD, totalBorrowedUSD, borrowed_LP, borrowedAll] =
-    usePortfolioAssets();
-  const isMobile = isMobileDevice();
 
   let overviewNode;
   if (accountId) {
