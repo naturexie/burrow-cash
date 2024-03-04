@@ -3,12 +3,14 @@ export enum ViewMethodsLogic {
   get_account,
   get_accounts_paged,
   get_account_all_positions,
+  get_margin_account,
   // assets
   get_asset,
   get_assets,
   get_assets_paged,
   // config
   get_config,
+  get_margin_config,
   // farms
   get_asset_farm,
   get_asset_farms,

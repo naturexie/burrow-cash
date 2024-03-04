@@ -12,6 +12,7 @@ import {
   IShadowRecordInfo,
 } from "./asset";
 import { IAccount, IAccountDetailed, IAccountAllPositionsDetailed } from "./account";
+import { IMarginConfig, IMarginAccountDetailedView } from "./margin";
 
 export interface IConfig {
   booster_decimals: number;
@@ -63,6 +64,8 @@ export interface IBurrow {
     | NetTvlFarm
     | string
     | boolean
+    | IMarginConfig
+    | IMarginAccountDetailedView
   >;
   call: (
     contract: Contract,
