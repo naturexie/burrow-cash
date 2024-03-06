@@ -13,7 +13,7 @@ import ClaimAllRewards from "../ClaimAllRewards";
 import { isMobileDevice } from "../../helpers/helpers";
 import { useAPY } from "../../hooks/useAPY";
 
-const FirstCarousel = ({ className }) => {
+const FirstCarousel = () => {
   const INCENTIVE_POPUP_STATUS = localStorage.getItem("INCENTIVE_POPUP_STATUS");
   const joinedText =
     "If you have contributed liquidity to USDC or USDT, please click “Claim & Join” to join the new incentives for these assets.";
@@ -64,21 +64,17 @@ const FirstCarousel = ({ className }) => {
   }
   if (!show) return null;
   return (
-    <div className={twMerge(className || "", "lg:fixed lg:right-0 lg:bottom-8 xsm:relative")}>
+    <div className="flex items-center justify-center">
       {isMobileDevice() ? <BoxMobileSvg /> : <BoxSvg />}
-      <CloseButton
-        className="absolute cursor-pointer top-3 right-6 xsm:right-2 z-50"
-        onClick={closePopup}
-      />
       <div className="absolute content w-[340px] h-[200px] lg:top-[50px] xsm:top-[25px] left-[20px] px-[20px]">
         <p className="text-gray-300 text-sm pt-[80px]">
           {status === 1 ? joinedText : noJoinedText}
           {/* <a
-              href="https://burrow.finance/"
-              className="underline cursor-pointer ml-0.5 underline-offset-4 inline-block"
-            >
-              @burrow_finance.
-            </a> */}
+          href="https://burrow.finance/"
+          className="underline cursor-pointer ml-0.5 underline-offset-4 inline-block"
+        >
+          @burrow_finance.
+        </a> */}
         </p>
         {status === 0 || status === 2 ? (
           <div className="w-full flex items-center justify-center gap-2 mt-2">
@@ -108,7 +104,7 @@ const FirstCarousel = ({ className }) => {
           />
         ) : null}
         {/* {status === 2 ? (
-            <Button classInfo="float-right transform translate-y-2 text-dark-200 bg-gray-950 cursor-not-allowed">
+      <Button classInfo="float-right transform translate-y-2 text-dark-200 bg-gray-950 cursor-not-allowed">
               Joined
             </Button>
           ) : null} */}
