@@ -1,11 +1,17 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, memo } from "react";
 import { BeatLoader } from "react-spinners";
 import { twMerge } from "tailwind-merge";
-import { useNonFarmedAssets, useAccountId, usePortfolioAssets } from "../../hooks/hooks";
+import {
+  useNonFarmedAssets,
+  useAccountId,
+  usePortfolioAssets,
+  useAvailableAssets,
+} from "../../hooks/hooks";
 import { IPortfolioAsset } from "../../interfaces";
 import { incentiveTokens } from "../../utils/config";
 import ClaimAllRewards from "../ClaimAllRewards";
 import { isMobileDevice } from "../../helpers/helpers";
+import { useAPY } from "../../hooks/useAPY";
 
 const Popup = ({ className }) => {
   const INCENTIVE_POPUP_STATUS = localStorage.getItem("INCENTIVE_POPUP_STATUS");
@@ -15,6 +21,9 @@ const Popup = ({ className }) => {
     "You can participate in the incentive program by supplying USDC native or USDT native.";
   const [show, setShow] = useState<boolean>(false);
   const { hasNonFarmedAssets, hasNegativeNetLiquidity } = useNonFarmedAssets();
+  const [tokenRowOne, setTokenRowOne] = useState<any>();
+  const [tokenRowTwo, setTokenRowTwo] = useState<any>();
+  const assets = useAvailableAssets();
   const needJoinAndClaim = useMemo(() => {
     if (!hasNonFarmedAssets || hasNegativeNetLiquidity) return false;
     return true;
@@ -36,6 +45,16 @@ const Popup = ({ className }) => {
       setShow(true);
     }
   }, [INCENTIVE_POPUP_STATUS]);
+  // TODO
+  useEffect(() => {
+    if (assets?.length) {
+      const incentiveTokensData = assets.filter((asset) => incentiveTokens.includes(asset.tokenId));
+      if (incentiveTokensData?.length === 2) {
+        setTokenRowOne(incentiveTokensData[0]);
+        setTokenRowTwo(incentiveTokensData[1]);
+      }
+    }
+  }, [assets?.length]);
   function closePopup() {
     setShow(false);
     localStorage.setItem("INCENTIVE_POPUP_STATUS", "1");
@@ -96,6 +115,10 @@ const Popup = ({ className }) => {
           ) : null} */}
         </div>
       </div>
+      {/* TODO */}
+      {tokenRowOne && tokenRowTwo ? (
+        <APYComponent rowOne={tokenRowOne} rowTwo={tokenRowTwo} />
+      ) : null}
     </div>
   );
 };
@@ -468,4 +491,22 @@ function Button({
       {children}
     </div>
   );
+}
+function APYComponent({ rowOne, rowTwo }: any) {
+  const rowOneAPY = useAPY({
+    baseAPY: rowOne.supplyApy,
+    rewards: rowOne.depositRewards,
+    tokenId: rowOne.tokenId,
+    page: "market",
+    onlyMarket: true,
+  });
+  const rowTwoAPY = useAPY({
+    baseAPY: rowTwo.supplyApy,
+    rewards: rowTwo.depositRewards,
+    tokenId: rowTwo.tokenId,
+    page: "market",
+    onlyMarket: true,
+  });
+  console.log("8888888888-rowOneAPY, rowTwoAPY", rowOneAPY, rowTwoAPY);
+  return null;
 }
