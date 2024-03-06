@@ -1,10 +1,6 @@
-import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/swiper.min.css";
-import SwiperCore, { Autoplay } from "swiper";
 import React, { useEffect, useMemo, useState, memo } from "react";
 import { BeatLoader } from "react-spinners";
 import { twMerge } from "tailwind-merge";
-import FirstCarousel from "./FirstCarousel";
 import {
   useNonFarmedAssets,
   useAccountId,
@@ -17,9 +13,7 @@ import ClaimAllRewards from "../ClaimAllRewards";
 import { isMobileDevice } from "../../helpers/helpers";
 import { useAPY } from "../../hooks/useAPY";
 
-SwiperCore.use([Autoplay]);
-
-const Popup = ({ className }) => {
+const FirstCarousel = ({ className }) => {
   const INCENTIVE_POPUP_STATUS = localStorage.getItem("INCENTIVE_POPUP_STATUS");
   const joinedText =
     "If you have contributed liquidity to USDC or USDT, please click “Claim & Join” to join the new incentives for these assets.";
@@ -70,83 +64,63 @@ const Popup = ({ className }) => {
   }
   if (!show) return null;
   return (
-    <div className="flex justify-end items-center">
-      <div className={twMerge(className || "", "")} style={{ width: "400px" }}>
-        <Swiper
-          spaceBetween={30}
-          centeredSlides
-          autoHeight={false}
-          autoplay={{
-            delay: 10000,
-            disableOnInteraction: false,
-          }}
-          loop={false}
-        >
-          <SwiperSlide>
-            <div className="relative">
-              {isMobileDevice() ? <BoxMobileSvg /> : <BoxSvg />}
-              <CloseButton
-                className="absolute cursor-pointer top-3 right-6 xsm:right-2 z-50"
-                onClick={closePopup}
-              />
-              <div className="absolute content w-[340px] h-[200px] lg:top-[50px] xsm:top-[25px] left-[20px] px-[20px]">
-                <p className="text-gray-300 text-sm pt-[80px]">
-                  {status === 1 ? joinedText : noJoinedText}
-                  {/* <a
+    <div className={twMerge(className || "", "lg:fixed lg:right-0 lg:bottom-8 xsm:relative")}>
+      {isMobileDevice() ? <BoxMobileSvg /> : <BoxSvg />}
+      <CloseButton
+        className="absolute cursor-pointer top-3 right-6 xsm:right-2 z-50"
+        onClick={closePopup}
+      />
+      <div className="absolute content w-[340px] h-[200px] lg:top-[50px] xsm:top-[25px] left-[20px] px-[20px]">
+        <p className="text-gray-300 text-sm pt-[80px]">
+          {status === 1 ? joinedText : noJoinedText}
+          {/* <a
               href="https://burrow.finance/"
               className="underline cursor-pointer ml-0.5 underline-offset-4 inline-block"
             >
               @burrow_finance.
             </a> */}
-                </p>
-                {status === 0 || status === 2 ? (
-                  <div className="w-full flex items-center justify-center gap-2 mt-2">
-                    <Button
-                      classInfo="text-white bg-blue-100 cursor-pointer"
-                      onClick={() => {
-                        jump(incentiveTokens[0]);
-                      }}
-                    >
-                      Supply USDC
-                    </Button>
-                    <Button
-                      classInfo="text-white bg-green-50 cursor-pointer"
-                      onClick={() => {
-                        jump(incentiveTokens[1]);
-                      }}
-                    >
-                      Supply USDT
-                    </Button>
-                  </div>
-                ) : null}
-                {status === 1 ? (
-                  <ClaimAllRewards
-                    location="non-farmed-assets"
-                    Button={ClaimButton}
-                    disabled={hasNegativeNetLiquidity}
-                  />
-                ) : null}
-                {/* {status === 2 ? (
+        </p>
+        {status === 0 || status === 2 ? (
+          <div className="w-full flex items-center justify-center gap-2 mt-2">
+            <Button
+              classInfo="text-white bg-blue-100 cursor-pointer"
+              onClick={() => {
+                jump(incentiveTokens[0]);
+              }}
+            >
+              Supply USDC
+            </Button>
+            <Button
+              classInfo="text-white bg-green-50 cursor-pointer"
+              onClick={() => {
+                jump(incentiveTokens[1]);
+              }}
+            >
+              Supply USDT
+            </Button>
+          </div>
+        ) : null}
+        {status === 1 ? (
+          <ClaimAllRewards
+            location="non-farmed-assets"
+            Button={ClaimButton}
+            disabled={hasNegativeNetLiquidity}
+          />
+        ) : null}
+        {/* {status === 2 ? (
             <Button classInfo="float-right transform translate-y-2 text-dark-200 bg-gray-950 cursor-not-allowed">
               Joined
             </Button>
           ) : null} */}
-              </div>
-
-              {/* TODO */}
-              {tokenRowOne && tokenRowTwo ? (
-                <APYComponent rowOne={tokenRowOne} rowTwo={tokenRowTwo} />
-              ) : null}
-            </div>
-          </SwiperSlide>
-          {/* <SwiperSlide>2</SwiperSlide>
-        <SwiperSlide>3</SwiperSlide> */}
-        </Swiper>
       </div>
+
+      {/* TODO */}
+      {tokenRowOne && tokenRowTwo ? (
+        <APYComponent rowOne={tokenRowOne} rowTwo={tokenRowTwo} />
+      ) : null}
     </div>
   );
 };
-export default Popup;
 
 const ClaimButton = (props) => {
   const { loading } = props;
@@ -159,6 +133,9 @@ const ClaimButton = (props) => {
     </Button>
   );
 };
+
+export default FirstCarousel;
+
 function BoxSvg() {
   return (
     <svg
