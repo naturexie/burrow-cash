@@ -42,6 +42,7 @@ module.exports = {
         h1: "90px",
         h2: "26px",
         h3: "18px",
+        56: "56px",
       },
       borderRadius: {
         sm: "6px",

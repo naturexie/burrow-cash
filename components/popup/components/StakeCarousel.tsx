@@ -294,5 +294,5 @@ function APYComponent({ rowOne, rowTwo }: any) {
   });
   const highestAPY = Math.max(rowOneAPY, rowTwoAPY);
   const percentage = (highestAPY * 1.3).toFixed(0);
-  return <p className="text-primary text-6xl font-bold pt-[62px]">{percentage}%</p>;
+  return <p className="text-primary text-6xl font-bold pt-[62px] xsm:text-56">{percentage}%</p>;
 }
