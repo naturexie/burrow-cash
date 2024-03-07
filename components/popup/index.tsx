@@ -3,7 +3,8 @@ import "swiper/swiper.min.css";
 import SwiperCore, { Autoplay } from "swiper";
 import React, { useEffect, useMemo, useState, memo } from "react";
 import { twMerge } from "tailwind-merge";
-import FirstCarousel from "./FirstCarousel";
+import SupplyCarousel from "./components/SupplyCarousel";
+import StakeCarousel from "./components/StakeCarousel";
 
 SwiperCore.use([Autoplay]);
 const Popup = ({ className }) => {
@@ -25,7 +26,10 @@ const Popup = ({ className }) => {
   if (!show) return null;
   return (
     <div
-      className={twMerge(className || "", "lg:fixed lg:bottom-14 lg:right-0 z-50 xsm:relative")}
+      className={twMerge(
+        className || "",
+        "lg:fixed lg:bottom-14 lg:right-0 z-50 xsm:relative cursor-pointer",
+      )}
       style={{ width: "400px" }}
     >
       <div className="flex items-center justify-center">
@@ -42,14 +46,21 @@ const Popup = ({ className }) => {
           <SwiperSlide>
             <>
               <CloseButton
-                className="absolute cursor-pointer top-3 right-6 xsm:right-2 z-50"
+                className="absolute cursor-pointer top-3 right-6 xsm:right-6 z-50"
                 onClick={closePopup}
               />
-              <FirstCarousel />
+              <SupplyCarousel />
             </>
           </SwiperSlide>
-          <SwiperSlide>22</SwiperSlide>
-          <SwiperSlide>33</SwiperSlide>
+          <SwiperSlide>
+            <>
+              <CloseButton
+                className="absolute cursor-pointer top-3 right-6 xsm:right-6 z-50"
+                onClick={closePopup}
+              />
+              <StakeCarousel />
+            </>
+          </SwiperSlide>
         </Swiper>
       </div>
     </div>
