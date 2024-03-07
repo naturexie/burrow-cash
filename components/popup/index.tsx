@@ -25,43 +25,45 @@ const Popup = ({ className }) => {
   }
   if (!show) return null;
   return (
-    <div
-      className={twMerge(
-        className || "",
-        "lg:fixed lg:bottom-10 lg:right-0 z-50 xsm:relative cursor-pointer",
-      )}
-      style={{ width: "400px" }}
-    >
-      <div className="flex items-center justify-center">
-        <Swiper
-          spaceBetween={30}
-          centeredSlides
-          autoHeight={false}
-          autoplay={{
-            delay: 10000,
-            disableOnInteraction: false,
-          }}
-          loop
-        >
-          <SwiperSlide>
-            <>
-              <CloseButton
-                className="absolute cursor-pointer top-3 right-6 xsm:right-6 z-50"
-                onClick={closePopup}
-              />
-              <SupplyCarousel />
-            </>
-          </SwiperSlide>
-          <SwiperSlide>
-            <>
-              <CloseButton
-                className="absolute cursor-pointer top-3 right-6 xsm:right-6 z-50"
-                onClick={closePopup}
-              />
-              <StakeCarousel />
-            </>
-          </SwiperSlide>
-        </Swiper>
+    <div className="flex item-center justify-center">
+      <div
+        className={twMerge(
+          className || "",
+          "lg:fixed lg:bottom-10 lg:right-0 z-50 xsm:relative cursor-pointer",
+        )}
+        style={{ width: "400px" }}
+      >
+        <div className="flex items-center justify-center">
+          <Swiper
+            spaceBetween={30}
+            centeredSlides
+            autoHeight={false}
+            autoplay={{
+              delay: 10000,
+              disableOnInteraction: false,
+            }}
+            loop
+          >
+            <SwiperSlide>
+              <>
+                <CloseButton
+                  className="absolute cursor-pointer top-3 right-6 xsm:right-6 z-50"
+                  onClick={closePopup}
+                />
+                <SupplyCarousel />
+              </>
+            </SwiperSlide>
+            <SwiperSlide>
+              <>
+                <CloseButton
+                  className="absolute cursor-pointer top-3 right-6 xsm:right-6 z-50"
+                  onClick={closePopup}
+                />
+                <StakeCarousel />
+              </>
+            </SwiperSlide>
+          </Swiper>
+        </div>
       </div>
     </div>
   );
