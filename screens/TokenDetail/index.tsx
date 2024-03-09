@@ -48,7 +48,7 @@ import { ConnectWalletButton } from "../../components/Header/WalletButton";
 import { OuterLinkConfig } from "./config";
 import { APYCell } from "../Market/APYCell";
 import { RewardsV2 } from "../../components/Rewards";
-import getConfig from "../../utils/config";
+import getConfig, { incentiveTokens } from "../../utils/config";
 import InterestRateChart, { LabelText } from "./interestRateChart";
 import TokenBorrowSuppliesChart from "./tokenBorrowSuppliesChart";
 import { useTokenDetails } from "../../hooks/useTokenDetails";
@@ -794,7 +794,7 @@ function YouSupplied() {
                 baseAPY={tokenRow.supplyApy}
                 page="deposit"
                 tokenId={tokenRow.tokenId}
-                excludeNetApy
+                excludeNetApy={!incentiveTokens.includes(tokenRow.tokenId)}
               />
             }
           />
