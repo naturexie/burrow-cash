@@ -22,6 +22,7 @@ import { ConnectWalletButton } from "../../components/Header/WalletButton";
 import SupplyBorrowListMobile from "./supplyBorrowListMobile";
 import { AdjustButton, WithdrawButton, RepayButton, MarketButton } from "./supplyBorrowButtons";
 import { hiddenAssets } from "../../utils/config";
+import { APYCell } from "../Market/APYCell";
 
 const Index = () => {
   const accountId = useAccountId();
@@ -106,9 +107,15 @@ const yourSuppliedColumns = [
     header: "Your APY",
     cell: ({ originalData }) => {
       return (
-        <DashboardApy
+        // <DashboardApy
+        //   baseAPY={originalData?.apy}
+        //   rewardList={originalData?.depositRewards}
+        //   tokenId={originalData?.tokenId}
+        // />
+        <APYCell
+          rewards={originalData?.depositRewards}
           baseAPY={originalData?.apy}
-          rewardList={originalData?.depositRewards}
+          page="deposit"
           tokenId={originalData?.tokenId}
         />
       );
@@ -259,11 +266,17 @@ const yourBorrowedColumns = [
     header: "Your APY",
     cell: ({ originalData }) => {
       return (
-        <DashboardApy
+        // <DashboardApy
+        //   baseAPY={originalData?.borrowApy}
+        //   rewardList={originalData?.borrowRewards}
+        //   tokenId={originalData?.tokenId}
+        //   isBorrow
+        // />
+        <APYCell
+          rewards={originalData?.borrowRewards}
           baseAPY={originalData?.borrowApy}
-          rewardList={originalData?.borrowRewards}
+          page="borrow"
           tokenId={originalData?.tokenId}
-          isBorrow
         />
       );
     },

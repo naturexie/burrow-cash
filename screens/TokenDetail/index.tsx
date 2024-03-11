@@ -794,7 +794,7 @@ function YouSupplied() {
                 baseAPY={tokenRow.supplyApy}
                 page="deposit"
                 tokenId={tokenRow.tokenId}
-                excludeNetApy={!incentiveTokens.includes(tokenRow.tokenId)}
+                // excludeNetApy={!incentiveTokens.includes(tokenRow.tokenId)}
               />
             }
           />
