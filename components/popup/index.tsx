@@ -31,7 +31,7 @@ const Popup = ({ className }) => {
           className || "",
           "lg:fixed lg:bottom-10 lg:right-0 z-50 xsm:relative cursor-pointer",
         )}
-        style={{ width: "400px" }}
+        style={{ width: "416px" }}
       >
         <div className="flex items-center justify-center">
           <Swiper
@@ -42,12 +42,12 @@ const Popup = ({ className }) => {
               delay: 10000,
               disableOnInteraction: false,
             }}
-            loop
+            loop={false}
           >
             <SwiperSlide>
               <>
                 <CloseButton
-                  className="absolute cursor-pointer top-3 right-6 xsm:right-6 z-50"
+                  className="absolute cursor-pointer top-4 right-10 xsm:right-8  z-50 xsm:top-3"
                   onClick={closePopup}
                 />
                 <SupplyCarousel />

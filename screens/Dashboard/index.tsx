@@ -117,6 +117,7 @@ const yourSuppliedColumns = [
           baseAPY={originalData?.apy}
           page="deposit"
           tokenId={originalData?.tokenId}
+          onlyMarket
         />
       );
     },
@@ -277,6 +278,7 @@ const yourBorrowedColumns = [
           baseAPY={originalData?.borrowApy}
           page="borrow"
           tokenId={originalData?.tokenId}
+          onlyMarket
         />
       );
     },

@@ -22,6 +22,7 @@ export const WALLET_CONNECT_ID =
 
 export const missingPriceTokens = [REF_TOKEN, META_TOKEN, BRRR_TOKEN];
 export const incentiveTokens = [
+  "853d955acef822db058eb8505911ed77f175b99e.factory.bridge.near",
   "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1",
   "usdt.tether-token.near",
 ];

@@ -96,6 +96,7 @@ module.exports = {
           800: "#23253A",
           900: "#0f101c",
           950: "#787B93",
+          1000: "#3A3A3A",
         },
         toolTipBoxBorderColor: "#D2FF3A",
         toolTipBoxBgColor: "rgba(35,37,58,0.8)",

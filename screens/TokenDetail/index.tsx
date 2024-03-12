@@ -786,7 +786,7 @@ function YouSupplied() {
               </span>
             </div>
           </div>
-          <Label
+          {/* <Label
             title="Your APY"
             content={
               <APYCell
@@ -798,7 +798,7 @@ function YouSupplied() {
               />
             }
           />
-          <Label title="Daily rewards" content={RewardsReactNode} />
+          <Label title="Daily rewards" content={RewardsReactNode} /> */}
           <Label title="Collateral" content={formatWithCommas_number(supplied?.collateral)} />
           <div className="flex items-center justify-between gap-2 mt-[35px]">
             <YellowLineButton
@@ -884,7 +884,7 @@ function YouBorrowed() {
               </span>
             </div>
           </div>
-          <Label
+          {/* <Label
             title="Your APY"
             content={
               <APYCell
@@ -894,7 +894,7 @@ function YouBorrowed() {
                 tokenId={tokenRow.tokenId}
               />
             }
-          />
+          /> */}
           <Label title="Daily rewards" content={RewardsReactNode} />
           <div className="flex items-center justify-between gap-2 mt-[35px]">
             <RedLineButton className="w-1 flex-grow" onClick={handleRepayClick}>

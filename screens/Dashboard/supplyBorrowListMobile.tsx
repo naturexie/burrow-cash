@@ -8,6 +8,7 @@ import { formatTokenValue, formatUSDValue, millifyNumber } from "../../helpers/h
 import { AdjustButton, MarketButton, RepayButton, WithdrawButton } from "./supplyBorrowButtons";
 import { NoDataMascot } from "../../components/Icons/Icons";
 import { hiddenAssets } from "../../utils/config";
+import { APYCell } from "../Market/APYCell";
 
 const SupplyBorrowListMobile = ({ suppliedRows, borrowedRows, accountId }) => {
   const [tabIndex, setTabIndex] = useState(0);
@@ -159,10 +160,17 @@ const SupplyItem = ({ data }) => {
 
       <div style={{ padding: "16px" }}>
         <ItemRow label="APY">
-          <DashboardApy
+          {/* <DashboardApy
             baseAPY={data?.apy}
             rewardList={data?.depositRewards}
             tokenId={data?.tokenId}
+          /> */}
+          <APYCell
+            rewards={data?.depositRewards}
+            baseAPY={data?.apy}
+            page="deposit"
+            tokenId={data?.tokenId}
+            onlyMarket
           />
         </ItemRow>
         <ItemRow label="Rewards">
@@ -210,11 +218,18 @@ const BorrowItem = ({ data }) => {
       </div>
       <div style={{ padding: "16px" }}>
         <ItemRow label="APY">
-          <DashboardApy
+          {/* <DashboardApy
             baseAPY={data?.borrowApy}
             rewardList={data?.borrowRewards}
             tokenId={data?.tokenId}
             isBorrow
+          /> */}
+          <APYCell
+            rewards={data?.borrowRewards}
+            baseAPY={data?.borrowApy}
+            page="borrow"
+            tokenId={data?.tokenId}
+            onlyMarket
           />
         </ItemRow>
         <ItemRow label="Rewards">
