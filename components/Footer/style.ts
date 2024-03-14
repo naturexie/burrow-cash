@@ -18,7 +18,7 @@ export const Wrapper = styled("div")(({ theme }) => ({
   [theme.breakpoints.up("sm")]: {
     gridTemplateColumns: "1fr 1fr",
     width: "100%",
-    padding: "1.5rem",
+    padding: "36px",
   },
 }));
 
@@ -28,7 +28,7 @@ export const CopyWrapper = styled("div")(({ theme }) => ({
   [theme.breakpoints.down("sm")]: {
     justifyContent: "space-around",
     gridRow: 2,
-    marginBottom: theme.spacing(3),
+    marginBottom: "40px",
   },
   [theme.breakpoints.up("sm")]: {
     gap: "1rem",
