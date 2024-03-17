@@ -1,4 +1,5 @@
 import { ConnectConfig } from "near-api-js";
+import { getRpcList } from "../components/Rpc/tool";
 
 export const LOGIC_CONTRACT_NAME = process.env.NEXT_PUBLIC_CONTRACT_NAME as string;
 export const DUST_THRESHOLD = 0.001;
@@ -27,12 +28,21 @@ export const incentiveTokens = [
   "usdt.tether-token.near",
 ];
 const getConfig = (env: string = defaultNetwork) => {
+  const RPC_LIST = getRpcList();
+  let endPoint = "defaultRpc";
+  try {
+    endPoint = window.localStorage.getItem("endPoint") || endPoint;
+    if (!RPC_LIST[endPoint]) {
+      endPoint = "defaultRpc";
+      localStorage.removeItem("endPoint");
+    }
+  } catch (error) {}
   switch (env) {
     case "production":
     case "mainnet":
       return {
         networkId: "mainnet",
-        nodeUrl: "https://rpc.mainnet.near.org",
+        nodeUrl: RPC_LIST[endPoint].url,
         walletUrl: "https://wallet.near.org",
         helperUrl: "https://helper.mainnet.near.org",
         explorerUrl: "https://explorer.mainnet.near.org",
@@ -58,7 +68,7 @@ const getConfig = (env: string = defaultNetwork) => {
     case "testnet":
       return {
         networkId: "testnet",
-        nodeUrl: "https://rpc.testnet.near.org",
+        nodeUrl: RPC_LIST[endPoint].url,
         walletUrl: "https://wallet.testnet.near.org",
         helperUrl: "https://helper.testnet.near.org",
         explorerUrl: "https://explorer.testnet.near.org",
@@ -74,7 +84,7 @@ const getConfig = (env: string = defaultNetwork) => {
     case "betanet":
       return {
         networkId: "betanet",
-        nodeUrl: "https://rpc.betanet.near.org",
+        nodeUrl: RPC_LIST[endPoint].url,
         walletUrl: "https://wallet.betanet.near.org",
         helperUrl: "https://helper.betanet.near.org",
         explorerUrl: "https://explorer.betanet.near.org",

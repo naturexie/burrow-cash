@@ -120,7 +120,13 @@ export const getWalletSelector = async ({ onAccountChange }: GetWalletSelectorAr
       }),
       setupLedger(),
     ],
-    network: defaultNetwork,
+    network: {
+      networkId: "",
+      nodeUrl: "",
+      helperUrl: "",
+      explorerUrl: "",
+      indexerUrl: "",
+    },
     debug: !!isTestnet,
     optimizeWalletOrder: false,
   });
