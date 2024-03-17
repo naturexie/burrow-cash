@@ -1,9 +1,9 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useEffect, useState } from "react";
 import { FiChevronDown } from "@react-icons/all-files/fi/FiChevronDown";
-import { getRpcList, ping, switchPoint } from "./rpcUtil";
+import { getRpcList, ping, switchPoint } from "./tool";
 import { isMobileDevice } from "../../helpers/helpers";
-import { displayCurrentRpc, ModalAddCustomNetWork } from "./component/Base";
+import { displayCurrentRpc, ModalAddCustomNetWork } from "./component/Common";
 import { MoreButtonIcon } from "./component/svg";
 
 const RpcList = () => {

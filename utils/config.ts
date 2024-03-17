@@ -1,5 +1,5 @@
 import { ConnectConfig } from "near-api-js";
-import { getRpcList } from "../components/Rpc/rpcUtil";
+import { getRpcList } from "../components/Rpc/tool";
 
 export const LOGIC_CONTRACT_NAME = process.env.NEXT_PUBLIC_CONTRACT_NAME as string;
 export const DUST_THRESHOLD = 0.001;

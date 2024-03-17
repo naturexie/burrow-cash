@@ -15,7 +15,7 @@ import {
   ModalClose,
 } from "./svg";
 import { isMobileDevice } from "../../../helpers/helpers";
-import { getRpcList, trimStr, ping_gas, pingChain, getCustomConfig, switchPoint } from "../rpcUtil";
+import { getRpcList, trimStr, ping_gas, pingChain, getCustomConfig, switchPoint } from "../tool";
 /* eslint-disable jsx-a11y/label-has-associated-control */
 export const displayCurrentRpc = (responseTimeList: any, key: any, inBox?: boolean) => {
   if (responseTimeList[key] === -1) {
