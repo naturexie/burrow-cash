@@ -87,7 +87,8 @@ export const computePoolsDailyAmount = (
     shrinkToken(farmData.asset_farm_reward.reward_per_day, rewardAssetDecimals),
   );
 
-  const dailyAmount = (boostedShares / totalBoostedShares) * totalRewardsPerDay;
+  const dailyAmount =
+    totalBoostedShares > 0 ? (boostedShares / totalBoostedShares) * totalRewardsPerDay : 0;
 
   const suppliedShares = Number(
     shrinkToken(portfolio.supplied[asset.token_id]?.shares || 0, assetDecimals),
@@ -102,7 +103,8 @@ export const computePoolsDailyAmount = (
   const shares = type === "supplied" ? suppliedShares + collateralShares : borrowedShares;
   const newBoostedShares = shares * multiplier;
   const newTotalBoostedShares = totalBoostedShares + newBoostedShares - boostedShares;
-  const newDailyAmount = (newBoostedShares / newTotalBoostedShares) * totalRewardsPerDay;
+  const newDailyAmount =
+    newTotalBoostedShares > 0 ? (newBoostedShares / newTotalBoostedShares) * totalRewardsPerDay : 0;
 
   return { dailyAmount, newDailyAmount, multiplier, totalBoostedShares, shares };
 };

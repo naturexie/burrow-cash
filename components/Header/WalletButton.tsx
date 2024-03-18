@@ -8,12 +8,8 @@ import {
   Typography,
   Modal as MUIModal,
 } from "@mui/material";
-import { GiHamburgerMenu } from "@react-icons/all-files/gi/GiHamburgerMenu";
 import type { WalletSelector } from "@near-wallet-selector/core";
-import CopyToClipboard from "react-copy-to-clipboard";
-
 import { BeatLoader } from "react-spinners";
-import Decimal from "decimal.js";
 import { fetchAssets, fetchRefPrices } from "../../redux/assetsSlice";
 import { logoutAccount, fetchAccount, setAccountId } from "../../redux/accountSlice";
 import { useAppSelector, useAppDispatch } from "../../redux/hooks";
@@ -29,12 +25,12 @@ import { HamburgerMenu } from "./Menu";
 import Disclaimer from "../Disclaimer";
 import { useDisclaimer } from "../../hooks/useDisclaimer";
 import { NearSolidIcon, ArrowDownIcon, CloseIcon, ArrowRightTopIcon } from "./svg";
-import NearIcon from "../../public/near-icon.svg";
 import ClaimAllRewards from "../ClaimAllRewards";
 import { formatWithCommas_usd } from "../../utils/uiNumber";
 import { isMobileDevice } from "../../helpers/helpers";
 import getConfig from "../../utils/config";
 import CopyToClipboardComponent from "./CopyToClipboardComponent";
+import CustomButton from "../CustomButton/CustomButton";
 
 const config = getConfig();
 
@@ -54,8 +50,9 @@ const WalletButton = () => {
 
   const selectorRef = useRef<WalletSelector>();
   const [selector, setSelector] = useState<WalletSelector | null>(null);
+  const [currentWallet, setCurrentWallet] = useState<any>(null);
   const rewards = useAppSelector(getAccountRewards);
-
+  const isSignedIn = selector?.isSignedIn();
   const hideModal = () => {
     dispatch(_hideModal());
   };
@@ -71,17 +68,26 @@ const WalletButton = () => {
   };
 
   const onMount = async () => {
-    if (selector) return;
-    const { selector: s } = await getBurrow({ fetchData, hideModal, signOut });
+    let walletSelector = selector;
+    if (!selector) {
+      const { selector: s } = await getBurrow({ fetchData, hideModal, signOut });
+      walletSelector = s;
+      selectorRef.current = s;
+      setSelector(s);
+      window.selector = s;
+    }
 
-    selectorRef.current = s;
-    setSelector(s);
-    window.selector = s;
+    if (walletSelector) {
+      const wallet: any = await walletSelector?.wallet();
+      if (wallet) {
+        setCurrentWallet(wallet);
+      }
+    }
   };
 
   useEffect(() => {
     onMount();
-  }, []);
+  }, [accountId]);
 
   const onWalletButtonClick = async () => {
     if (!hasAgreedDisclaimer) {
@@ -95,7 +101,9 @@ const WalletButton = () => {
 
   const handleSignOut = async () => {
     const { signOut: signOutBurrow } = await getBurrow();
-    signOutBurrow();
+    if (typeof signOutBurrow === "function") {
+      signOutBurrow();
+    }
     trackLogout();
     setAnchorEl(null);
     setDisclaimer(false);
@@ -118,6 +126,7 @@ const WalletButton = () => {
         getUnClaimRewards,
         isMobile,
         rewards,
+        currentWallet,
       }}
     >
       <Box
@@ -171,15 +180,19 @@ function Account() {
   const { balance, show_account_detail, set_show_account_detail, accountId, isMobile } = useContext(
     WalletContext,
   ) as any;
+
   function handleOpen() {
     set_show_account_detail(true);
   }
+
   function handleClose() {
     set_show_account_detail(false);
   }
+
   function handleSwitch() {
     set_show_account_detail(!show_account_detail);
   }
+
   return (
     <div className="flex items-center gap-4">
       {/* near balance */}
@@ -252,9 +265,11 @@ function AccountDetail({ onClose }: { onClose?: () => void }) {
     getUnClaimRewards,
     isMobile,
     rewards,
+    currentWallet,
   } = useContext(WalletContext) as any;
   const [showTip, setShowTip] = useState<boolean>(false);
   const [copyButtonDisabled, setCopyButtonDisabled] = useState<boolean>(false);
+
   function showToast() {
     if (copyButtonDisabled) return;
     setCopyButtonDisabled(true);
@@ -264,6 +279,8 @@ function AccountDetail({ onClose }: { onClose?: () => void }) {
       setCopyButtonDisabled(false);
     }, 1000);
   }
+
+  const changeWalletDisable = currentWallet?.id === "keypom";
   return (
     <div className="border border-dark-300 bg-dark-100 lg:rounded-md p-4 xsm:rounded-b-xl xsm:p-6">
       {isMobile && (
@@ -288,37 +305,57 @@ function AccountDetail({ onClose }: { onClose?: () => void }) {
         )}
       </div>
       <div className="flex items-center justify-between">
-        <div className="flex items-center text-xs text-gray-300 -ml-1 xsm:text-sm">
-          <NearIcon style={{ width: "1.5rem", height: "1.5rem", fill: "white" }} />
-          Near Wallet
+        <div className="flex items-center text-xs text-gray-300 xsm:text-sm">
+          {currentWallet?.metadata?.iconUrl && (
+            <span className="mr-1" style={{ marginLeft: -2 }}>
+              <img src={currentWallet.metadata.iconUrl} className="w-3 h-3 mr-1" alt="" />
+            </span>
+          )}
+          {currentWallet?.metadata?.name}
         </div>
       </div>
       <div className="flex items-center justify-between w-full gap-2 my-3.5">
-        <div
-          style={{ width: "104px" }}
-          onClick={() => {
-            if (onClose) {
-              onClose();
-            }
-            handleSwitchWallet();
+        <CustomButton
+          style={{
+            width: 104,
+            height: 30,
+            minHeight: 0,
           }}
-          className="flex flex-grow items-center justify-center border border-primary border-opacity-60 cursor-pointer rounded-md text-sm text-primary font-bold bg-primary hover:opacity-80 bg-opacity-5 py-1"
+          disabled={changeWalletDisable}
+          color="primaryBorder"
+          className="flex flex-grow items-center justify-center text-sm font-bold py-1"
+          onClick={() => {
+            if (!changeWalletDisable) {
+              if (onClose) {
+                onClose();
+              }
+              handleSwitchWallet();
+            }
+          }}
         >
           Change
-        </div>
-        <div
-          role="button"
-          style={{ width: "104px" }}
-          onClick={() => {
-            if (onClose) {
-              onClose();
-            }
-            handleSignOut();
+        </CustomButton>
+
+        <CustomButton
+          style={{
+            width: 104,
+            height: 30,
+            minHeight: 0,
           }}
-          className="flex flex-grow items-center justify-center border border-red-50 border-opacity-60 cursor-pointer rounded-md text-sm text-red-50 font-bold bg-red-50 bg-opacity-5 hover:opacity-80 py-1"
+          disabled={changeWalletDisable}
+          color="errorBorder"
+          className="flex flex-grow items-center justify-center text-sm font-bold py-1"
+          onClick={() => {
+            if (!changeWalletDisable) {
+              if (onClose) {
+                onClose();
+              }
+              handleSwitchWallet();
+            }
+          }}
         >
           Disconnect
-        </div>
+        </CustomButton>
       </div>
       <div className="flex lg:items-center justify-between xsm:items-end">
         <div className="relative flex flex-col xsm:top-1">
