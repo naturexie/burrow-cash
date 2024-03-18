@@ -1,6 +1,5 @@
 import { setupWalletSelector } from "@near-wallet-selector/core";
 import type { WalletSelector } from "@near-wallet-selector/core";
-import { setupNearWallet } from "@near-wallet-selector/near-wallet";
 import { setupSender } from "@near-wallet-selector/sender";
 import { setupHereWallet } from "@near-wallet-selector/here-wallet";
 import { setupNightly } from "@near-wallet-selector/nightly";
@@ -92,7 +91,6 @@ export const getWalletSelector = async ({ onAccountChange }: GetWalletSelectorAr
     modules: [
       myNearWallet,
       setupSender() as any,
-      setupNearWallet(),
       setupMeteorWallet(),
       walletConnect,
       setupHereWallet(),

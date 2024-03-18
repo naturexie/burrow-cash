@@ -45,7 +45,9 @@ const Layout = ({ children }) => {
     <Theme>
       <PageGrid>
         <Header />
-        <main className="md:px-10">{children}</main>
+        <main className="md:px-10" id="root">
+          {children}
+        </main>
       </PageGrid>
       <Footer />
     </Theme>
