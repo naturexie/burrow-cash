@@ -14,11 +14,12 @@ export const Wrapper = styled("div")(({ theme }) => ({
     left: 0,
     right: 0,
     marginTop: "38px",
+    paddingBottom: "20px",
   },
   [theme.breakpoints.up("sm")]: {
     gridTemplateColumns: "1fr 1fr",
     width: "100%",
-    padding: "1.5rem",
+    padding: "38px",
   },
 }));
 
