@@ -38,6 +38,7 @@ export function useStakingRewards() {
         xBRRR + extraXBRRRAmount,
         rewards,
         appConfig.booster_decimals,
+        appConfig.boost_suppress_factor,
       );
 
       reward.rewards.reward_per_day = expandToken(newDailyAmount, decimals, 0);

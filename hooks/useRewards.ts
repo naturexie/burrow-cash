@@ -14,6 +14,7 @@ export function useRewards() {
   const { brrr, totalUnClaimUSD } = assetRewards || {};
   const extra = Object.entries(assetRewards.extra);
   const net = Object.entries(assetRewards.net);
+  const poolRewards = Object.entries(assetRewards.poolRewards);
   const allRewards = Object.entries(assetRewards.sumRewards);
 
   let totalUnClaimUSDDisplay;
@@ -41,6 +42,7 @@ export function useRewards() {
     brrr,
     extra,
     net,
+    poolRewards,
     protocol,
     data: {
       array: all,

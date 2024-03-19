@@ -37,6 +37,9 @@ export interface IAccountRewards {
   sumRewards: {
     [tokenId: string]: IPortfolioReward;
   };
+  poolRewards: {
+    [tokenId: string]: IPortfolioReward;
+  };
   totalUnClaimUSD: number;
 }
 
@@ -67,6 +70,7 @@ export const computePoolsDailyAmount = (
   xBRRRAmount: number,
   farmData: FarmData,
   boosterDecimals: number,
+  boost_suppress_factor: number,
 ) => {
   const boosterLogBase = Number(
     shrinkToken(farmData.asset_farm_reward.booster_log_base, boosterDecimals),
@@ -75,7 +79,7 @@ export const computePoolsDailyAmount = (
   const assetDecimals = asset.metadata.decimals + asset.config.extra_decimals;
   const rewardAssetDecimals = rewardAsset.metadata.decimals + rewardAsset.config.extra_decimals;
 
-  const log = Math.log(xBRRRAmount) / Math.log(boosterLogBase);
+  const log = Math.log(xBRRRAmount / boost_suppress_factor) / Math.log(boosterLogBase);
   const multiplier = log >= 0 ? 1 + log : 1;
 
   const boostedShares = Number(shrinkToken(farmData.boosted_shares, assetDecimals));
@@ -99,10 +103,12 @@ export const computePoolsDailyAmount = (
   const borrowedShares = Number(
     shrinkToken(portfolio.borrowed[asset.token_id]?.shares || 0, assetDecimals),
   );
-
   const shares = type === "supplied" ? suppliedShares + collateralShares : borrowedShares;
-  const newBoostedShares = shares * multiplier;
-  const newTotalBoostedShares = totalBoostedShares + newBoostedShares - boostedShares;
+  // const newBoostedShares = shares * multiplier;
+  // const newTotalBoostedShares = totalBoostedShares + newBoostedShares - boostedShares;
+  const extraShares = log > 0 ? boostedShares * log : 0;
+  const newBoostedShares = boostedShares + extraShares;
+  const newTotalBoostedShares = totalBoostedShares + extraShares;
   const newDailyAmount =
     newTotalBoostedShares > 0 ? (newBoostedShares / newTotalBoostedShares) * totalRewardsPerDay : 0;
 
@@ -116,6 +122,7 @@ export const computeNetLiquidityDailyAmount = (
   farmData: FarmData,
   boosterDecimals: number,
   netLiquidity: number,
+  boost_suppress_factor: number,
 ) => {
   const boosterLogBase = Number(
     shrinkToken(farmData.asset_farm_reward.booster_log_base, boosterDecimals),
@@ -123,7 +130,7 @@ export const computeNetLiquidityDailyAmount = (
 
   const assetDecimals = asset.metadata.decimals + asset.config.extra_decimals;
 
-  const log = Math.log(xBRRRAmount) / Math.log(boosterLogBase);
+  const log = Math.log(xBRRRAmount / boost_suppress_factor) / Math.log(boosterLogBase);
   const multiplier = log >= 0 ? 1 + log : 1;
 
   const boostedShares = Number(shrinkToken(farmData.boosted_shares, assetDecimals));
@@ -140,10 +147,10 @@ export const computeNetLiquidityDailyAmount = (
   const shares =
     Number(shrinkToken(new Decimal(netLiquidity).mul(10 ** 18).toFixed(), assetDecimals)) || 0;
 
-  const newBoostedShares = shares * multiplier;
-  const newTotalBoostedShares = totalBoostedShares + newBoostedShares - boostedShares;
+  const extraShares = log > 0 ? boostedShares * log : 0;
+  const newBoostedShares = boostedShares + extraShares;
+  const newTotalBoostedShares = totalBoostedShares + extraShares;
   const newDailyAmount = (newBoostedShares / newTotalBoostedShares) * totalRewardsPerDay;
-
   return { dailyAmount, newDailyAmount, multiplier, totalBoostedShares, shares };
 };
 
@@ -186,10 +193,11 @@ export const getAccountRewards = createSelector(
             xBRRRAmount,
             farmData,
             app.config.booster_decimals,
+            app.config.boost_suppress_factor,
           );
 
           return {
-            icon: icon || `data:image/svg+xml,${NEAR_LOGO_SVG}`,
+            icon,
             name,
             symbol,
             tokenId: rewardTokenId,
@@ -216,6 +224,7 @@ export const getAccountRewards = createSelector(
         farmData,
         app.config.booster_decimals,
         netLiquidity,
+        app.config.boost_suppress_factor,
       );
 
       return {
@@ -234,7 +243,6 @@ export const getAccountRewards = createSelector(
 
     const { supplied, borrowed, netTvl } = account.portfolio.farms;
     const hasNetTvlFarm = !!Object.entries(assets.netTvlFarm).length;
-
     const suppliedRewards = Object.entries(supplied).map(computePoolsRewards("supplied")).flat();
     const borrowedRewards = Object.entries(borrowed).map(computePoolsRewards("borrowed")).flat();
 
@@ -266,6 +274,7 @@ export const getAccountRewards = createSelector(
     return {
       brrr: poolRewards[brrrTokenId] || {},
       extra: omit(poolRewards, brrrTokenId) || {},
+      poolRewards: poolRewards || {},
       net: netLiquidityRewards.reduce(
         (rewards, asset) => ({ ...rewards, [asset.tokenId]: asset }),
         {},

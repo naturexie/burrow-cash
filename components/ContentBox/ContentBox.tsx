@@ -16,13 +16,13 @@ export const ContentBox = ({ children, style, className, padding }: BoxProps) =>
 };
 
 const StyledBox = styled.div<{ padding?: string }>`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   position: relative;
-  border-radius: 12px;
-  border: 1px solid #31344d;
-  background: #23253a;
+  border-radius: 6px;
+  border: 1px solid #4f5178;
+  background: #2e304b;
+  font-size: 12px;
   padding: ${(p) => p.padding ?? "20px 30px"};
-
-  @media (max-width: 767px) {
-    padding: 20px;
-  }
 `;
