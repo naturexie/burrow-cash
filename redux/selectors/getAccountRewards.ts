@@ -104,11 +104,9 @@ export const computePoolsDailyAmount = (
     shrinkToken(portfolio.borrowed[asset.token_id]?.shares || 0, assetDecimals),
   );
   const shares = type === "supplied" ? suppliedShares + collateralShares : borrowedShares;
-  // const newBoostedShares = shares * multiplier;
-  // const newTotalBoostedShares = totalBoostedShares + newBoostedShares - boostedShares;
-  const extraShares = log > 0 ? boostedShares * log : 0;
-  const newBoostedShares = boostedShares + extraShares;
-  const newTotalBoostedShares = totalBoostedShares + extraShares;
+  const newBoostedShares = log > 0 ? shares * multiplier : boostedShares;
+  const newTotalBoostedShares =
+    log > 0 ? totalBoostedShares + newBoostedShares - boostedShares : totalBoostedShares;
   const newDailyAmount =
     newTotalBoostedShares > 0 ? (newBoostedShares / newTotalBoostedShares) * totalRewardsPerDay : 0;
 
@@ -143,13 +141,12 @@ export const computeNetLiquidityDailyAmount = (
   );
 
   const dailyAmount = (boostedShares / totalBoostedShares) * totalRewardsPerDay;
-
   const shares =
     Number(shrinkToken(new Decimal(netLiquidity).mul(10 ** 18).toFixed(), assetDecimals)) || 0;
 
-  const extraShares = log > 0 ? boostedShares * log : 0;
-  const newBoostedShares = boostedShares + extraShares;
-  const newTotalBoostedShares = totalBoostedShares + extraShares;
+  const newBoostedShares = log > 0 ? shares * multiplier : boostedShares;
+  const newTotalBoostedShares =
+    log > 0 ? totalBoostedShares + newBoostedShares - boostedShares : totalBoostedShares;
   const newDailyAmount = (newBoostedShares / newTotalBoostedShares) * totalRewardsPerDay;
   return { dailyAmount, newDailyAmount, multiplier, totalBoostedShares, shares };
 };
