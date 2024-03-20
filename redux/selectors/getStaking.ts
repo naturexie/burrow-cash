@@ -8,7 +8,6 @@ export const getStaking = createSelector(
   (account, app) => {
     const { config } = app;
     const { amount, months } = app.staking;
-
     const BRRR = Number(
       shrinkToken(account.portfolio.staking["staked_booster_amount"], app.config.booster_decimals),
     );
@@ -23,10 +22,9 @@ export const getStaking = createSelector(
       ((months * config.minimum_staking_duration_sec - config.minimum_staking_duration_sec) /
         (config.maximum_staking_duration_sec - config.minimum_staking_duration_sec)) *
         (config.x_booster_multiplier_at_maximum_staking_duration / 10000 - 1);
-
     const totalXBRRR = Math.max(
-      xBRRR + amount * xBRRRMultiplier,
-      (BRRR + amount) * xBRRRMultiplier,
+      xBRRR + Number(amount) * xBRRRMultiplier,
+      (BRRR + Number(amount)) * xBRRRMultiplier,
     );
 
     const extraXBRRRAmount = totalXBRRR - xBRRR;

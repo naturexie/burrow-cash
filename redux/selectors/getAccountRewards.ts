@@ -78,7 +78,6 @@ export const computePoolsDailyAmount = (
 
   const assetDecimals = asset.metadata.decimals + asset.config.extra_decimals;
   const rewardAssetDecimals = rewardAsset.metadata.decimals + rewardAsset.config.extra_decimals;
-
   const log = Math.log(xBRRRAmount / boost_suppress_factor) / Math.log(boosterLogBase);
   const multiplier = log >= 0 ? 1 + log : 1;
 
@@ -104,9 +103,8 @@ export const computePoolsDailyAmount = (
     shrinkToken(portfolio.borrowed[asset.token_id]?.shares || 0, assetDecimals),
   );
   const shares = type === "supplied" ? suppliedShares + collateralShares : borrowedShares;
-  const newBoostedShares = log > 0 ? shares * multiplier : boostedShares;
-  const newTotalBoostedShares =
-    log > 0 ? totalBoostedShares + newBoostedShares - boostedShares : totalBoostedShares;
+  const newBoostedShares = shares * multiplier;
+  const newTotalBoostedShares = totalBoostedShares + newBoostedShares - boostedShares;
   const newDailyAmount =
     newTotalBoostedShares > 0 ? (newBoostedShares / newTotalBoostedShares) * totalRewardsPerDay : 0;
 
@@ -115,11 +113,11 @@ export const computePoolsDailyAmount = (
 
 export const computeNetLiquidityDailyAmount = (
   asset: Asset,
-  xBRRRAmount: number,
+  totalxBRRRAmount: number,
   netTvlFarm: INetTvlFarmRewards,
   farmData: FarmData,
   boosterDecimals: number,
-  netLiquidity: number,
+  xBRRR: number,
   boost_suppress_factor: number,
 ) => {
   const boosterLogBase = Number(
@@ -128,7 +126,7 @@ export const computeNetLiquidityDailyAmount = (
 
   const assetDecimals = asset.metadata.decimals + asset.config.extra_decimals;
 
-  const log = Math.log(xBRRRAmount / boost_suppress_factor) / Math.log(boosterLogBase);
+  const log = Math.log(totalxBRRRAmount / boost_suppress_factor) / Math.log(boosterLogBase);
   const multiplier = log >= 0 ? 1 + log : 1;
 
   const boostedShares = Number(shrinkToken(farmData.boosted_shares, assetDecimals));
@@ -141,12 +139,13 @@ export const computeNetLiquidityDailyAmount = (
   );
 
   const dailyAmount = (boostedShares / totalBoostedShares) * totalRewardsPerDay;
-  const shares =
-    Number(shrinkToken(new Decimal(netLiquidity).mul(10 ** 18).toFixed(), assetDecimals)) || 0;
+  const logStaked = Math.log(xBRRR / boost_suppress_factor) / Math.log(boosterLogBase);
+  const multiplierStaked = logStaked >= 0 ? 1 + logStaked : 1;
 
-  const newBoostedShares = log > 0 ? shares * multiplier : boostedShares;
-  const newTotalBoostedShares =
-    log > 0 ? totalBoostedShares + newBoostedShares - boostedShares : totalBoostedShares;
+  const shares = boostedShares / multiplierStaked;
+
+  const newBoostedShares = shares * multiplier;
+  const newTotalBoostedShares = totalBoostedShares + newBoostedShares - boostedShares;
   const newDailyAmount = (newBoostedShares / newTotalBoostedShares) * totalRewardsPerDay;
   return { dailyAmount, newDailyAmount, multiplier, totalBoostedShares, shares };
 };
@@ -220,7 +219,7 @@ export const getAccountRewards = createSelector(
         assets.netTvlFarm,
         farmData,
         app.config.booster_decimals,
-        netLiquidity,
+        xBRRR,
         app.config.boost_suppress_factor,
       );
 
