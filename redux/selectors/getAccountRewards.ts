@@ -2,7 +2,7 @@ import Decimal from "decimal.js";
 import { createSelector } from "@reduxjs/toolkit";
 import { omit } from "lodash";
 
-import { NEAR_LOGO_SVG, shrinkToken } from "../../store";
+import { shrinkToken } from "../../store";
 import { RootState } from "../store";
 import { Asset, AssetsState } from "../assetState";
 import { Farm, FarmData, Portfolio } from "../accountState";
@@ -224,7 +224,7 @@ export const getAccountRewards = createSelector(
       );
 
       return {
-        icon: icon || `data:image/svg+xml,${NEAR_LOGO_SVG}`,
+        icon,
         name,
         symbol,
         tokenId: rewardTokenId,
