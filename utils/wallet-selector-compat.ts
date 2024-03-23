@@ -93,17 +93,17 @@ export const getWalletSelector = async ({ onAccountChange }: GetWalletSelectorAr
       setupSender() as any,
       setupMeteorWallet(),
       walletConnect,
-      setupHereWallet(),
-      setupNightly(),
-      setupNeth({
-        bundle: false,
-        gas: "300000000000000",
-      }),
       setupNearMobileWallet({
         dAppMetadata: {
           logoUrl: "https://ref-finance-images.s3.amazonaws.com/images/burrowIcon.png",
           name: "NEAR Wallet Selector",
         },
+      }),
+      setupHereWallet(),
+      setupNightly(),
+      setupNeth({
+        bundle: false,
+        gas: "300000000000000",
       }),
       setupKeypom({
         networkId: defaultNetwork,
