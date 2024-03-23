@@ -13,7 +13,7 @@ import CustomModal from "../../components/CustomModal/CustomModal";
 import { APY_FORMAT, TOKEN_FORMAT } from "../../store";
 import CustomButton from "../../components/CustomButton/CustomButton";
 import { useRewards } from "../../hooks/useRewards";
-import { ContentBox } from "../../components/ContentBox/ContentBox";
+import { ContentTipBox } from "../../components/ContentBox/ContentBox";
 import { BrrrLogo } from "./components";
 import { Alerts } from "../../components/Modal/components";
 
@@ -289,7 +289,7 @@ const Reward = ({ data, type }: any) => {
       >
         {newDailyAmount.toLocaleString(undefined, TOKEN_FORMAT)}
         <div className="_hints text-gray-300">
-          <ContentBox padding="4px 8px">
+          <ContentTipBox padding="4px 8px">
             <div className="flex items-center justify-between gap-5">
               <div className="whitespace-nowrap">Current Daily</div>
               <div>{dailyAmount?.toLocaleString(undefined, TOKEN_FORMAT)}</div>
@@ -298,7 +298,7 @@ const Reward = ({ data, type }: any) => {
               <div className="whitespace-nowrap">Multiplier</div>
               <div>{multiplier?.toLocaleString(undefined, TOKEN_FORMAT)}</div>
             </div>
-          </ContentBox>
+          </ContentTipBox>
         </div>
       </StyledNewDailyAmount>
     </div>
