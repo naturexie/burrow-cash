@@ -47,7 +47,7 @@ const ModalStaking = ({ isOpen, onClose }) => {
   const unstakeDate = DateTime.fromMillis(stakingTimestamp / 1e6);
   const selectedMonths = stakingTimestamp ? Math.round(unstakeDate.diffNow().as("months")) : months;
   const invalidAmount = +amount > +total;
-  const invalidMonths = months < selectedMonths;
+  const invalidMonths = months === maxMonth ? false : months < selectedMonths;
   const disabledStake = !amount || invalidAmount || invalidMonths;
 
   const inputAmount = `${amount}`
