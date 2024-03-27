@@ -24,7 +24,12 @@ export const toUsd = (balance: string, asset: Asset) =>
       asset.price.usd
     : 0;
 
-export const emptySuppliedAsset = (asset: { supplied: number; collateral: number }): boolean =>
+export const emptySuppliedAsset = (asset: { supplied: number }): boolean =>
+  !(
+    asset.supplied.toLocaleString(undefined, TOKEN_FORMAT) ===
+    (0).toLocaleString(undefined, TOKEN_FORMAT)
+  );
+export const emptySuppliedAsset2 = (asset: { supplied: number; collateral: number }): boolean =>
   !(
     asset.supplied.toLocaleString(undefined, TOKEN_FORMAT) ===
       (0).toLocaleString(undefined, TOKEN_FORMAT) &&

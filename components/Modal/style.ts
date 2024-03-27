@@ -11,7 +11,7 @@ export const Wrapper = styled(Box)(({ theme }) => ({
   [theme.breakpoints.down("sm")]: {
     position: "absolute",
     width: "100%",
-    bottom: "0",
+    bottom: "32px",
     left: "0",
     borderTopLeftRadius: "16px",
     borderTopRightRadius: "16px",

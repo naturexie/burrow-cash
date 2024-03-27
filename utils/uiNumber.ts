@@ -28,13 +28,16 @@ export const formatWithCommas_number = (v, d?: number | any) => {
 
 export const toInternationalCurrencySystem_number = (v) => {
   if (isInvalid(v)) return "-";
+  const absDecimal = new Decimal(Decimal.abs(v));
   const decimal = new Decimal(v);
-  if (decimal.eq(0)) {
+  if (absDecimal.eq(0)) {
     return "0";
-  } else if (decimal.lt(0.01)) {
-    return "<0.01";
+  } else if (absDecimal.lt(0.01)) {
+    return decimal.lt(0) ? "-<0.01" : "<0.01";
   } else {
-    return toInternationalCurrencySystem(decimal.toFixed());
+    return decimal.lt(0)
+      ? `-${toInternationalCurrencySystem(decimal.toFixed())}`
+      : toInternationalCurrencySystem(decimal.toFixed());
   }
 };
 export const toInternationalCurrencySystem_usd = (v) => {
