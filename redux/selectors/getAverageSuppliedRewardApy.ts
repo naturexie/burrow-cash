@@ -3,6 +3,7 @@ import Decimal from "decimal.js";
 import { RootState } from "../store";
 import { shrinkToken } from "../../store";
 import { Farm } from "../accountState";
+import { filterAccountEndedFarms } from "./getAccountRewards";
 
 export const getAverageSupplyRewardApy = () =>
   createSelector(
@@ -10,7 +11,8 @@ export const getAverageSupplyRewardApy = () =>
     (state: RootState) => state.account,
     (assets, account) => {
       const { supplied, collateral, farms } = account.portfolio;
-      const supplyFarms = farms.supplied || {};
+      // const supplyFarms = farms.supplied || {};
+      const supplyFarms = filterAccountEndedFarms(farms, assets.allFarms).supplied || {};
       const [dailyTotalSupplyProfit, totalSupply] = Object.entries(supplyFarms)
         .map(([tokenId, farm]: [string, Farm]) => {
           const asset = assets.data[tokenId];

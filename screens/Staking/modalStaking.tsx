@@ -1,7 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { DateTime } from "luxon";
-import pluralize from "pluralize";
-import { Alert, Box, Stack, Typography } from "@mui/material";
 import styled from "styled-components";
 import RangeSlider, { MonthSlider } from "../../components/Modal/RangeSlider";
 import { useAppSelector } from "../../redux/hooks";
@@ -12,10 +10,11 @@ import { stake } from "../../store/actions/stake";
 import CustomModal from "../../components/CustomModal/CustomModal";
 import { APY_FORMAT, TOKEN_FORMAT } from "../../store";
 import CustomButton from "../../components/CustomButton/CustomButton";
-import { useRewards } from "../../hooks/useRewards";
+import { useRewards, useStakeRewardApy } from "../../hooks/useRewards";
 import { ContentTipBox } from "../../components/ContentBox/ContentBox";
 import { BrrrLogo } from "./components";
 import { Alerts } from "../../components/Modal/components";
+import { format_apy } from "../../utils/uiNumber";
 
 const ModalStaking = ({ isOpen, onClose }) => {
   const [total, totalUnclaim, totalToken] = useAppSelector(getTotalBRRR);
@@ -49,6 +48,7 @@ const ModalStaking = ({ isOpen, onClose }) => {
   const invalidAmount = +amount > +total;
   const invalidMonths = months === maxMonth ? false : months < selectedMonths;
   const disabledStake = !amount || invalidAmount || invalidMonths;
+  const { avgStakeSupplyAPY, avgStakeBorrowAPY, avgStakeNetAPY } = useStakeRewardApy();
 
   const inputAmount = `${amount}`
     .replace(/[^0-9.-]/g, "")
@@ -163,15 +163,6 @@ const ModalStaking = ({ isOpen, onClose }) => {
 
           <StyledRow>
             {minMonth && maxMonth ? (
-              // <RangeSlider
-              //   value={monthPercent}
-              //   onChange={handleMonthChange}
-              //   selectNavValueOnly
-              //   isWidthAuto
-              //   valueSymbol=""
-              //   isMonth
-              //   navs={monthList}
-              // />
               <MonthSlider
                 min={minMonth}
                 max={maxMonth}
@@ -189,19 +180,18 @@ const ModalStaking = ({ isOpen, onClose }) => {
             <div className="mr-2">Reward</div>
             <div className="border-b border-solid flex-grow border-dark-700" />
           </div>
-          <div className="flex justify-between mb-4">
-            <div className="h5 text-gray-300">Pools APY</div>
-            <div className="h5 text-primary">
-              {stakingNetAPY.toLocaleString(undefined, APY_FORMAT)}%
-            </div>
+          <div className={`flex justify-between mb-4 ${avgStakeSupplyAPY > 0 ? "" : "hidden"}`}>
+            <div className="h5 text-gray-300">Avg. Supply Reward APY</div>
+            <div className="h5 text-primary">{format_apy(avgStakeSupplyAPY)}</div>
           </div>
-          <div className="flex justify-between mb-4">
-            <div className="h5 text-gray-300">Net Liquidity APY</div>
-            <div className="h5 text-primary">
-              {stakingNetTvlAPY.toLocaleString(undefined, APY_FORMAT)}%
-            </div>
+          <div className={`flex justify-between mb-4 ${avgStakeBorrowAPY > 0 ? "" : "hidden"}`}>
+            <div className="h5 text-gray-300">Avg. Borrow Reward APY</div>
+            <div className="h5 text-primary">{format_apy(avgStakeBorrowAPY)}</div>
           </div>
-          <StakingReward />
+          <div className={`flex justify-between mb-4 ${avgStakeNetAPY > 0 ? "" : "hidden"}`}>
+            <div className="h5 text-gray-300">Avg. NetLiquidity Reward APY</div>
+            <div className="h5 text-primary">{format_apy(avgStakeNetAPY)}</div>
+          </div>
         </StyledRow>
 
         <CustomButton
