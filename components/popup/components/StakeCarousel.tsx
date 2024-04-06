@@ -8,16 +8,15 @@ import { useAPY } from "../../../hooks/useAPY";
 const StakeCarousel = () => {
   const [tokenRowOne, setTokenRowOne] = useState<any>();
   const [tokenRowTwo, setTokenRowTwo] = useState<any>();
-  const [tokenRowThree, setTokenRowThree] = useState<any>();
   const assets = useAvailableAssets();
-  // TODO
   useEffect(() => {
     if (assets?.length) {
-      const incentiveTokensData = assets.filter((asset) => incentiveTokens.includes(asset.tokenId));
-      if (incentiveTokensData?.length === 3) {
+      const incentiveTokensData = assets.filter(
+        (asset) => incentiveTokens.includes(asset.tokenId) && asset.symbol !== "FRAX",
+      );
+      if (incentiveTokensData?.length) {
         setTokenRowOne(incentiveTokensData[0]);
         setTokenRowTwo(incentiveTokensData[1]);
-        setTokenRowThree(incentiveTokensData[2]);
       }
     }
   }, [assets?.length]);
@@ -26,7 +25,7 @@ const StakeCarousel = () => {
       {isMobileDevice() ? <BoxMobileSvg /> : <BoxSvg />}
       <div className="absolute content lg:top-[76px] xsm:top-[48px] left-[200px] pl-[12px] flex flex-col items-center">
         {tokenRowOne && tokenRowTwo ? (
-          <APYComponent rowOne={tokenRowOne} rowTwo={tokenRowTwo} rowThree={tokenRowThree} />
+          <APYComponent rowOne={tokenRowOne} rowTwo={tokenRowTwo} />
         ) : (
           <p className="text-primary text-6xl font-bold pt-[62px]">0%</p>
         )}
@@ -294,14 +293,7 @@ function APYComponent({ rowOne, rowTwo }: any) {
     page: "market",
     onlyMarket: true,
   });
-  const rowThreeAPY = useAPY({
-    baseAPY: rowTwo.supplyApy,
-    rewards: rowTwo.depositRewards,
-    tokenId: rowTwo.tokenId,
-    page: "market",
-    onlyMarket: true,
-  });
-  const highestAPY = Math.max(rowOneAPY, rowTwoAPY, rowThreeAPY);
+  const highestAPY = Math.max(rowOneAPY, rowTwoAPY);
   const percentage = (highestAPY * 1.3).toFixed(0);
   return <p className="text-primary text-6xl font-bold pt-[62px] xsm:text-56">{percentage}%</p>;
 }
