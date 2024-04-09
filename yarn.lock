@@ -3456,10 +3456,10 @@
     redux-thunk "^2.4.1"
     reselect "^4.1.5"
 
-"@ref-finance/ref-sdk@^1.3.2":
-  version "1.3.2"
-  resolved "https://registry.yarnpkg.com/@ref-finance/ref-sdk/-/ref-sdk-1.3.2.tgz#56dee753472a014baeaa9f6d1208e1c0d8e04078"
-  integrity sha512-j7p/fa6q+nZLc4pykaL1I4JKU+CybIPc7AqhmSCB83eugj8VoYJUg27L7g3lYLtk+dmyiLKsNazQ3s8blo/OhA==
+"@ref-finance/ref-sdk@^1.3.3":
+  version "1.3.3"
+  resolved "https://registry.yarnpkg.com/@ref-finance/ref-sdk/-/ref-sdk-1.3.3.tgz#e963b063d15f01001815270d786fc646aa29b8eb"
+  integrity sha512-y7krmoCh2OxIWzvbtqmMpbmXJjGOcWQnR28a5exC6u/6nkIi5E/Q70T8k2+wKJcc/yqPHdzXQ/jnPSslonVi6g==
   dependencies:
     "@near-wallet-selector/core" "^7.0.0"
     "@react-icons/all-files" "^4.1.0"
