@@ -12,6 +12,7 @@ import DashboardApy from "./dashboardApy";
 import CustomTable from "../../components/CustomTable/CustomTable";
 import {
   formatTokenValue,
+  formatTokenValueWithMilify,
   formatUSDValue,
   isMobileDevice,
   millifyNumber,
@@ -22,6 +23,7 @@ import { ConnectWalletButton } from "../../components/Header/WalletButton";
 import SupplyBorrowListMobile from "./supplyBorrowListMobile";
 import { AdjustButton, WithdrawButton, RepayButton, MarketButton } from "./supplyBorrowButtons";
 import { hiddenAssets } from "../../utils/config";
+import { APYCell } from "../Market/APYCell";
 
 const Index = () => {
   const accountId = useAccountId();
@@ -106,10 +108,17 @@ const yourSuppliedColumns = [
     header: "Your APY",
     cell: ({ originalData }) => {
       return (
-        <DashboardApy
+        // <DashboardApy
+        //   baseAPY={originalData?.apy}
+        //   rewardList={originalData?.depositRewards}
+        //   tokenId={originalData?.tokenId}
+        // />
+        <APYCell
+          rewards={originalData?.depositRewards}
           baseAPY={originalData?.apy}
-          rewardList={originalData?.depositRewards}
+          page="deposit"
           tokenId={originalData?.tokenId}
+          onlyMarket
         />
       );
     },
@@ -134,7 +143,9 @@ const yourSuppliedColumns = [
     cell: ({ originalData }) => {
       return (
         <>
-          <div>{originalData?.collateral ? formatTokenValue(originalData?.collateral) : "-"}</div>
+          <div title={originalData?.collateral ? formatTokenValue(originalData?.collateral) : "-"}>
+            {formatTokenValueWithMilify(originalData.collateral, 4)}
+          </div>
           <div className="h6 text-gray-300">
             {originalData?.collateral
               ? formatUSDValue(originalData.collateral * originalData.price)
@@ -149,7 +160,9 @@ const yourSuppliedColumns = [
     cell: ({ originalData }) => {
       return (
         <>
-          <div>{formatTokenValue(originalData.supplied)}</div>
+          <div title={formatTokenValue(originalData.supplied)}>
+            {formatTokenValueWithMilify(originalData.supplied, 4)}
+          </div>
           <div className="h6 text-gray-300">
             {formatUSDValue(originalData.supplied * originalData.price)}
           </div>
@@ -259,11 +272,18 @@ const yourBorrowedColumns = [
     header: "Your APY",
     cell: ({ originalData }) => {
       return (
-        <DashboardApy
+        // <DashboardApy
+        //   baseAPY={originalData?.borrowApy}
+        //   rewardList={originalData?.borrowRewards}
+        //   tokenId={originalData?.tokenId}
+        //   isBorrow
+        // />
+        <APYCell
+          rewards={originalData?.borrowRewards}
           baseAPY={originalData?.borrowApy}
-          rewardList={originalData?.borrowRewards}
+          page="borrow"
           tokenId={originalData?.tokenId}
-          isBorrow
+          onlyMarket
         />
       );
     },
@@ -287,7 +307,9 @@ const yourBorrowedColumns = [
     cell: ({ originalData }) => {
       return (
         <>
-          <div>{formatTokenValue(originalData?.borrowed)}</div>
+          <div title={formatTokenValue(originalData?.borrowed)}>
+            {formatTokenValueWithMilify(originalData.borrowed, 4)}
+          </div>
           <div className="h6 text-gray-300">
             ${millifyNumber(originalData.borrowed * originalData.price)}
           </div>

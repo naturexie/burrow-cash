@@ -1,6 +1,6 @@
-import { isValidElement } from "react";
+import { isValidElement, useState } from "react";
 import { Box, Stack, ButtonGroup, Button, Typography, Tooltip, useTheme } from "@mui/material";
-import ReactToolTip from "../../ToolTip";
+import { TagToolTip } from "../../ToolTip";
 import { useAccountId } from "../../../hooks/hooks";
 import { useStatsToggle } from "../../../hooks/useStatsToggle";
 import TokenIcon from "../../TokenIcon";
@@ -80,7 +80,7 @@ export const Stat = ({
 }: {
   title: string | React.ReactElement;
   titleTooltip?: string;
-  amount: string;
+  amount: string | React.ReactElement;
   tooltip?: string;
   labels?: any;
   onClick?: () => void;
@@ -89,19 +89,22 @@ export const Stat = ({
     <div onClick={() => onClick && onClick()} style={{ minHeight: 81 }} className="md:w-[351px]">
       <div className="flex items-center gap-1">
         {typeof title === "string" ? <div className="h6 text-gray-300">{title}</div> : title}
-        {titleTooltip && <ReactToolTip content={titleTooltip} />}
+        {titleTooltip && <TagToolTip title={titleTooltip} />}
       </div>
-      <Tooltip title={tooltip} placement="top" arrow>
-        <div className="h2 my-1">{amount}</div>
-      </Tooltip>
+      {/* <Tooltip title={tooltip} placement="top" arrow> */}
+      <div className="h2 my-1">{amount}</div>
+      {/* </Tooltip> */}
       {labels && (
-        <Stack direction="row" gap="4px" flexWrap="wrap">
+        <Stack direction="row" gap="4px" flexWrap="wrap" alignItems="center">
           {isValidElement(labels) ? (
             <Label>{labels}</Label>
           ) : (
             labels?.map((row, i) => {
               const firstData = row[0];
               if (!firstData) return null;
+              if (firstData.type === "component") {
+                return firstData.content;
+              }
               return (
                 <div
                   className="flex gap-1 items-start flex-col md:flex-row md:flex-wrap"

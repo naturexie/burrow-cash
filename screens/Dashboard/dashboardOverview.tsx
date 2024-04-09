@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { BeatLoader } from "react-spinners";
 import { twMerge } from "tailwind-merge";
+import { Modal, Box, useTheme } from "@mui/material";
 import SemiCircleProgressBar from "../../components/SemiCircleProgressBar/SemiCircleProgressBar";
 import { useUserHealth } from "../../hooks/useUserHealth";
 import { formatTokenValue, formatUSDValue, isMobileDevice } from "../../helpers/helpers";
@@ -11,12 +12,14 @@ import ModalHistoryInfo from "./modalHistoryInfo";
 import { modalProps } from "../../interfaces/common";
 import { DangerIcon, QuestionIcon, RecordsIcon } from "../../components/Icons/Icons";
 import CustomTooltips from "../../components/CustomTooltips/CustomTooltips";
-import { useAccountId, useNonFarmedAssets, useUnreadLiquidation } from "../../hooks/hooks";
-import { ProtocolDailyRewards, UserDailyRewards } from "../../components/Header/stats/rewards";
+import { useUnreadLiquidation } from "../../hooks/hooks";
+import { UserDailyRewards } from "../../components/Header/stats/rewards";
 import { UserLiquidity } from "../../components/Header/stats/liquidity";
 import { APY } from "../../components/Header/stats/apy";
 import { ContentBox } from "../../components/ContentBox/ContentBox";
-import ToolTip from "../../components/ToolTip";
+import { TagToolTip } from "../../components/ToolTip";
+import { Wrapper } from "../../components/Modal/style";
+import { CloseIcon } from "../../components/Modal/svg";
 
 const DashboardOverview = ({ suppliedRows, borrowedRows }) => {
   const [modal, setModal] = useState<modalProps>({
@@ -27,6 +30,14 @@ const DashboardOverview = ({ suppliedRows, borrowedRows }) => {
   const rewardsObj = useRewards();
   const { unreadLiquidation, fetchUnreadLiquidation } = useUnreadLiquidation();
   const isMobile = isMobileDevice();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const theme = useTheme();
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
 
   useEffect(() => {
     fetchUnreadLiquidation().then();
@@ -82,11 +93,12 @@ const DashboardOverview = ({ suppliedRows, borrowedRows }) => {
 
   const unclaimNodes = rewardsObj?.data?.array.map(({ data, tokenId }) => {
     return (
-      <div className="flex justify-between mb-1 items-center" key={tokenId}>
+      <div className="flex justify-between mb-4 items-center" key={tokenId}>
         <div className="flex items-center gap-1.5">
           <img src={data?.icon} className="w-[26px] h-[26px] rounded-full" alt="" />
-          <span>{data?.symbol}</span>
+          <span className="text-gray-300">{data?.symbol}</span>
         </div>
+        <div className="flex-grow border-t border-dashed border-gray-300 mx-4" />
         <div>{formatTokenValue(data?.unclaimedAmount)}</div>
       </div>
     );
@@ -104,7 +116,7 @@ const DashboardOverview = ({ suppliedRows, borrowedRows }) => {
       <ContentBox className="mb-8">
         <div className="lg3:flex lg3:justify-between">
           <div className="mb-4 lg3:max-w-[640px] lg3:mb-0">
-            <div className="flex gap-2 justify-between lg3:gap-6 lg3:gap-8">
+            <div className="flex gap-2 justify-between lg3:gap-6">
               <div className="gap-6 flex flex-col flex-2">
                 <UserLiquidity />
                 <UserDailyRewards />
@@ -113,55 +125,60 @@ const DashboardOverview = ({ suppliedRows, borrowedRows }) => {
               <div className="gap-6 flex flex-col flex-1">
                 <APY />
                 <div className="flex flex-col">
-                  {/* <OverviewItem */}
-                  {/*  title="Unclaimed Rewards" */}
-                  {/*  value={rewardsObj?.data?.totalUnClaimUSDDisplay || "$0"} */}
-                  {/* /> */}
-                  <div className="h6 text-gray-300">Unclaimed Rewards</div>
-                  <div className="flex flex-col items-start lg3:flex-row lg3:items-center lg3:gap-4">
+                  <div className="h6 text-gray-300 flex items-center gap-1">
+                    Unclaimed Rewards
+                    <TagToolTip title="Base APY earnings added to your supply balance." />
+                  </div>
+                  <div className="items-start lg3:flex-row lg3:items-center lg3:gap-4">
                     <div className="flex items-center gap-4 my-1">
                       <div className="h2">{rewardsObj?.data?.totalUnClaimUSDDisplay || "$0"}</div>
                       <div className="flex" style={{ marginRight: 5 }}>
-                        {rewardsObj?.brrr?.icon ? (
-                          <img
-                            src={rewardsObj?.brrr?.icon}
-                            width={26}
-                            height={26}
-                            alt="token"
-                            className="rounded-full"
-                            style={{ margin: -3 }}
-                          />
-                        ) : null}
-
-                        {rewardsObj?.extra?.length
-                          ? rewardsObj.extra.map((d, i) => {
-                              const extraData = d?.[1];
-                              return (
-                                <img
-                                  src={extraData?.icon}
-                                  width={26}
-                                  key={(extraData?.tokenId || "0") + i}
-                                  height={26}
-                                  alt="token"
-                                  className="rounded-full"
-                                  style={{ margin: -3 }}
-                                />
-                              );
-                            })
-                          : null}
+                        {rewardsObj?.data?.array.map(({ data, tokenId }) => {
+                          return (
+                            <img
+                              src={data?.icon}
+                              width={20}
+                              key={tokenId}
+                              height={20}
+                              alt="token"
+                              className="rounded-full"
+                              style={{ margin: -3 }}
+                            />
+                          );
+                        })}
                       </div>
                     </div>
 
                     {rewardsObj?.data?.totalUnClaimUSD > 0 && (
                       <div className="mt-1 lg3:mt-0">
-                        <CustomTooltips
-                          text={unclaimNodes}
-                          style={{
-                            width: 170,
-                          }}
+                        <div
+                          className="flex items-center justify-center bg-primary rounded-md cursor-pointer text-sm font-bold text-dark-200 hover:opacity-80 w-20 h-8 mt-1.5"
+                          onClick={openModal}
                         >
-                          <ClaimAllRewards Button={ClaimButton} location="dashboard" />
-                        </CustomTooltips>
+                          Claim
+                        </div>
+                        <Modal open={isModalOpen} onClose={closeModal}>
+                          <Wrapper
+                            sx={{
+                              "& *::-webkit-scrollbar": {
+                                backgroundColor: theme.custom.scrollbarBg,
+                              },
+                            }}
+                          >
+                            <Box sx={{ p: ["20px", "20px"] }}>
+                              <div className="flex items-center justify-between text-lg text-white mb-7">
+                                <span className="text-lg font-bold">Claim Rewards</span>
+                                <CloseIcon onClick={closeModal} className="cursor-pointer" />
+                              </div>
+                              {unclaimNodes}
+                              <ClaimAllRewards
+                                Button={ClaimButton}
+                                onDone={closeModal}
+                                location="dashboard"
+                              />
+                            </Box>
+                          </Wrapper>
+                        </Modal>
                       </div>
                     )}
                   </div>
@@ -286,7 +303,7 @@ const ClaimButton = (props) => {
   return (
     <div
       {...props}
-      className="flex items-center justify-center bg-primary rounded-md cursor-pointer text-sm font-bold text-dark-200 hover:opacity-80 w-20 h-8"
+      className="flex items-center justify-center bg-primary rounded-md cursor-pointer text-sm font-bold text-dark-200 hover:opacity-80 w-full h-8 mt-1.5 "
     >
       {loading ? <BeatLoader size={5} color="#14162B" /> : <>Claim</>}
     </div>

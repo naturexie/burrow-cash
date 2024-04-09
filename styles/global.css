@@ -777,3 +777,31 @@ options-list::-webkit-scrollbar {
   user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Edge, Opera and Firefox */
 }
+
+.radio-custom {
+  width: 16px;
+  height: 16px;
+  position: relative;
+  -webkit-appearance: none;
+  outline: none;
+  cursor: pointer;
+  border: 1px solid #626486;
+  border-radius: 50%;
+  background-color: #23253A;
+}
+
+.radio-custom:checked {
+  border-color: #D2FF3A;
+}
+
+.radio-custom:checked::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #D2FF3A;
+}

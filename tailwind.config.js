@@ -57,6 +57,7 @@ module.exports = {
         },
         green: {
           50: "#00B4B4",
+          100: "#16F195",
         },
         dark: {
           50: "#31344D",
@@ -75,6 +76,7 @@ module.exports = {
           900: "#3F4162",
           950: "#31344C",
           1000: "#3E4260",
+          1050: "#2F324A",
         },
         red: {
           50: "#FF6BA9",
@@ -82,6 +84,7 @@ module.exports = {
         },
         yellow: {
           50: "#F3BA2F",
+          100: "#F1B416",
         },
         gray: {
           50: "#fafafa",
@@ -95,6 +98,7 @@ module.exports = {
           800: "#23253A",
           900: "#0f101c",
           950: "#787B93",
+          1000: "#3A3A3A",
         },
         toolTipBoxBorderColor: "#D2FF3A",
         toolTipBoxBgColor: "rgba(35,37,58,0.8)",

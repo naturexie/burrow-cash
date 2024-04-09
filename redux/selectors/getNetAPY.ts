@@ -1,5 +1,6 @@
 import { createSelector } from "@reduxjs/toolkit";
 
+import Decimal from "decimal.js";
 import { RootState } from "../store";
 import { hasAssets } from "../utils";
 import { getExtraDailyTotals } from "./getExtraDailyTotals";
@@ -47,8 +48,10 @@ export const getNetTvlAPY = ({ isStaking = false }) =>
         0,
       );
       const netLiquidity = totalCollateral + totalSupplied - totalBorrowed;
-      const apy = ((netTvlRewards * 365) / netLiquidity) * 100;
-
+      let apy;
+      if (new Decimal(netLiquidity).gt(0)) {
+        apy = ((netTvlRewards * 365) / netLiquidity) * 100;
+      }
       return apy || 0;
     },
   );

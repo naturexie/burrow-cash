@@ -6,6 +6,8 @@ import TokenIcon from "../../components/TokenIcon";
 import { useExtraAPY } from "../../hooks/useExtraAPY";
 import { useAPY } from "../../hooks/useAPY";
 import { format_apy } from "../../utils/uiNumber";
+import { getAssets } from "../../redux/assetsSelectors";
+import { useAppSelector } from "../../redux/hooks";
 
 export const APYCell = ({
   baseAPY,
@@ -53,13 +55,20 @@ const ToolTip = ({
   excludeNetApy,
 }) => {
   const [showTooltip, setShowTooltip] = useState(false);
+  const assets = useAppSelector(getAssets);
+  // suppose only one reward
+  const netTvlFarmTokenId = (Object.keys(assets?.netTvlFarm || {}) || [])[0];
   const { computeRewardAPY, computeStakingRewardAPY, netLiquidityAPY, netTvlMultiplier } =
     useExtraAPY({
       tokenId,
       isBorrow,
       onlyMarket,
     });
-
+  function getNetTvlFarmRewardIcon() {
+    const asset = assets.data[netTvlFarmTokenId];
+    const icon = asset?.metadata?.icon;
+    return icon;
+  }
   return (
     <HtmlTooltip
       open={showTooltip}
@@ -77,7 +86,10 @@ const ToolTip = ({
                 Net Liquidity APY
               </Typography>,
               <Typography fontSize="0.75rem" color="#fff" textAlign="right" key={1}>
-                {format_apy(netLiquidityAPY * netTvlMultiplier)}
+                <div className="flex items-center justify-end gap-1.5">
+                  <img className="w-4 h-4 rounded-full" alt="" src={getNetTvlFarmRewardIcon()} />
+                  {format_apy(netLiquidityAPY * netTvlMultiplier)}
+                </div>
               </Typography>,
             ]}
           {list.map(({ rewards, metadata, price, config }) => {

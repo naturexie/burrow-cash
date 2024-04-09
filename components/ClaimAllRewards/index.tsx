@@ -1,6 +1,7 @@
 import { LoadingButtonProps } from "@mui/lab/LoadingButton";
 import { ButtonProps, MenuItemProps } from "@mui/material";
 
+import { useEffect, useState } from "react";
 import { useClaimAllRewards } from "../../hooks/useClaimAllRewards";
 
 interface Props {
@@ -12,13 +13,22 @@ interface Props {
 
 function ClaimAllRewards({ Button, location, onDone, disabled = false }: Props) {
   const { handleClaimAll, isLoading } = useClaimAllRewards(location);
+  const [hasClicked, setHasClicked] = useState(false);
 
   const loading = Button.name === "ClaimMenuItem" ? undefined : isLoading;
 
   const handleClick = () => {
+    setHasClicked(true);
     handleClaimAll();
-    if (onDone) onDone();
   };
+  useEffect(() => {
+    if (hasClicked && !isLoading) {
+      if (onDone) {
+        onDone();
+      }
+      setHasClicked(false);
+    }
+  }, [hasClicked, isLoading, onDone]);
   return <Button onClick={handleClick} loading={loading} disabled={disabled} />;
 }
 

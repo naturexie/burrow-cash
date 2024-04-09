@@ -59,11 +59,11 @@ export const bridgeList: IBridge[] = [
   //   subTitle: "Solana | Terra | Celo",
   //   link: "https://app.allbridge.io/bridge",
   // },
-  {
-    title: "Electron Labs",
-    subTitle: "Ethereum",
-    link: "https://mainnet.electronlabs.org/bridge",
-  },
+  // {
+  //   title: "Electron Labs",
+  //   subTitle: "Ethereum",
+  //   link: "https://mainnet.electronlabs.org/bridge",
+  // },
 ];
 
 type IBridge = {
