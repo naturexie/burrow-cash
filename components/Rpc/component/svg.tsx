@@ -1,20 +1,20 @@
 import { BeatLoader } from "react-spinners";
 
-export const CircleIconLarge = (props: any) => {
-  const { width, height, className, ...rest } = props;
-  return (
-    <svg
-      {...props}
-      width="10"
-      height="10"
-      viewBox="0 0 10 10"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <circle cx="5" cy="5" r="5" fill="currentColor" />
-    </svg>
-  );
-};
+// export const CircleIconLarge = (props: any) => {
+//   const { width, height, className, ...rest } = props;
+//   return (
+//     <svg
+//       {...props}
+//       width="6"
+//       height="6"
+//       viewBox="0 0 6 6"
+//       fill="none"
+//       xmlns="http://www.w3.org/2000/svg"
+//     >
+//       <circle cx="5" cy="5" r="5" fill="currentColor" />
+//     </svg>
+//   );
+// };
 export const SelectedButtonIcon = (props: any) => {
   return (
     <svg
@@ -55,13 +55,13 @@ export const CircleIcon = (props: any) => {
     <svg
       className={className}
       {...rest}
-      width={width || "5"}
-      height={height || "5"}
-      viewBox="0 0 5 5"
+      width="6"
+      height="6"
+      viewBox="0 0 6 6"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <circle cx="2.5" cy="2.5" r="2.5" fill="currentColor" />
+      <circle cx="3" cy="3" r="3" fill="currentColor" />
     </svg>
   );
 };

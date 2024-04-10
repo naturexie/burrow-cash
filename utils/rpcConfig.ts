@@ -24,7 +24,7 @@ export function getExtendConfig(
             simpleName: "official rpc",
           },
           lavaRpc: {
-            url: "https://g.w.lavanet.xyz/gateway/near/rpc-http/a6e88c7710da77f09430aacd6328efd6",
+            url: "https://near.lava.build",
             simpleName: "lava rpc",
           },
           betaRpc: {

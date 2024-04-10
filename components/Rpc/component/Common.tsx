@@ -6,7 +6,6 @@ import Modal from "react-modal";
 import {
   CircleIcon,
   AddButtonIcon,
-  CircleIconLarge,
   SelectedButtonIcon,
   SetButtonIcon,
   ReturnArrowButtonIcon,
@@ -18,26 +17,27 @@ import { isMobileDevice } from "../../../helpers/helpers";
 import { getRpcList, trimStr, ping_gas, pingChain, getCustomConfig, switchPoint } from "../tool";
 /* eslint-disable jsx-a11y/label-has-associated-control */
 export const displayCurrentRpc = (responseTimeList: any, key: any, inBox?: boolean) => {
+  const colorClass = responseTimeList[key] > 500 ? "text-yellow-100" : "text-green-100";
   if (responseTimeList[key] === -1) {
     return (
       <>
-        <span className="cursor-pointer text-danger">
-          {inBox ? <CircleIconLarge /> : <CircleIcon />}
-        </span>
-        <label className="text-xs ml-1.5 mr-2.5 cursor-pointer text-danger whitespace-nowrap">
+        <label className="text-xs ml-1.5 mr-1 cursor-pointer text-danger whitespace-nowrap">
           time out
         </label>
+        <span className="cursor-pointer text-danger">
+          <CircleIcon />
+        </span>
       </>
     );
   } else if (responseTimeList[key]) {
     return (
       <>
-        <span className="cursor-pointer text-darkGreenColor">
-          {inBox ? <CircleIconLarge /> : <CircleIcon />}
-        </span>
-        <label className="text-xs text-primaryText ml-1.5 mr-2.5 cursor-pointer whitespace-nowrap">
+        <label className={`text-xs ${colorClass} mr-1 cursor-pointer whitespace-nowrap`}>
           {responseTimeList[key]}ms
         </label>
+        <span className={`cursor-pointer ${colorClass}`}>
+          <CircleIcon />
+        </span>
       </>
     );
   } else {
@@ -296,15 +296,15 @@ export const ModalAddCustomNetWork = (props: any) => {
           ) : (
             <div>
               <div className="flex items-center justify-between text-xl text-white mb-5">
-                RPC
+                RPC Selector
                 <span onClick={closeModal} className="cursor-pointer">
                   <ModalClose />
                 </span>
               </div>
-              <div
-                style={{ maxHeight: cardHeight }}
-                className="overflow-y-auto overflow-x-hidden px-2 py-2"
-              >
+              <div className="text-dark-800 text-sm mb-4">
+                Select the available RPC service below and the page will be automatically refreshed
+              </div>
+              <div style={{ maxHeight: cardHeight }} className="overflow-y-auto overflow-x-hidden">
                 {Object.entries(rpclist).map(([key, data]: any, index: number) => {
                   return (
                     <div className="flex items-center" key={data.simpleName}>
@@ -316,25 +316,36 @@ export const ModalAddCustomNetWork = (props: any) => {
                         } ${
                           isInEditStatus && !data.custom
                             ? ""
-                            : "bg-black bg-opacity-20 hover:bg-opacity-30"
-                        } justify-between text-white ${
-                          currentEndPoint === key && !isInEditStatus ? "bg-opacity-30" : ""
-                        }`}
+                            : "bg-black bg-gray-500 bg-opacity-30 hover:bg-opacity-50"
+                        } justify-between text-white`}
                         onClick={() => {
                           if (!isInEditStatus) {
                             switchPoint(key);
                           }
                         }}
                       >
-                        <label className="text-sm pr-5 whitespace-nowrap overflow-hidden overflow-ellipsis">
-                          {data.simpleName}
-                        </label>
+                        <div className="flex items-center">
+                          <input
+                            type="radio"
+                            className="radio-custom w-4 h-4 mr-2"
+                            checked={currentEndPoint === key && !isInEditStatus}
+                            onChange={() => {
+                              if (!isInEditStatus) {
+                                switchPoint(key);
+                              }
+                            }}
+                            disabled={isInEditStatus}
+                          />
+                          <label className="text-sm pr-5 whitespace-nowrap overflow-hidden overflow-ellipsis">
+                            {data.simpleName}
+                          </label>
+                        </div>
                         <div className="flex items-center text-sm">
                           {displayCurrentRpc(responseTimeList, key, true)}
                         </div>
-                        {currentEndPoint === key && !isInEditStatus ? (
+                        {/* {currentEndPoint === key && !isInEditStatus ? (
                           <SelectedButtonIcon className="absolute -right-1 -top-1" />
-                        ) : null}
+                        ) : null} */}
                       </div>
                       {isInEditStatus && data.custom ? (
                         <div>
@@ -351,7 +362,7 @@ export const ModalAddCustomNetWork = (props: any) => {
                 })}
               </div>
               <div
-                className={`flex items-center mt-6 px-2 ${
+                className={`flex items-center mt-6  ${
                   isInEditStatus ? "justify-end" : "justify-between"
                 }`}
               >
@@ -363,7 +374,7 @@ export const ModalAddCustomNetWork = (props: any) => {
                   onClick={showCustomNetWork}
                 >
                   <div className="flex items-center text-black">
-                    <AddButtonIcon style={{ zoom: 1.35 }} className="mr-1" />
+                    <AddButtonIcon className="mr-1" />
                     Add
                   </div>
                 </GradientButton>

@@ -54,22 +54,19 @@ const RpcList = () => {
             zIndex: 999999,
             boxShadow: "0px 0px 10px 10px rgba(0, 0, 0, 0.15)",
           }}
-          className="fixed bottom-0 left-0 w-full h-8 bg-gray-800 mt-3"
+          className="fixed bottom-0 right-1 w-min h-8 bg-dark-200 border border-dark-1050 rounded-tl-md rounded-tr-md mt-3"
         >
-          <div
-            className="flex items-center w-full h-full justify-between"
-            onClick={addCustomNetwork}
-          >
-            <div className="flex items-center justify-between w-full flex-grow px-16">
-              <div className="flex items-center w-3/4">
+          <div className="flex items-center w-min h-full justify-end" onClick={addCustomNetwork}>
+            <div className="flex items-center justify-between w-full flex-grow py-1 px-3">
+              {/* <div className="flex items-center w-3/4">
                 <label className="text-xs text-primaryText mr-5">RPC</label>
                 <label className="text-xs text-primaryText cursor-pointer pr-5 whitespace-nowrap overflow-hidden overflow-ellipsis">
                   {rpclist[currentEndPoint].simpleName}
                 </label>
-              </div>
+              </div> */}
               <div className="flex items-center">
                 {displayCurrentRpc(responseTimeList, currentEndPoint)}
-                <FiChevronDown className="text-primaryText transform rotate-180 cursor-pointer" />
+                {/* <FiChevronDown className="text-primaryText transform rotate-180 cursor-pointer" /> */}
               </div>
             </div>
           </div>
@@ -88,31 +85,39 @@ const RpcList = () => {
             {/* selected rpc */}
             <div className="pt-3">
               <div
-                className="flex items-center justify-between px-2  bg-gray-800 hover:bg-dark-100 rounded cursor-pointer"
+                className="flex items-center justify-between px-2 rounded cursor-pointer"
                 style={{
                   minWidth,
                   maxWidth,
-                  boxShadow: "0px 0px 10px 10px rgba(0, 0, 0, 0.15)",
                   height: "25px",
                 }}
               >
                 <div className="flex items-center w-2/3">
                   <label className="text-xs w-full text-primaryText cursor-pointer pr-3 whitespace-nowrap overflow-hidden overflow-ellipsis">
-                    {rpclist[currentEndPoint].simpleName}
+                    {/* {rpclist[currentEndPoint].simpleName} */}
                   </label>
                 </div>
-                <div className="flex items-center">
+                <div
+                  className="flex items-center"
+                  onMouseEnter={() => {
+                    setHoverSet(true);
+                  }}
+                  onMouseLeave={() => {
+                    setHoverSet(false);
+                  }}
+                  onClick={addCustomNetwork}
+                >
                   {displayCurrentRpc(responseTimeList, currentEndPoint)}
-                  <FiChevronDown
+                  {/* <FiChevronDown
                     className={`text-primaryText transform rotate-180 cursor-pointer ${
                       hover ? "text-greenColor" : ""
                     }`}
-                  />
+                  /> */}
                 </div>
               </div>
             </div>
             {/* hover rpc list */}
-            <div
+            {/* <div
               className={`absolute py-2 bottom-8 flex flex-col w-full bg-gray-800 rounded ${
                 hover ? "" : "hidden"
               }`}
@@ -145,10 +150,10 @@ const RpcList = () => {
                   </div>
                 );
               })}
-            </div>
+            </div> */}
           </div>
           {/* add custom rpc button */}
-          <div
+          {/* <div
             onMouseEnter={() => {
               setHoverSet(true);
             }}
@@ -160,7 +165,7 @@ const RpcList = () => {
             className="flex items-center bg-gray-800 hover:bg-dark-100 rounded  cursor-pointer ml-0.5 px-2 "
           >
             <MoreButtonIcon className={`text-primaryText ${hoverSet ? "text-greenColor" : ""}`} />
-          </div>
+          </div> */}
         </div>
       )}
       <ModalAddCustomNetWork

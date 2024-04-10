@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { useTheme, Box, Snackbar, Alert } from "@mui/material";
+import { useTheme, Box, Snackbar, Typography } from "@mui/material";
 import { useRouter } from "next/router";
 import Link from "next/link";
-
 import LogoIcon from "../../public/logo.svg";
 import BurrowIcon from "../../public/burrow.svg";
 import BrrrIcon from "../../public/brrr.svg";
 import WalletButton from "./WalletButton";
 import Bridge from "./Bridge";
 import Set from "./Set";
-import { Wrapper, Logo, Menu, LinkStyled, WrapperMobile, WalletMobile } from "./style";
+import { Wrapper, Logo, Menu, LinkStyled, WrapperMobile } from "./style";
 import { useAppSelector } from "../../redux/hooks";
 import { isAssetsFetching } from "../../redux/assetsSelectors";
 import { helpMenu, mainMenuList, Imenu } from "./menuData";
 import MenuMobile from "./MenuMobile";
 import { RefreshIcon } from "./svg";
+import { DiscordIcon, MediumIcon, TwitterIcon } from "../Footer/svg";
+import { LinksWrapper } from "../Footer/style";
+import { isMobileDevice } from "../../helpers/helpers";
 
 const MenuItem = ({ item }: { item: Imenu }) => {
   const { title, link, allLinks } = item;
@@ -50,6 +52,45 @@ const HelpMenuItem = () => {
           fill="currentColor"
         />
       </svg>
+    </div>
+  );
+};
+const CommunityItem = () => {
+  const [isHovered, setIsHovered] = useState(false);
+  const isMobile = isMobileDevice();
+  return (
+    <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="inline-block py-3 px-2 cursor-pointer hover:bg-gray-800 hover:border hover:border-dark-50 relative rounded-md"
+    >
+      <svg
+        width="13"
+        height="3"
+        viewBox="0 0 13 3"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className={`fill-current ${isHovered ? "text-white" : "text-blue-200"}`}
+      >
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M3 1.5C3 2.32843 2.32843 3 1.5 3C0.671573 3 0 2.32843 0 1.5C0 0.671573 0.671573 0 1.5 0C2.32843 0 3 0.671573 3 1.5ZM8 1.5C8 2.32843 7.32843 3 6.5 3C5.67157 3 5 2.32843 5 1.5C5 0.671573 5.67157 0 6.5 0C7.32843 0 8 0.671573 8 1.5ZM11.5 3C12.3284 3 13 2.32843 13 1.5C13 0.671573 12.3284 0 11.5 0C10.6716 0 10 0.671573 10 1.5C10 2.32843 10.6716 3 11.5 3Z"
+        />
+      </svg>
+      {isHovered && (
+        <div className="absolute z-50 top-full mt-1 left-0 w-48 p-2 bg-dark-100 shadow-lg border border-dark-300 rounded-md pt-4 pb-6 px-6">
+          <h1 className="text-sm text-gray-300 mb-4">Community</h1>
+          <LinksWrapper>
+            <Links />
+          </LinksWrapper>
+          <h1 className="text-sm text-gray-300 mt-4">Developer</h1>
+          <div>
+            <Github />
+            <BugBounty />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -93,6 +134,7 @@ const Header = () => {
               return <MenuItem key={item.title} item={item} />;
             })}
             <HelpMenuItem />
+            <CommunityItem />
           </Menu>
           <Box display="flex" justifyContent="flex-end" alignItems="stretch" className=" gap-4">
             <Bridge />
@@ -133,3 +175,69 @@ const Header = () => {
 };
 
 export default Header;
+const Links = () => {
+  const theme = useTheme();
+  return (
+    <Box
+      display="grid"
+      gridTemplateColumns="repeat(4, 1fr)"
+      alignItems="center"
+      lineHeight="0"
+      sx={{ gap: "48px" }}
+    >
+      <Link
+        href="https://twitter.com/burrow_finance"
+        title="Twitter"
+        target="_blank"
+        color={theme.custom.footerIcon}
+      >
+        <TwitterIcon />
+      </Link>
+      <Link
+        href="https://discord.gg/gUWBKy9Vur"
+        title="Discord"
+        target="_blank"
+        color={theme.custom.footerIcon}
+      >
+        <DiscordIcon />
+      </Link>
+      <Link
+        href="https://burrowfinance.medium.com/"
+        title="Medium"
+        target="_blank"
+        color={theme.custom.footerIcon}
+      >
+        <MediumIcon />
+      </Link>
+    </Box>
+  );
+};
+const BugBounty = () => {
+  const isMobile = isMobileDevice();
+  return (
+    <Link href="https://immunefi.com/bounty/burrow/" title="Bug Bounty" target="_blank">
+      <Typography
+        fontSize="14px"
+        lineHeight="16px"
+        style={{ color: isMobile ? "#6F7188" : "#ffffff", letterSpacing: "1px" }}
+      >
+        Bug Bounty
+      </Typography>
+    </Link>
+  );
+};
+
+const Github = () => {
+  const isMobile = isMobileDevice();
+  return (
+    <Link href="https://github.com/burrowHQ/" title="Github" target="_blank">
+      <Typography
+        fontSize="14px"
+        lineHeight="46px"
+        style={{ color: isMobile ? "#6F7188" : "#ffffff", letterSpacing: "1px" }}
+      >
+        Github
+      </Typography>
+    </Link>
+  );
+};

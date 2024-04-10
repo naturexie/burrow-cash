@@ -43,13 +43,15 @@ const Layout = ({ children }) => {
   const { hasTicker } = useTicker();
   return (
     <Theme>
-      <PageGrid>
-        <Header />
-        <main className="md:px-10" id="root">
-          {children}
-        </main>
-      </PageGrid>
-      <Footer />
+      <div className="md:pb-8">
+        <PageGrid>
+          <Header />
+          <main className="md:px-10" id="root">
+            {children}
+          </main>
+        </PageGrid>
+        {/* <Footer /> */}
+      </div>
     </Theme>
   );
 };
