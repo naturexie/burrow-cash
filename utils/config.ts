@@ -62,7 +62,10 @@ const getConfig = (env: string = defaultNetwork) => {
           "853d955acef822db058eb8505911ed77f175b99e.factory.bridge.near",
           "a663b02cf0a4b149d2ad41910cb81e23e1c41c32.factory.bridge.near",
         ],
-      } as unknown as ConnectConfig;
+        PYTH_ORACLE_CONTRACT_ID: "pyth-oracle.near",
+      } as unknown as ConnectConfig & {
+        PYTH_ORACLE_CONTRACT_ID: string;
+      };
 
     case "development":
     case "testnet":
@@ -80,7 +83,10 @@ const getConfig = (env: string = defaultNetwork) => {
         ],
         NATIVE_TOKENS: ["usdc.fakes.testnet"],
         NEW_TOKENS: ["usdc.fakes.testnet"],
-      } as unknown as ConnectConfig;
+        PYTH_ORACLE_CONTRACT_ID: "pyth-oracle.testnet",
+      } as unknown as ConnectConfig & {
+        PYTH_ORACLE_CONTRACT_ID: string;
+      };
     case "betanet":
       return {
         networkId: "betanet",
@@ -89,27 +95,35 @@ const getConfig = (env: string = defaultNetwork) => {
         helperUrl: "https://helper.betanet.near.org",
         explorerUrl: "https://explorer.betanet.near.org",
         SPECIAL_REGISTRATION_TOKEN_IDS: [],
-      } as unknown as ConnectConfig;
+      } as unknown as ConnectConfig & {
+        PYTH_ORACLE_CONTRACT_ID: string;
+      };
     case "local":
       return {
         networkId: "local",
         nodeUrl: RPC_LIST[endPoint].url,
         keyPath: `${process.env.HOME}/.near/validator_key.json`,
         walletUrl: "http://localhost:4000/wallet",
-      } as ConnectConfig;
+      } as ConnectConfig & {
+        PYTH_ORACLE_CONTRACT_ID: string;
+      };
     case "test":
     case "ci":
       return {
         networkId: "shared-test",
         nodeUrl: RPC_LIST[endPoint].url,
         masterAccount: "test.near",
-      } as ConnectConfig;
+      } as ConnectConfig & {
+        PYTH_ORACLE_CONTRACT_ID: string;
+      };
     case "ci-betanet":
       return {
         networkId: "shared-test-staging",
         nodeUrl: RPC_LIST[endPoint].url,
         masterAccount: "test.near",
-      } as ConnectConfig;
+      } as ConnectConfig & {
+        PYTH_ORACLE_CONTRACT_ID: string;
+      };
     default:
       throw Error(`Unconfigured environment '${env}'. Can be configured in src/config.js.`);
   }

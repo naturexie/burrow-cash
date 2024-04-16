@@ -2,7 +2,12 @@ import BN from "bn.js";
 
 import { getBurrow, nearTokenId } from "../../utils";
 import { expandToken, expandTokenDecimal } from "../helper";
-import { ChangeMethodsNearToken, ChangeMethodsOracle, ChangeMethodsToken } from "../../interfaces";
+import {
+  ChangeMethodsNearToken,
+  ChangeMethodsOracle,
+  ChangeMethodsToken,
+  ChangeMethodsLogic,
+} from "../../interfaces";
 import { Transaction, isRegistered, isRegisteredNew } from "../wallet";
 import { prepareAndExecuteTransactions, getMetadata, getTokenContract } from "../tokens";
 import { NEAR_DECIMALS, NO_STORAGE_DEPOSIT_CONTRACTS, NEAR_STORAGE_DEPOSIT } from "../constants";
@@ -13,10 +18,12 @@ export async function borrow({
   tokenId,
   extraDecimals,
   amount,
+  enable_pyth_oracle,
 }: {
   tokenId: string;
   extraDecimals: number;
   amount: string;
+  enable_pyth_oracle: boolean;
 }) {
   const { oracleContract, logicContract, account } = await getBurrow();
   const { decimals } = (await getMetadata(tokenId))!;
@@ -90,15 +97,21 @@ export async function borrow({
   };
 
   transactions.push({
-    receiverId: oracleContract.contractId,
+    receiverId: enable_pyth_oracle ? logicContract.contractId : oracleContract.contractId,
     functionCalls: [
       {
-        methodName: ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
-        gas: new BN("100000000000000"),
-        args: {
-          receiver_id: logicContract.contractId,
-          msg: JSON.stringify(borrowTemplate),
-        },
+        methodName: enable_pyth_oracle
+          ? ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth]
+          : ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
+        gas: new BN("300000000000000"),
+        args: enable_pyth_oracle
+          ? {
+              actions: borrowTemplate.Execute.actions,
+            }
+          : {
+              receiver_id: logicContract.contractId,
+              msg: JSON.stringify(borrowTemplate),
+            },
       },
     ],
   });

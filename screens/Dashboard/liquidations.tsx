@@ -83,12 +83,43 @@ const columns = [
   {
     header: () => (
       <div style={{ whiteSpace: "normal" }}>
-        Health Factor
-        <div>before Liquidate</div>
+        Collateral<div>Type</div>
       </div>
     ),
     cell: ({ originalData }) => {
-      const { healthFactor_before } = originalData || {};
+      const { LiquidatedAssets } = originalData || {};
+      return (
+        <div>
+          {LiquidatedAssets?.[0]?.data?.isLpToken ||
+          LiquidatedAssets?.[0]?.token_id?.indexOf("shadow_ref_v1") > -1
+            ? "LP token"
+            : "Single token"}
+        </div>
+      );
+    },
+  },
+  {
+    header: () => (
+      <div style={{ whiteSpace: "normal" }}>
+        Liquidation<div>Type</div>
+      </div>
+    ),
+    cell: ({ originalData }) => {
+      const { liquidation_type } = originalData || {};
+      return <div>{liquidation_type || "-"}</div>;
+    },
+  },
+  {
+    header: () => (
+      <div style={{ whiteSpace: "normal" }}>
+        Health Factor<div>before Liquidate</div>
+      </div>
+    ),
+    cell: ({ originalData }) => {
+      const { healthFactor_before, liquidation_type } = originalData || {};
+      if (liquidation_type === "ForceClose") {
+        return "-";
+      }
       return <div>{(Number(healthFactor_before) * 100).toFixed(2)}%</div>;
     },
   },
@@ -96,6 +127,10 @@ const columns = [
     header: () => <div style={{ whiteSpace: "normal" }}>Repaid Assets Amount</div>,
     cell: ({ originalData }) => {
       const { RepaidAssets } = originalData || {};
+      if (!RepaidAssets?.length) {
+        return "-";
+      }
+
       const node = RepaidAssets?.map((d, i) => {
         const isLast = RepaidAssets.length === i + 1;
         const { metadata, config } = d.data || {};
@@ -124,6 +159,10 @@ const columns = [
     header: () => <div style={{ whiteSpace: "normal" }}>Liquidated Assets</div>,
     cell: ({ originalData }) => {
       const { LiquidatedAssets } = originalData || {};
+      if (!LiquidatedAssets?.length) {
+        return "-";
+      }
+
       const node = LiquidatedAssets?.map((d) => {
         const { metadata, config } = d.data || {};
         const { extra_decimals } = config || {};
@@ -154,8 +193,14 @@ const columns = [
       </div>
     ),
     cell: ({ originalData }) => {
-      const { healthFactor_after } = originalData || {};
-      return <div>{(Number(healthFactor_after) * 100).toFixed(2)}%</div>;
+      const { healthFactor_after, liquidation_type } = originalData || {};
+      if (liquidation_type === "ForceClose") {
+        return <div style={{ textAlign: "right" }}>-</div>;
+      }
+
+      return (
+        <div style={{ textAlign: "right" }}>{(Number(healthFactor_after) * 100).toFixed(2)}%</div>
+      );
     },
   },
 ];

@@ -13,11 +13,13 @@ export async function adjustCollateral({
   extraDecimals,
   amount,
   isMax,
+  enable_pyth_oracle,
 }: {
   tokenId: string;
   extraDecimals: number;
   amount: string;
   isMax: boolean;
+  enable_pyth_oracle: boolean;
 }) {
   const { oracleContract, logicContract, account, call } = await getBurrow();
   const { decimals } = (await getMetadata(tokenId))!;
@@ -38,22 +40,14 @@ export async function adjustCollateral({
     : decimalMin(totalBalance, expandTokenDecimal(amount, decimals + extraDecimals));
 
   if (expandedAmount.gt(collateralBalance)) {
-    // await call(logicContract, ChangeMethodsLogic[ChangeMethodsLogic.execute], {
-    //   actions: [
-    //     {
-    //       IncreaseCollateral: {
-    //         token_id: tokenId,
-    //         max_amount: !isMax ? expandedAmount.sub(collateralBalance).toFixed(0) : undefined,
-    //       },
-    //     },
-    //   ],
-    // });
     await prepareAndExecuteTransactions([
       {
         receiverId: logicContract.contractId,
         functionCalls: [
           {
-            methodName: ChangeMethodsLogic[ChangeMethodsLogic.execute],
+            methodName: enable_pyth_oracle
+              ? ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth]
+              : ChangeMethodsLogic[ChangeMethodsLogic.execute],
             gas: new BN("100000000000000"),
             args: {
               actions: [
@@ -72,30 +66,35 @@ export async function adjustCollateral({
       } as Transaction,
     ]);
   } else if (expandedAmount.lt(collateralBalance)) {
+    const decreaseCollateralTemplate = {
+      DecreaseCollateral: {
+        token_id: tokenId,
+        max_amount: expandedAmount.gt(0)
+          ? collateralBalance.sub(expandedAmount).toFixed(0)
+          : undefined,
+      },
+    };
     await prepareAndExecuteTransactions([
       {
-        receiverId: oracleContract.contractId,
+        receiverId: enable_pyth_oracle ? logicContract.contractId : oracleContract.contractId,
         functionCalls: [
           {
-            methodName: ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
-            gas: new BN("100000000000000"),
-            args: {
-              receiver_id: logicContract.contractId,
-              msg: JSON.stringify({
-                Execute: {
-                  actions: [
-                    {
-                      DecreaseCollateral: {
-                        token_id: tokenId,
-                        max_amount: expandedAmount.gt(0)
-                          ? collateralBalance.sub(expandedAmount).toFixed(0)
-                          : undefined,
-                      },
+            methodName: enable_pyth_oracle
+              ? ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth]
+              : ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
+            gas: new BN("300000000000000"),
+            args: enable_pyth_oracle
+              ? {
+                  actions: [decreaseCollateralTemplate],
+                }
+              : {
+                  receiver_id: logicContract.contractId,
+                  msg: JSON.stringify({
+                    Execute: {
+                      actions: [decreaseCollateralTemplate],
                     },
-                  ],
+                  }),
                 },
-              }),
-            },
           },
         ],
       } as Transaction,

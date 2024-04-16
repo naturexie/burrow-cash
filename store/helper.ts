@@ -3,9 +3,28 @@ import Decimal from "decimal.js";
 import { Account, Contract } from "near-api-js";
 
 import { DEFAULT_PRECISION, NANOS_PER_YEAR, NEAR_DECIMALS } from "./constants";
-import { getBurrow } from "../utils";
-import { ViewMethodsOracle, IAssetPrice, IPrices, ChangeMethodsLogic } from "../interfaces";
+import { getBurrow, nearTokenId } from "../utils";
+import {
+  ViewMethodsOracle,
+  IAssetPrice,
+  IPrices,
+  ChangeMethodsLogic,
+  ViewMethodsPyth,
+  IPythPrice,
+  ViewMethodsToken,
+  ViewMethodsLogic,
+  IConfig,
+  IPrice,
+} from "../interfaces";
 import { isRegistered } from "./wallet";
+import {
+  NEARX_TOKEN,
+  LINEAR_TOKEN,
+  STNEAR_TOKEN,
+  FRACTION_DIGITS,
+} from "../utils/pythOracleConfig";
+// eslint-disable-next-line import/no-cycle
+import { getTokenContract } from "./tokens";
 
 Decimal.set({ precision: DEFAULT_PRECISION });
 
@@ -26,8 +45,138 @@ export const rateToApr = (rate: string): string => {
 };
 
 export const getPrices = async (): Promise<IPrices | undefined> => {
+  const { view, logicContract } = await getBurrow();
+  const config = (await view(
+    logicContract,
+    ViewMethodsLogic[ViewMethodsLogic.get_config],
+  )) as IConfig;
+  const { enable_pyth_oracle } = config;
+  if (enable_pyth_oracle) {
+    const pythResponse = await getPythPrices();
+    return pythResponse;
+  } else {
+    const oracleResponse = await getOraclePrices();
+    return oracleResponse;
+  }
+};
+const getPythPrices = async () => {
+  const { view, pythContract, logicContract } = await getBurrow();
+  const COINList = await view(
+    logicContract,
+    ViewMethodsLogic[ViewMethodsLogic.get_all_token_pyth_infos],
+  );
+  try {
+    const array_coins = Object.entries(COINList) as any[];
+    const allRequest = array_coins.map(([, coin]) => {
+      return view(pythContract, ViewMethodsPyth[ViewMethodsPyth.get_price], {
+        price_identifier: coin.price_identifier,
+      });
+    });
+    let near_pyth_price_obj: IPythPrice = {
+      price: "0",
+      conf: "0",
+      expo: 0,
+      publish_time: 0,
+    };
+    const price_array = (await Promise.all(allRequest)) as IPythPrice[];
+    const format_price: IAssetPrice[] = price_array.map((priceObject: IPythPrice, index) => {
+      const coin = array_coins[index];
+      if (!priceObject) {
+        if (coin[1].default_price) {
+          return {
+            asset_id: coin[0],
+            price: coin[1].default_price as IPrice,
+          };
+        }
+        return {
+          asset_id: coin[0],
+          price: {
+            multiplier: "0",
+            decimals: coin[1].decimals + coin[1].fraction_digits,
+          },
+        };
+      }
+      const { price, expo } = priceObject;
+      const p = new Decimal(10).pow(expo).mul(price).toNumber();
+      if (coin[0] === nearTokenId) {
+        near_pyth_price_obj = priceObject;
+      }
+      coin[1].fraction_digits = coin[1].fraction_digits || FRACTION_DIGITS;
+      const discrepancy_denominator = new Decimal(10).pow(coin[1].fraction_digits).toNumber();
+      const object = {
+        asset_id: coin[0],
+        price: {
+          multiplier: new Decimal(p).mul(discrepancy_denominator).toFixed(0),
+          decimals: coin[1].decimals + coin[1].fraction_digits,
+        },
+      };
+      return object;
+    });
+    const format_price_map = format_price.reduce(
+      (acc, p: IAssetPrice) => ({ ...acc, [p.asset_id]: p }),
+      {},
+    );
+    if (near_pyth_price_obj) {
+      const near_price = new Decimal(10)
+        .pow(near_pyth_price_obj.expo)
+        .mul(near_pyth_price_obj.price);
+      const NEARX_CONTRACT = await getTokenContract(NEARX_TOKEN);
+      const STNEAR_CONTRACT = await getTokenContract(STNEAR_TOKEN);
+      const LINEAR_CONTRACT = await getTokenContract(LINEAR_TOKEN);
+      const nearx_proportion = (await view(
+        NEARX_CONTRACT,
+        ViewMethodsToken[ViewMethodsToken.get_nearx_price],
+      )) as string;
+      const stnear_proportion = (await view(
+        STNEAR_CONTRACT,
+        ViewMethodsToken[ViewMethodsToken.get_st_near_price],
+      )) as string;
+      const linear_proportion = (await view(
+        LINEAR_CONTRACT,
+        ViewMethodsToken[ViewMethodsToken.ft_price],
+      )) as string;
+      const nearx_price = new Decimal(near_price)
+        .mul(nearx_proportion)
+        .div(new Decimal(10).pow(24));
+      const stnear_price = new Decimal(near_price)
+        .mul(stnear_proportion)
+        .div(new Decimal(10).pow(24));
+      const linear_price = new Decimal(near_price)
+        .mul(linear_proportion)
+        .div(new Decimal(10).pow(24));
+      format_price_map[NEARX_TOKEN] = {
+        asset_id: NEARX_TOKEN,
+        price: {
+          multiplier: nearx_price.mul(new Decimal(10).pow(FRACTION_DIGITS)).toFixed(0),
+          decimals: 24 + FRACTION_DIGITS,
+        },
+      };
+      format_price_map[STNEAR_TOKEN] = {
+        asset_id: STNEAR_TOKEN,
+        price: {
+          multiplier: stnear_price.mul(new Decimal(10).pow(FRACTION_DIGITS)).toFixed(0),
+          decimals: 24 + FRACTION_DIGITS,
+        },
+      };
+      format_price_map[LINEAR_TOKEN] = {
+        asset_id: LINEAR_TOKEN,
+        price: {
+          multiplier: linear_price.mul(new Decimal(10).pow(FRACTION_DIGITS)).toFixed(0),
+          decimals: 24 + FRACTION_DIGITS,
+        },
+      };
+    }
+    return {
+      prices: Object.values(format_price_map) as IAssetPrice[],
+      recency_duration_sec: 0,
+      timestamp: "0",
+    };
+  } catch (error) {
+    return undefined;
+  }
+};
+const getOraclePrices = async () => {
   const { view, oracleContract } = await getBurrow();
-
   try {
     const priceResponse: IPrices = (await view(
       oracleContract,
@@ -37,12 +186,7 @@ export const getPrices = async (): Promise<IPrices | undefined> => {
     if (priceResponse) {
       priceResponse.prices = priceResponse?.prices.map((assetPrice: IAssetPrice) => ({
         ...assetPrice,
-        price: assetPrice.price
-          ? {
-              ...assetPrice.price,
-              usd: new Decimal(assetPrice.price?.multiplier || 0).div(10000).toNumber(),
-            }
-          : null,
+        price: assetPrice.price,
       }))!;
     }
 

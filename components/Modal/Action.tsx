@@ -11,7 +11,7 @@ import { borrow } from "../../store/actions/borrow";
 import { withdraw } from "../../store/actions/withdraw";
 import { adjustCollateral } from "../../store/actions/adjustCollateral";
 import { useAppSelector, useAppDispatch } from "../../redux/hooks";
-import { getSelectedValues, getAssetData } from "../../redux/appSelectors";
+import { getSelectedValues, getAssetData, getConfig } from "../../redux/appSelectors";
 import { trackActionButton, trackUseAsCollateral } from "../../utils/telemetry";
 import { useDegenMode } from "../../hooks/hooks";
 import { SubmitButton, AlertWarning } from "./components";
@@ -20,6 +20,7 @@ import { expandToken } from "../../store";
 export default function Action({ maxBorrowAmount, healthFactor, poolAsset }) {
   const [loading, setLoading] = useState(false);
   const { amount, useAsCollateral, isMax } = useAppSelector(getSelectedValues);
+  const { enable_pyth_oracle } = useAppSelector(getConfig);
   const dispatch = useAppDispatch();
   const asset = useAppSelector(getAssetData);
   const { action = "Deposit", tokenId, borrowApy, price, borrowed } = asset;
@@ -67,7 +68,7 @@ export default function Action({ maxBorrowAmount, healthFactor, poolAsset }) {
         }
         break;
       case "Borrow": {
-        await borrow({ tokenId, extraDecimals, amount });
+        await borrow({ tokenId, extraDecimals, amount, enable_pyth_oracle });
         break;
       }
       case "Withdraw": {
@@ -76,6 +77,7 @@ export default function Action({ maxBorrowAmount, healthFactor, poolAsset }) {
           extraDecimals,
           amount,
           isMax,
+          enable_pyth_oracle,
         });
         break;
       }
@@ -85,10 +87,10 @@ export default function Action({ maxBorrowAmount, healthFactor, poolAsset }) {
           extraDecimals,
           amount,
           isMax,
+          enable_pyth_oracle,
         });
         break;
       case "Repay": {
-        // TODO
         let minRepay = "0";
         let interestChargedIn1min = "0";
         if (borrowApy && price && borrowed) {
@@ -117,6 +119,7 @@ export default function Action({ maxBorrowAmount, healthFactor, poolAsset }) {
             amount,
             extraDecimals,
             isMax,
+            enable_pyth_oracle,
           });
         } else {
           await repay({

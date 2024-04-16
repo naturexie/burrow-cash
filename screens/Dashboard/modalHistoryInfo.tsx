@@ -13,7 +13,9 @@ const ModalHistoryInfo = ({ isOpen, onClose, tab }) => {
   const { unreadLiquidation, fetchUnreadLiquidation } = useUnreadLiquidation();
 
   useEffect(() => {
-    setTabIndex(tab);
+    if (tab !== undefined) {
+      setTabIndex(tab);
+    }
   }, [tab]);
 
   const handleTabChange = (i) => {

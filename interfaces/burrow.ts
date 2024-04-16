@@ -1,7 +1,7 @@
 import { Account, Contract } from "near-api-js";
 import type { WalletSelector } from "@near-wallet-selector/core";
 
-import { IPrices } from "./oracle";
+import { IPrices, IPythPrice } from "./oracle";
 import { IMetadata, AssetEntry, IAssetDetailed, Balance, NetTvlFarm } from "./asset";
 import { IAccount, IAccountDetailed } from "./account";
 
@@ -18,6 +18,8 @@ export interface IConfig {
   owner_id: string;
   x_booster_multiplier_at_maximum_staking_duration: number;
   boost_suppress_factor: number;
+  enable_price_oracle: boolean;
+  enable_pyth_oracle: boolean;
 }
 
 export interface IBurrow {
@@ -30,6 +32,7 @@ export interface IBurrow {
   signIn: () => void;
   logicContract: Contract;
   oracleContract: Contract;
+  pythContract: Contract;
   config: IConfig;
   view: (
     contract: Contract,
@@ -37,6 +40,7 @@ export interface IBurrow {
     args?: any,
   ) => Promise<
     | IPrices
+    | IPythPrice
     | IMetadata
     | AssetEntry[]
     | IAssetDetailed
