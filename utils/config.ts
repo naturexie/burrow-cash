@@ -65,6 +65,7 @@ const getConfig = (env: string = defaultNetwork) => {
         PYTH_ORACLE_CONTRACT_ID: "pyth-oracle.near",
       } as unknown as ConnectConfig & {
         PYTH_ORACLE_CONTRACT_ID: string;
+        recordsUrl: string;
       };
 
     case "development":
@@ -86,6 +87,7 @@ const getConfig = (env: string = defaultNetwork) => {
         PYTH_ORACLE_CONTRACT_ID: "pyth-oracle.testnet",
       } as unknown as ConnectConfig & {
         PYTH_ORACLE_CONTRACT_ID: string;
+        recordsUrl: string;
       };
     case "betanet":
       return {
@@ -97,6 +99,7 @@ const getConfig = (env: string = defaultNetwork) => {
         SPECIAL_REGISTRATION_TOKEN_IDS: [],
       } as unknown as ConnectConfig & {
         PYTH_ORACLE_CONTRACT_ID: string;
+        recordsUrl: string;
       };
     case "local":
       return {
@@ -106,6 +109,7 @@ const getConfig = (env: string = defaultNetwork) => {
         walletUrl: "http://localhost:4000/wallet",
       } as ConnectConfig & {
         PYTH_ORACLE_CONTRACT_ID: string;
+        recordsUrl: string;
       };
     case "test":
     case "ci":
@@ -115,6 +119,7 @@ const getConfig = (env: string = defaultNetwork) => {
         masterAccount: "test.near",
       } as ConnectConfig & {
         PYTH_ORACLE_CONTRACT_ID: string;
+        recordsUrl: string;
       };
     case "ci-betanet":
       return {
@@ -123,6 +128,7 @@ const getConfig = (env: string = defaultNetwork) => {
         masterAccount: "test.near",
       } as ConnectConfig & {
         PYTH_ORACLE_CONTRACT_ID: string;
+        recordsUrl: string;
       };
     default:
       throw Error(`Unconfigured environment '${env}'. Can be configured in src/config.js.`);

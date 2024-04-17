@@ -80,9 +80,14 @@ const NEARX_TOKEN_ENV = {
 };
 const LINEAR_TOKEN_ENV = { testnet: "linear-protocol.testnet", mainnet: "linear-protocol.near" };
 const STNEAR_TOKEN_ENV = { testnet: "meta-v2.pool.testnet", mainnet: "meta-pool.near" };
+const SFRAX_TOKEN_ENV = {
+  testnet: "a663b0.fakes.testnet",
+  mainnet: "a663b02cf0a4b149d2ad41910cb81e23e1c41c32.factory.bridge.near",
+};
 const COINS = COINS_ENV[defaultNetwork];
 const NEARX_TOKEN = NEARX_TOKEN_ENV[defaultNetwork];
 const LINEAR_TOKEN = LINEAR_TOKEN_ENV[defaultNetwork];
 const STNEAR_TOKEN = STNEAR_TOKEN_ENV[defaultNetwork];
+const SFRAX_TOKEN = SFRAX_TOKEN_ENV[defaultNetwork];
 
-export { COINS, FRACTION_DIGITS, NEARX_TOKEN, LINEAR_TOKEN, STNEAR_TOKEN };
+export { COINS, FRACTION_DIGITS, NEARX_TOKEN, LINEAR_TOKEN, STNEAR_TOKEN, SFRAX_TOKEN };

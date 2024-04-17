@@ -1,3 +1,4 @@
+import BN from "bn.js";
 import Decimal from "decimal.js";
 
 import { decimalMax, getBurrow } from "../../utils";
@@ -55,6 +56,7 @@ export async function repayFromDeposits({
         methodName: enable_pyth_oracle
           ? ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth]
           : ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
+        gas: new BN("300000000000000"),
         args: enable_pyth_oracle
           ? {
               actions: [
