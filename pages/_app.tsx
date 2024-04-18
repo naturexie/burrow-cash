@@ -77,14 +77,11 @@ const Init = () => {
   const fetchData = () => {
     dispatch(fetchAssets()).then(() => dispatch(fetchRefPrices()));
     dispatch(fetchAccount());
-  };
-
-  useEffect(() => {
-    console.info("ttest");
     dispatch(fetchConfig());
-  }, []);
+  };
   useEffect(fetchData, []);
-  useInterval(fetchData, !isIdle ? REFETCH_INTERVAL : null);
+  // useInterval(fetchData, !isIdle ? REFETCH_INTERVAL : null);
+  useInterval(fetchData, REFETCH_INTERVAL);
 
   return null;
 };
