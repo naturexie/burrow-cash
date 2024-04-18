@@ -16,16 +16,22 @@ import { trackActionButton, trackUseAsCollateral } from "../../utils/telemetry";
 import { useDegenMode } from "../../hooks/hooks";
 import { SubmitButton, AlertWarning } from "./components";
 import { expandToken } from "../../store";
+import { getContractConfig } from "../../store/helper";
 
 export default function Action({ maxBorrowAmount, healthFactor, poolAsset }) {
   const [loading, setLoading] = useState(false);
+  const [enable_pyth_oracle, set_enable_pyth_oracle] = useState<boolean>(false);
   const { amount, useAsCollateral, isMax } = useAppSelector(getSelectedValues);
-  const { enable_pyth_oracle } = useAppSelector(getConfig);
+  // const { enable_pyth_oracle } = useAppSelector(getConfig);
   const dispatch = useAppDispatch();
   const asset = useAppSelector(getAssetData);
   const { action = "Deposit", tokenId, borrowApy, price, borrowed } = asset;
   const { isRepayFromDeposits } = useDegenMode();
-
+  useEffect(() => {
+    getContractConfig().then((c) => {
+      set_enable_pyth_oracle(c.enable_pyth_oracle);
+    });
+  }, []);
   const { available, canUseAsCollateral, extraDecimals, collateral, disabled, decimals } =
     getModalData({
       ...asset,
