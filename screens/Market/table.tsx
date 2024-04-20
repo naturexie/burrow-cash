@@ -172,13 +172,7 @@ function TableBody({ rows, sorting }: TableProps) {
     if (rows?.length) {
       setSortedRows(rows.sort(comparator));
     }
-  }, [
-    rows?.length,
-    Object.keys(depositApyMap).length,
-    Object.keys(borrowApyMap).length,
-    property,
-    order,
-  ]);
+  }, [rows, Object.keys(depositApyMap).length, Object.keys(borrowApyMap).length, property, order]);
   if (!rows?.length) return null;
   function comparator(b: UIAsset, a: UIAsset) {
     let a_comparator_value;
