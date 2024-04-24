@@ -40,7 +40,6 @@ export const assetSlice = createSlice({
       throw new Error("Failed to fetch assets and metadata");
     });
     builder.addCase(fetchRefPrices.fulfilled, (state, action) => {
-      console.log("99999999999");
       missingPriceTokens.forEach((missingToken) => {
         const missingTokenId = missingToken[defaultNetwork];
         if (missingTokenId && state.data[missingTokenId] && !state.data[missingTokenId]["price"]) {
