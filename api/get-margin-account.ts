@@ -12,6 +12,9 @@ const getMarginAccount = async () => {
       const marginAccount = (await view(
         logicContract,
         ViewMethodsLogic[ViewMethodsLogic.get_margin_account],
+        {
+          account_id: accountId,
+        },
       )) as IMarginAccountDetailedView;
 
       return marginAccount;

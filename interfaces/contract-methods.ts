@@ -42,6 +42,8 @@ export enum ChangeMethodsLogic {
   account_stake_booster,
   account_unstake_booster,
   register_account,
+  // margin action
+  margin_execute_with_pyth,
 }
 
 export enum ViewMethodsOracle {

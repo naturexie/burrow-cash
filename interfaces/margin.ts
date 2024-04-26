@@ -26,6 +26,6 @@ export interface IMarginTradingPositionView {
 
 export interface IMarginAccountDetailedView {
   account_id: string;
-  supplied: IAsset;
+  supplied: IAsset[];
   margin_positions: IMarginTradingPositionView;
 }

@@ -18,6 +18,8 @@ import { useAppDispatch } from "../redux/hooks";
 import { fetchAssets, fetchRefPrices } from "../redux/assetsSlice";
 import { fetchAccount } from "../redux/accountSlice";
 import { fetchConfig } from "../redux/appSlice";
+import { fetchMarginAccount } from "../redux/marginAccountSlice";
+import { fetchMarginConfig } from "../redux/marginConfigSlice";
 import { ToastMessage } from "../components/ToastMessage";
 
 const SENTRY_ORG = process.env.NEXT_PUBLIC_SENTRY_ORG as string;
@@ -49,6 +51,8 @@ const Init = () => {
   const fetchData = () => {
     dispatch(fetchAssets()).then(() => dispatch(fetchRefPrices()));
     dispatch(fetchAccount());
+    dispatch(fetchMarginAccount());
+    dispatch(fetchMarginConfig());
   };
 
   useEffect(() => {
