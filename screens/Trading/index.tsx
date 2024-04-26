@@ -35,13 +35,16 @@ const Trading = () => {
   };
   return (
     <LayoutBox>
+      {/* back */}
       <Link href="/marginTrading">
         <div className="flex items-center text-sm text-gray-300 cursor-pointer mb-8">
           <ComeBackIcon />
           <p className="ml-3.5"> Margin Trading Markets</p>
         </div>
       </Link>
+      {/* main */}
       <div className="grid grid-cols-6 mb-4">
+        {/* left charts */}
         <div className="col-span-4 bg-gray-800 border border-dark-50 rounded-md mr-4">
           <div className="flex justify-between items-center border-b border-dark-50 py-6 px-5">
             <div className="flex items-center">
@@ -100,6 +103,7 @@ const Trading = () => {
           </div>
           <div style={{ height: "520px" }} />
         </div>
+        {/* right tradingopts */}
         <div className="col-span-2 bg-gray-800 border border-dark-50 rounded-md">
           <TradingOperate />
         </div>

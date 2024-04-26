@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import TradingToken from "./tokenbox";
 import { RefLogoIcon, SetUp, ShrinkArrow } from "./TradingIcon";
-import { useAppDispatch } from "../../../redux/hooks";
+import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
 import RangeSlider from "./RangeSlider";
 import ConfirmMobile from "./ConfirmMobile";
+import { getAccountBalance, getAccountId } from "../../../redux/accountSelectors";
 
 const TradingOperate = () => {
   const dispatch = useAppDispatch();
@@ -11,6 +12,8 @@ const TradingOperate = () => {
   const [showSetUpPopup, setShowSetUpPopup] = useState(false);
   const [selectedSetUpOption, setSelectedSetUpOption] = useState("auto");
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const balance = useAppSelector(getAccountBalance);
+  const accountId = useAppSelector(getAccountId);
   const handleTabClick = (tabString) => {
     setActiveTab(tabString);
   };
@@ -115,49 +118,51 @@ const TradingOperate = () => {
               <p className="text-gray-300 mt-2 text-xs">Long: $0.00</p>
             </div>
             <RangeSlider defaultValue={1.5} action="Long" />
-            <div className="mt-5">
-              <div className="flex items-center justify-between text-sm mb-4">
-                <div className="text-gray-300">Position Size</div>
-                <div>
-                  45.2435 NEAR
-                  <span className="text-xs text-gray-300 ml-1.5">($149.35)</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between text-sm mb-4">
-                <div className="text-gray-300">Liq. Price</div>
-                <div>$1.23</div>
-              </div>
-              <div className="flex items-center justify-between text-sm mb-4">
-                <div className="text-gray-300">Fee</div>
-                <div className="flex items-center justify-center">
-                  <p className="border-b border-dashed border-dark-800">0.26</p>
-                  NEAR
-                  <span className="text-xs text-gray-300 ml-1.5">($0.89)</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between text-sm mb-4">
-                <div className="text-gray-300">Route</div>
-                <div className="flex items-center justify-center">
-                  <div className="border-r mr-1.5 pr-1.5 border-dark-800">
-                    <RefLogoIcon />
+            {accountId && (
+              <div className="mt-5">
+                <div className="flex items-center justify-between text-sm mb-4">
+                  <div className="text-gray-300">Position Size</div>
+                  <div>
+                    45.2435 NEAR
+                    <span className="text-xs text-gray-300 ml-1.5">($149.35)</span>
                   </div>
-                  NEAR &gt; USDT.e &gt; USDC.e
                 </div>
+                <div className="flex items-center justify-between text-sm mb-4">
+                  <div className="text-gray-300">Liq. Price</div>
+                  <div>$1.23</div>
+                </div>
+                <div className="flex items-center justify-between text-sm mb-4">
+                  <div className="text-gray-300">Fee</div>
+                  <div className="flex items-center justify-center">
+                    <p className="border-b border-dashed border-dark-800">0.26</p>
+                    NEAR
+                    <span className="text-xs text-gray-300 ml-1.5">($0.89)</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between text-sm mb-4">
+                  <div className="text-gray-300">Route</div>
+                  <div className="flex items-center justify-center">
+                    <div className="border-r mr-1.5 pr-1.5 border-dark-800">
+                      <RefLogoIcon />
+                    </div>
+                    NEAR &gt; USDT.e &gt; USDC.e
+                  </div>
+                </div>
+                <div
+                  className="flex items-center justify-between bg-primary text-dark-200 text-base rounded-md h-12 text-center cursor-pointer"
+                  onClick={handleConfirmButtonClick}
+                >
+                  <div className="flex-grow">Long NEAR 1.5x</div>
+                </div>
+                {isConfirmModalOpen && (
+                  <ConfirmMobile
+                    open={isConfirmModalOpen}
+                    onClose={() => setIsConfirmModalOpen(false)}
+                    action="Long"
+                  />
+                )}
               </div>
-              <div
-                className="flex items-center justify-between bg-primary text-dark-200 text-base rounded-md h-12 text-center cursor-pointer"
-                onClick={handleConfirmButtonClick}
-              >
-                <div className="flex-grow">Long NEAR 1.5x</div>
-              </div>
-              {isConfirmModalOpen && (
-                <ConfirmMobile
-                  open={isConfirmModalOpen}
-                  onClose={() => setIsConfirmModalOpen(false)}
-                  action="Long"
-                />
-              )}
-            </div>
+            )}
           </>
         )}
         {activeTab === "short" && (
