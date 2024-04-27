@@ -7,7 +7,6 @@ import MarketMarginTrading from "./components/MarketTrading";
 const MarginTrading = () => {
   const dispatch = useAppDispatch();
   const [activeTab, setActiveTab] = useState("market");
-
   const getTabClassName = (tabName) => {
     const baseClass = "py-2.5 px-24 text-base";
     const activeClass = "bg-primary rounded-md text-dark-200";

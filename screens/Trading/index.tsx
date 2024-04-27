@@ -1,17 +1,70 @@
 import Link from "next/link";
-import { useState } from "react";
-import { useAppDispatch } from "../../redux/hooks";
+import { useEffect, useState } from "react";
+import { fetchAllPools, getStablePools, init_env } from "@ref-finance/ref-sdk";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { LayoutBox } from "../../components/LayoutContainer/LayoutContainer";
 import { ComeBackIcon, ShrinkArrow, TokenArrow } from "./components/TradingIcon";
 import { TestNearIcon } from "../MarginTrading/components/Icon";
 import TradingTable from "./components/Table";
 import TradingOperate from "./components/TradingOperate";
+import { useEstimateSwap } from "../../hooks/useEstimateSwap";
+import { openPosition } from "../../store/marginActions/openPosition";
+import { closePosition } from "../../store/marginActions/closePosition";
+import { increaseCollateral } from "../../store/marginActions/increaseCollateral";
+import { decreaseCollateral } from "../../store/marginActions/decreaseCollateral";
+import { getAssets } from "../../redux/assetsSelectors";
+import { shrinkToken } from "../../store";
 
+init_env("dev");
 const Trading = () => {
   const dispatch = useAppDispatch();
+  const assets = useAppSelector(getAssets);
   const [showPopup, setShowPopup] = useState(false);
   const [selectedItem, setSelectedItem] = useState("USDC");
+  const [simplePools, setSimplePools] = useState<any[]>([]);
+  const [stablePools, setStablePools] = useState<any[]>([]);
+  const [stablePoolsDetail, setStablePoolsDetail] = useState<any[]>([]);
   const tokenList = ["USDC", "DAI", "USDT", "USDC.e"];
+  // const slippageTolerance = 0.01;
+
+  // const token_c_id = "usdte.ft.ref-labs.testnet";
+  // const token_c_amount = "10";
+  // const token_d_id = "wrap.testnet";
+  // const token_d_amount = "3";
+  // const token_p_id = "usdte.ft.ref-labs.testnet";
+
+  // const token_c_id = "usdte.ft.ref-labs.testnet";
+  // const token_c_amount = "10";
+  // const token_d_id = "usdte.ft.ref-labs.testnet";
+  // const token_d_amount = "50";
+  // const token_p_id = "wrap.testnet";
+
+  // const pos_id = "nature6.testnet_1714226686497784491";
+  // const token_p_id = "usdte.ft.ref-labs.testnet";
+  // const token_p_amount = "30114967000000000000";
+  // const token_d_id = "wrap.testnet";
+
+  // const estimateData = useEstimateSwap({
+  //   tokenIn_id: token_d_id,
+  //   tokenOut_id: token_p_id,
+  //   tokenIn_amount: token_d_amount,
+  //   slippageTolerance,
+  //   account_id: "",
+  //   simplePools,
+  //   stablePools,
+  //   stablePoolsDetail,
+  // });
+  useEffect(() => {
+    getPoolsData();
+  }, []);
+  async function getPoolsData() {
+    const { ratedPools, unRatedPools, simplePools: simplePoolsFromSdk } = await fetchAllPools();
+    const stablePoolsFromSdk = unRatedPools.concat(ratedPools);
+    const stablePoolsDetailFromSdk = await getStablePools(stablePools);
+    setSimplePools(simplePoolsFromSdk);
+    setStablePools(stablePoolsFromSdk);
+    setStablePoolsDetail(stablePoolsDetailFromSdk);
+  }
   let timer;
 
   const handlePopupToggle = () => {
@@ -33,6 +86,46 @@ const Trading = () => {
       setShowPopup(false);
     }, 200);
   };
+  // function openPositionAction() {
+  //   const { min_amount_out, swap_indication } = estimateData;
+  //   openPosition({
+  //     token_c_id,
+  //     token_c_amount,
+  //     token_d_id,
+  //     token_d_amount,
+  //     token_p_id,
+  //     min_token_p_amount: min_amount_out,
+  //     swap_indication,
+  //     assets: assets.data,
+  //   });
+  // }
+  // function closePositionAction() {
+  //   const { min_amount_out, swap_indication } = estimateData;
+  //   closePosition({
+  //     pos_id,
+  //     token_p_id,
+  //     token_p_amount,
+  //     token_d_id,
+  //     min_token_d_amount: min_amount_out,
+  //     swap_indication,
+  //   });
+  // }
+  // function increaseCollateralAction() {
+  //   increaseCollateral({
+  //     pos_id: "nature6.testnet_1714128838458437802",
+  //     token_c_id: "usdte.ft.ref-labs.testnet",
+  //     amount: "10",
+  //     assets: assets.data,
+  //   });
+  // }
+  // function decreaseCollateralAction() {
+  //   decreaseCollateral({
+  //     pos_id: "nature6.testnet_1714128838458437802",
+  //     token_c_id: "usdte.ft.ref-labs.testnet",
+  //     amount: "10",
+  //     assets: assets.data,
+  //   });
+  // }
   return (
     <LayoutBox>
       {/* back */}
