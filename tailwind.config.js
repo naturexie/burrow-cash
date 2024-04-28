@@ -1,4 +1,15 @@
 /** @type {import("tailwindcss").Config} */
+
+const getStyleMapping = (max, min, por) => {
+  if (!max) {
+    return;
+  }
+  const maxArray = [...Array(max + 1).keys()];
+  return maxArray.reduce((pre, cur) => {
+    // eslint-disable-next-line no-unused-expressions
+    cur >= min && (pre[cur] = `${cur}rem`);
+    return pre;
+  }, {});
 module.exports = {
   content: [
     "./screens/**/*.{js,ts,jsx,tsx,mdx}",
@@ -26,6 +37,12 @@ module.exports = {
     },
     boxShadow: {},
     extend: {
+      width: {
+        ...getStyleMapping(900, 0),
+      },
+      minWidth: {
+        ...getStyleMapping(900, 0),
+      },
       boxShadow: {
         100: "0px 0px 2px 0px #00000080",
       },

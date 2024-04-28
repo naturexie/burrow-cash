@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { fetchAllPools, getStablePools, init_env } from "@ref-finance/ref-sdk";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { LayoutBox } from "../../components/LayoutContainer/LayoutContainer";
@@ -14,17 +14,20 @@ import { increaseCollateral } from "../../store/marginActions/increaseCollateral
 import { decreaseCollateral } from "../../store/marginActions/decreaseCollateral";
 import { getAssets } from "../../redux/assetsSelectors";
 import { shrinkToken } from "../../store";
+import { getMarginConfig } from "../../redux/marginConfigSelectors";
 
 init_env("dev");
 const Trading = () => {
   const dispatch = useAppDispatch();
   const assets = useAppSelector(getAssets);
+  const marginConfig = useAppSelector(getMarginConfig);
   const [showPopup, setShowPopup] = useState(false);
   const [selectedItem, setSelectedItem] = useState("USDC");
   const [simplePools, setSimplePools] = useState<any[]>([]);
   const [stablePools, setStablePools] = useState<any[]>([]);
   const [stablePoolsDetail, setStablePoolsDetail] = useState<any[]>([]);
-  const tokenList = ["USDC", "DAI", "USDT", "USDC.e"];
+  const [tokenList, setTokenList] = useState<Array<string>>([]);
+  // const tokenList = ["USDC", "DAI", "USDT", "USDC.e"];
   // const slippageTolerance = 0.01;
 
   // const token_c_id = "usdte.ft.ref-labs.testnet";
@@ -57,6 +60,26 @@ const Trading = () => {
   useEffect(() => {
     getPoolsData();
   }, []);
+
+  // computed tokenlist dropdown
+  useMemo(() => {
+    //
+    const { registered_tokens } = marginConfig;
+    const tokenArray: string[] = [];
+    const filteredKeys: string[] = Object.keys(registered_tokens || {}).filter(
+      (key: string) => registered_tokens[key] == 2,
+    );
+    //
+    filteredKeys.forEach((item: string) => {
+      // security check
+      if (assets && assets.data && assets.data[item] && assets.data[item].metadata) {
+        tokenArray.push(assets.data[item].metadata.symbol);
+      }
+    });
+    //
+    setTokenList(tokenArray);
+  }, []);
+
   async function getPoolsData() {
     const { ratedPools, unRatedPools, simplePools: simplePoolsFromSdk } = await fetchAllPools();
     const stablePoolsFromSdk = unRatedPools.concat(ratedPools);
@@ -148,6 +171,7 @@ const Trading = () => {
             <div className="text-sm">
               <div className="flex justify-center items-center">
                 <p className="text-gray-300 mr-1.5">Price</p>
+                {/* drop down */}
                 <div
                   className="relative hover:bg-gray-300 hover:bg-opacity-20 py-1 px-1.5 rounded-sm cursor-pointer"
                   onMouseLeave={handleMouseLeave}
@@ -164,7 +188,7 @@ const Trading = () => {
                     <div
                       onMouseEnter={handleMouseEnter}
                       onMouseLeave={handleMouseLeave}
-                      className="bg-dark-250 border border-dark-500 rounded-sm absolute top-8 left-0 right-0 pt-0.5 text-gray-300 text-xs pb-1.5 w-16"
+                      className="bg-dark-250 border border-dark-500 rounded-sm absolute top-8 left-0 right-0 pt-0.5 text-gray-300 text-xs pb-1.5 min-w-4"
                     >
                       {tokenList.map((token, index) => (
                         <div
