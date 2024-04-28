@@ -7,7 +7,7 @@ const getStyleMapping = (max, min) => {
   const maxArray = [...Array(max + 1).keys()];
   return maxArray.reduce((pre, cur) => {
     // eslint-disable-next-line no-unused-expressions
-    cur >= min && (pre[cur] = `${cur}rem`);
+    cur >= min && (pre[cur] = `${cur / 4}rem`);
     return pre;
   }, {});
 };
@@ -39,10 +39,10 @@ module.exports = {
     boxShadow: {},
     extend: {
       width: {
-        ...getStyleMapping(900, 0),
+        ...getStyleMapping(1800, 0),
       },
       minWidth: {
-        ...getStyleMapping(900, 0),
+        ...getStyleMapping(1800, 0),
       },
       boxShadow: {
         100: "0px 0px 2px 0px #00000080",
