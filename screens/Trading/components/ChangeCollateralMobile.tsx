@@ -5,7 +5,7 @@ import { Wrapper } from "../../../components/Modal/style";
 import { DEFAULT_POSITION } from "../../../utils/config";
 import { CloseIcon } from "../../../components/Modal/svg";
 import { RefLogoIcon, RightArrow, RightShoulder } from "./TradingIcon";
-import { TestNearIcon } from "../../MarginTrading/components/Icon";
+import { NearIcon } from "../../MarginTrading/components/Icon";
 
 export const ModalContext = createContext(null) as any;
 const ChangeCollateralMobile = ({ open, onClose }) => {
@@ -81,7 +81,7 @@ const ChangeCollateralMobile = ({ open, onClose }) => {
                     </div>
                     <div>
                       <div className="flex items-center justify-end">
-                        <TestNearIcon />
+                        <NearIcon />
                         <p className="text-base ml-1">USDC</p>
                       </div>
                       <p className="text-xs text-gray-300 mt-1.5">
@@ -139,7 +139,7 @@ const ChangeCollateralMobile = ({ open, onClose }) => {
                     </div>
                     <div>
                       <div className="flex items-center justify-end">
-                        <TestNearIcon />
+                        <NearIcon />
                         <p className="text-base ml-1">USDC</p>
                       </div>
                       <p className="text-xs text-gray-300 mt-1.5">

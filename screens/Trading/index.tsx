@@ -4,7 +4,7 @@ import { fetchAllPools, getStablePools, init_env } from "@ref-finance/ref-sdk";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { LayoutBox } from "../../components/LayoutContainer/LayoutContainer";
 import { ComeBackIcon, ShrinkArrow, TokenArrow } from "./components/TradingIcon";
-import { TestNearIcon } from "../MarginTrading/components/Icon";
+import { NearIcon } from "../MarginTrading/components/Icon";
 import TradingTable from "./components/Table";
 import TradingOperate from "./components/TradingOperate";
 import { useEstimateSwap } from "../../hooks/useEstimateSwap";
@@ -96,7 +96,7 @@ const Trading = () => {
         <div className="col-span-4 bg-gray-800 border border-dark-50 rounded-md mr-4">
           <div className="flex justify-between items-center border-b border-dark-50 py-6 px-5">
             <div className="flex items-center">
-              <TestNearIcon />
+              <NearIcon />
               <p className="ml-2 mr-3.5 text-lg">NEAR</p>
               <ShrinkArrow />
             </div>

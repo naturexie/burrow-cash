@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TestNearIcon } from "../../MarginTrading/components/Icon";
+import { NearIcon } from "../../MarginTrading/components/Icon";
 import { TokenThinArrow, TokenSelected } from "./TradingIcon";
 
 const TradingToken = () => {
@@ -40,7 +40,7 @@ const TradingToken = () => {
         onMouseEnter={handleMouseEnter}
       >
         <div className="w-6 h-6">
-          <TestNearIcon />
+          <NearIcon />
         </div>
         <div className="mx-1.5 text-base">{selectedItem || "NEAR"}</div>
         <TokenThinArrow />
@@ -60,7 +60,7 @@ const TradingToken = () => {
               className="py-2 px-3.5 hover:bg-gray-950 flex items-center w-full rounded-md"
               onClick={() => handleTokenClick(token.name)}
             >
-              <TestNearIcon />
+              <NearIcon />
               <p className="ml-1.5 mr-2 text-sm">{token.name}</p>
               {selectedItem === token.name && <TokenSelected />}
               <p className="ml-auto text-sm">{token.price}</p>

@@ -82,7 +82,7 @@ export function Export({ ...props }) {
   );
 }
 
-export function TestNearIcon({ ...props }) {
+export function NearIcon({ ...props }) {
   return (
     <svg
       width="26"
