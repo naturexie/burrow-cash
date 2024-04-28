@@ -27,36 +27,7 @@ const Trading = () => {
   const [stablePools, setStablePools] = useState<any[]>([]);
   const [stablePoolsDetail, setStablePoolsDetail] = useState<any[]>([]);
   const [tokenList, setTokenList] = useState<Array<string>>([]);
-  // const tokenList = ["USDC", "DAI", "USDT", "USDC.e"];
-  // const slippageTolerance = 0.01;
-
-  // const token_c_id = "usdte.ft.ref-labs.testnet";
-  // const token_c_amount = "10";
-  // const token_d_id = "wrap.testnet";
-  // const token_d_amount = "3";
-  // const token_p_id = "usdte.ft.ref-labs.testnet";
-
-  // const token_c_id = "usdte.ft.ref-labs.testnet";
-  // const token_c_amount = "10";
-  // const token_d_id = "usdte.ft.ref-labs.testnet";
-  // const token_d_amount = "50";
-  // const token_p_id = "wrap.testnet";
-
-  // const pos_id = "nature6.testnet_1714226686497784491";
-  // const token_p_id = "usdte.ft.ref-labs.testnet";
-  // const token_p_amount = "30114967000000000000";
-  // const token_d_id = "wrap.testnet";
-
-  // const estimateData = useEstimateSwap({
-  //   tokenIn_id: token_d_id,
-  //   tokenOut_id: token_p_id,
-  //   tokenIn_amount: token_d_amount,
-  //   slippageTolerance,
-  //   account_id: "",
-  //   simplePools,
-  //   stablePools,
-  //   stablePoolsDetail,
-  // });
+  //
   useEffect(() => {
     getPoolsData();
   }, []);
@@ -109,46 +80,7 @@ const Trading = () => {
       setShowPopup(false);
     }, 200);
   };
-  // function openPositionAction() {
-  //   const { min_amount_out, swap_indication } = estimateData;
-  //   openPosition({
-  //     token_c_id,
-  //     token_c_amount,
-  //     token_d_id,
-  //     token_d_amount,
-  //     token_p_id,
-  //     min_token_p_amount: min_amount_out,
-  //     swap_indication,
-  //     assets: assets.data,
-  //   });
-  // }
-  // function closePositionAction() {
-  //   const { min_amount_out, swap_indication } = estimateData;
-  //   closePosition({
-  //     pos_id,
-  //     token_p_id,
-  //     token_p_amount,
-  //     token_d_id,
-  //     min_token_d_amount: min_amount_out,
-  //     swap_indication,
-  //   });
-  // }
-  // function increaseCollateralAction() {
-  //   increaseCollateral({
-  //     pos_id: "nature6.testnet_1714128838458437802",
-  //     token_c_id: "usdte.ft.ref-labs.testnet",
-  //     amount: "10",
-  //     assets: assets.data,
-  //   });
-  // }
-  // function decreaseCollateralAction() {
-  //   decreaseCollateral({
-  //     pos_id: "nature6.testnet_1714128838458437802",
-  //     token_c_id: "usdte.ft.ref-labs.testnet",
-  //     amount: "10",
-  //     assets: assets.data,
-  //   });
-  // }
+  //
   return (
     <LayoutBox>
       {/* back */}
@@ -173,7 +105,7 @@ const Trading = () => {
                 <p className="text-gray-300 mr-1.5">Price</p>
                 {/* drop down */}
                 <div
-                  className="relative hover:bg-gray-300 hover:bg-opacity-20 py-1 px-1.5 rounded-sm cursor-pointer"
+                  className="relative hover:bg-gray-300 hover:bg-opacity-20 py-1 px-1.5 rounded-sm cursor-pointer min-w-24"
                   onMouseLeave={handleMouseLeave}
                 >
                   <div
@@ -188,7 +120,7 @@ const Trading = () => {
                     <div
                       onMouseEnter={handleMouseEnter}
                       onMouseLeave={handleMouseLeave}
-                      className="bg-dark-250 border border-dark-500 rounded-sm absolute top-8 left-0 right-0 pt-0.5 text-gray-300 text-xs pb-1.5 min-w-4"
+                      className="bg-dark-250 border border-dark-500 rounded-sm absolute top-8 left-0 right-0 pt-0.5 text-gray-300 text-xs pb-1.5"
                     >
                       {tokenList.map((token, index) => (
                         <div
