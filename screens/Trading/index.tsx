@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { fetchAllPools, getStablePools, init_env } from "@ref-finance/ref-sdk";
+import { useRouter } from "next/router";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { LayoutBox } from "../../components/LayoutContainer/LayoutContainer";
 import { ComeBackIcon, ShrinkArrow, TokenArrow } from "./components/TradingIcon";
@@ -18,6 +19,7 @@ import { getMarginConfig } from "../../redux/marginConfigSelectors";
 
 init_env("dev");
 const Trading = () => {
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const assets = useAppSelector(getAssets);
   const marginConfig = useAppSelector(getMarginConfig);
@@ -49,6 +51,8 @@ const Trading = () => {
     });
     //
     setTokenList(tokenArray);
+
+    console.log(router.query, assets);
   }, []);
 
   async function getPoolsData() {
