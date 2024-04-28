@@ -1,6 +1,6 @@
 /** @type {import("tailwindcss").Config} */
 
-const getStyleMapping = (max, min, por) => {
+const getStyleMapping = (max, min) => {
   if (!max) {
     return;
   }
@@ -10,6 +10,7 @@ const getStyleMapping = (max, min, por) => {
     cur >= min && (pre[cur] = `${cur}rem`);
     return pre;
   }, {});
+};
 module.exports = {
   content: [
     "./screens/**/*.{js,ts,jsx,tsx,mdx}",
