@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import _ from "lodash";
 import TradingToken from "./tokenbox";
 import { RefLogoIcon, SetUp, ShrinkArrow } from "./TradingIcon";
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
@@ -6,14 +7,34 @@ import RangeSlider from "./RangeSlider";
 import ConfirmMobile from "./ConfirmMobile";
 import { getAccountBalance, getAccountId } from "../../../redux/accountSelectors";
 
-const TradingOperate = () => {
+// main components
+const TradingOperate = ({ tokenList }) => {
   const dispatch = useAppDispatch();
   const [activeTab, setActiveTab] = useState("long");
   const [showSetUpPopup, setShowSetUpPopup] = useState(false);
   const [selectedSetUpOption, setSelectedSetUpOption] = useState("auto");
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+
+  //
+  const [longInput, setLongInput] = useState(0);
+  const [longOutput, setLongOutput] = useState(0);
+  const [shortInput, setShortInput] = useState(0);
+  const [shortOutput, setShortOutput] = useState(0);
+  //
   const balance = useAppSelector(getAccountBalance);
   const accountId = useAppSelector(getAccountId);
+
+  // long & short input change fn.
+  const inputPriceChange = (value, flag) => {
+    const obj = {
+      longInput: setLongInput,
+      longOutput: setLongOutput,
+      shortInput: setShortInput,
+      shortOutput: setShortOutput,
+    };
+    return obj[flag](value);
+  };
+
   const handleTabClick = (tabString) => {
     setActiveTab(tabString);
   };
@@ -39,6 +60,7 @@ const TradingOperate = () => {
   const handleConfirmButtonClick = () => {
     setIsConfirmModalOpen(true);
   };
+
   return (
     <div className="w-full pt-4 px-4 pb-9">
       <div className="flex justify-between items-center">
@@ -101,9 +123,13 @@ const TradingOperate = () => {
         {activeTab === "long" && (
           <>
             <div className="relative bg-dark-600 border border-dark-500 pt-3 pb-2.5 pr-3 pl-2.5 rounded-md z-30">
-              <input type="text" value={0} />
+              <input
+                onChange={(e) => inputPriceChange(e.target.value, "longInput")}
+                type="text"
+                value={longInput}
+              />
               <div className="absolute top-2 right-2">
-                <TradingToken />
+                <TradingToken tokenList={tokenList} />
               </div>
               <p className="text-gray-300 mt-2 text-xs">Use: $0.00</p>
             </div>
@@ -111,9 +137,13 @@ const TradingOperate = () => {
               <ShrinkArrow />
             </div>
             <div className="relative bg-dark-600 border border-dark-500 pt-3 pb-2.5 pr-3 pl-2.5 rounded-md z-20">
-              <input type="text" value={0} />
+              <input
+                onChange={(e) => inputPriceChange(e.target.value, "longOutput")}
+                type="text"
+                value={longOutput}
+              />
               <div className="absolute top-2 right-2">
-                <TradingToken />
+                <TradingToken tokenList={tokenList} />
               </div>
               <p className="text-gray-300 mt-2 text-xs">Long: $0.00</p>
             </div>
@@ -168,9 +198,13 @@ const TradingOperate = () => {
         {activeTab === "short" && (
           <>
             <div className="relative bg-dark-600 border border-dark-500 pt-3 pb-2.5 pr-3 pl-2.5 rounded-md z-30">
-              <input type="text" value={0} />
+              <input
+                onChange={(e) => inputPriceChange(e.target.value, "shortInput")}
+                type="text"
+                value={shortInput}
+              />
               <div className="absolute top-2 right-2">
-                <TradingToken />
+                <TradingToken tokenList={tokenList} />
               </div>
               <p className="text-gray-300 mt-2 text-xs">Use: $0.00</p>
             </div>
@@ -178,9 +212,13 @@ const TradingOperate = () => {
               <ShrinkArrow />
             </div>
             <div className="relative bg-dark-600 border border-dark-500 pt-3 pb-2.5 pr-3 pl-2.5 rounded-md z-20">
-              <input type="text" value={0} />
+              <input
+                onChange={(e) => inputPriceChange(e.target.value, "shortOutput")}
+                type="text"
+                value={shortOutput}
+              />
               <div className="absolute top-2 right-2">
-                <TradingToken />
+                <TradingToken tokenList={tokenList} />
               </div>
               <p className="text-gray-300 mt-2 text-xs">Long: $0.00</p>
             </div>

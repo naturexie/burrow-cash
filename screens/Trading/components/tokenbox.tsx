@@ -1,22 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { NearIcon } from "../../MarginTrading/components/Icon";
 import { TokenThinArrow, TokenSelected } from "./TradingIcon";
 
-const TradingToken = () => {
+const TradingToken = ({ tokenList }) => {
   const [showModal, setShowModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const tokenList = [
-    { name: "USDC", price: "123.23" },
-    { name: "BTC", price: "105.89" },
-  ];
-  let timer;
+  const [selectedItemIcon, setSelectedItemIcon] = useState("");
 
+  let timer;
+  //
+  useEffect(() => {
+    if (tokenList.length > 0) {
+      setSelectedItem(tokenList[0].metadata.symbol);
+      setSelectedItemIcon(tokenList[0].metadata.icon);
+    }
+  }, [tokenList]);
+  //
   const handleTokenClick = (item) => {
-    if (selectedItem === item) {
+    if (selectedItem === item.metadata.symbol) {
       setSelectedItem(null);
+      setSelectedItemIcon("");
       setShowModal(false);
     } else {
-      setSelectedItem(item);
+      setSelectedItem(item.metadata.symbol);
+      setSelectedItemIcon(item.metadata.icon);
       setShowModal(false);
     }
   };
@@ -40,7 +47,11 @@ const TradingToken = () => {
         onMouseEnter={handleMouseEnter}
       >
         <div className="w-6 h-6">
-          <NearIcon />
+          {selectedItem == "wNEAR" ? (
+            <NearIcon />
+          ) : (
+            <img alt="" src={selectedItemIcon} style={{ width: "26px", height: "26px" }} />
+          )}
         </div>
         <div className="mx-1.5 text-base">{selectedItem || "NEAR"}</div>
         <TokenThinArrow />
@@ -58,12 +69,16 @@ const TradingToken = () => {
             <div
               key={index}
               className="py-2 px-3.5 hover:bg-gray-950 flex items-center w-full rounded-md"
-              onClick={() => handleTokenClick(token.name)}
+              onClick={() => handleTokenClick(token)}
             >
-              <NearIcon />
-              <p className="ml-1.5 mr-2 text-sm">{token.name}</p>
-              {selectedItem === token.name && <TokenSelected />}
-              <p className="ml-auto text-sm">{token.price}</p>
+              {token?.metadata?.symbol === "wNEAR" ? (
+                <NearIcon />
+              ) : (
+                <img alt="" src={token?.metadata?.icon} style={{ width: "26px", height: "26px" }} />
+              )}
+              <p className="ml-1.5 mr-2 text-sm">{token.metadata.symbol}</p>
+              {selectedItem === token.metadata.symbol && <TokenSelected />}
+              <p className="ml-auto text-sm">${token.price?.usd}</p>
             </div>
           ))}
         </div>
