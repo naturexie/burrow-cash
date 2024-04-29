@@ -161,6 +161,7 @@ export async function withdraw({
             args: {
               actions: [withdrawAction],
             },
+            gas: new BN("300000000000000"),
           },
         ],
       });

@@ -71,7 +71,7 @@ export async function adjustCollateral({
             methodName: enable_pyth_oracle
               ? ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth]
               : ChangeMethodsLogic[ChangeMethodsLogic.execute],
-            gas: new BN("100000000000000"),
+            gas: new BN("300000000000000"),
             args: {
               actions: [increaseCollateralTemplate],
             },
