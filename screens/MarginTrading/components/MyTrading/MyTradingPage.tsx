@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import TradingTable from "../../../Trading/components/Table";
+import { useMarginAccount } from "../../../../hooks/useMarginAccount";
 
 const MyMarginTradingPage = () => {
   const [showCollateralPopup, setShowCollateralPopup] = useState(false);
+  const { useMarginAccountList } = useMarginAccount();
+  console.log(Object.values(useMarginAccountList), "111");
   let timer;
   const handleMouseEnter = () => {
     clearTimeout(timer);

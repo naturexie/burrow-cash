@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import Link from "next/link";
 import getConfig from "next/config";
 import { ArrowDownIcon, ArrowUpIcon, NearIcon } from "./Icon";
-import { useMarginConfigToken } from "../../../hooks/useMarginConfigList";
+import { useMarginConfigToken } from "../../../hooks/useMarginConfig";
 import {
   formatWithCommas_usd,
   toInternationalCurrencySystem_number,
