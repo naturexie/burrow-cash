@@ -17,5 +17,5 @@ export function useMarginConfigToken() {
     }
     return item;
   }, {});
-  return { filterMarginConfigList };
+  return { filterMarginConfigList, marginConfigTokens };
 }

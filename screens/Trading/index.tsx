@@ -161,7 +161,7 @@ const Trading = () => {
           <TradingOperate />
         </div>
       </div>
-      <TradingTable />
+      {/* <TradingTable /> */}
     </LayoutBox>
   );
 };

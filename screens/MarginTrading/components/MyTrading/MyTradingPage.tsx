@@ -5,7 +5,6 @@ import { useMarginAccount } from "../../../../hooks/useMarginAccount";
 const MyMarginTradingPage = () => {
   const [showCollateralPopup, setShowCollateralPopup] = useState(false);
   const { useMarginAccountList } = useMarginAccount();
-  console.log(Object.values(useMarginAccountList), "111");
   let timer;
   const handleMouseEnter = () => {
     clearTimeout(timer);
@@ -23,13 +22,13 @@ const MyMarginTradingPage = () => {
         <div className="flex flex-1 justify-center">
           <div>
             <p className="text-gray-300 text-sm">Long Open Interest</p>
-            <h2 className="text-h2">$298.70</h2>
+            <h2 className="text-h2">$-</h2>
           </div>
         </div>
         <div className="flex flex-1 justify-center">
           <div>
             <p className="text-gray-300 text-sm">Short Open Interest</p>
-            <h2 className="text-h2">$100.05</h2>
+            <h2 className="text-h2">$-</h2>
           </div>
         </div>
         <div className="flex flex-1 justify-center">
@@ -41,7 +40,7 @@ const MyMarginTradingPage = () => {
               onMouseLeave={handleMouseLeave}
             >
               <div className="text-h2 " onMouseEnter={handleMouseEnter}>
-                $200
+                $-
               </div>
               {showCollateralPopup && (
                 <div
@@ -52,12 +51,12 @@ const MyMarginTradingPage = () => {
                   <div className="flex items-center justify-center mb-3">
                     <div className="w-4 h-4" />
                     <p className="ml-1 text-xs text-gray-300">USDC</p>
-                    <div className="text-xs ml-auto">$100</div>
+                    <div className="text-xs ml-auto">$-</div>
                   </div>
                   <div className="flex items-center justify-center">
                     <div className="w-4 h-4" />
                     <p className="ml-1 text-xs text-gray-300">USDC</p>
-                    <div className="text-xs ml-auto">$100</div>
+                    <div className="text-xs ml-auto">$-</div>
                   </div>
                 </div>
               )}
@@ -67,11 +66,11 @@ const MyMarginTradingPage = () => {
         <div className="flex flex-1 justify-center">
           <div>
             <p className="text-gray-300 text-sm">PLN</p>
-            <h2 className="text-h2">+$0.16</h2>
+            <h2 className="text-h2">-</h2>
           </div>
         </div>
       </div>
-      <TradingTable />
+      <TradingTable positionsList={useMarginAccountList} />
     </div>
   );
 };

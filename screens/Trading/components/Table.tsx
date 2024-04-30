@@ -3,11 +3,17 @@ import Link from "next/link";
 import { AddCollateral, Export } from "../../MarginTrading/components/Icon";
 import ClosePositionMobile from "./ClosePositionMobile";
 import ChangeCollateralMobile from "./ChangeCollateralMobile";
+import { useMarginAccount } from "../../../hooks/useMarginAccount";
+import { useMarginConfigToken } from "../../../hooks/useMarginConfig";
+import { shrinkToken } from "../../../store/helper";
+import { toInternationalCurrencySystem_number } from "../../../utils/uiNumber";
 
-const TradingTable = () => {
+const TradingTable = ({ positionsList }) => {
   const [selectedTab, setSelectedTab] = useState("positions");
   const [isClosePositionModalOpen, setIsClosePositionMobileOpen] = useState(false);
   const [isChangeCollateralMobileOpen, setIsChangeCollateralMobileOpen] = useState(false);
+  const { marginConfigTokens } = useMarginConfigToken();
+  const { assets } = useMarginAccount();
   const handleTabClick = (tabNumber) => {
     setSelectedTab(tabNumber);
   };
@@ -17,6 +23,18 @@ const TradingTable = () => {
   const handleChangeCollateralButtonClick = () => {
     setIsChangeCollateralMobileOpen(true);
   };
+  const getAssetById = (id) => {
+    const assetsData = assets.data;
+    return assetsData[id];
+  };
+  const getPositionType = (token_id) => {
+    const type = marginConfigTokens.registered_tokens[token_id];
+    return {
+      label: type === 1 ? "Short" : "Long",
+      class: type === 1 ? "text-red-50" : "text-primary",
+    };
+  };
+
   return (
     <div className="flex flex-col items-center justify-center w-full">
       <div className="w-full border border-dark-50 bg-gray-800 rounded-md">
@@ -49,50 +67,85 @@ const TradingTable = () => {
                 </tr>
               </thead>
               <tbody>
-                <Link href="/trading">
-                  <tr className="text-base hover:bg-dark-100 cursor-pointer font-normal">
-                    <td className="py-5 pl-5 ">
-                      NEAR/USDC.e <span className="text-primary text-xs">Long 1.5X</span>
-                    </td>
-                    <td>$149.35</td>
-                    <td>$100</td>
-                    <td>
-                      <div className="flex items-center">
-                        <p className="mr-2.5"> 100 USDC.e </p>
-                        <div
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleChangeCollateralButtonClick();
-                          }}
-                        >
-                          <AddCollateral />
-                        </div>
-                      </div>
-                    </td>
-                    <td>$3.25</td>
-                    <td>$3.24</td>
-                    <td>$1.23</td>
-                    <td>
-                      <div className="flex items-center">
-                        <p className="text-gray-1000"> +$0.2248</p>
-                        <span className="text-gray-400 text-xs">(+0.01%)</span>
-                      </div>
-                    </td>
-                    <td className="pr-5">
-                      <div
-                        className="text-gray-300 text-sm border border-dark-300 text-center h-6 rounded flex justify-center items-center"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleClosePositionButtonClick();
-                        }}
-                      >
-                        Close
-                      </div>
-                    </td>
-                  </tr>
-                </Link>
+                {positionsList &&
+                  Object.values(positionsList as Record<string, any>).map((item, index) => {
+                    // console.log(item);
+                    const assetD = getAssetById(item.token_d_info.token_id);
+                    const assetC = getAssetById(item.token_c_info.token_id);
+                    const assetDecimals_d =
+                      (assetD.metadata?.decimals ?? 0) + (assetD.config?.extra_decimals ?? 0);
+                    const assetDecimals_c =
+                      (assetC.metadata?.decimals ?? 0) + (assetC.config?.extra_decimals ?? 0);
+                    const leverage_d = Number(
+                      shrinkToken(item.token_d_info.balance, assetDecimals_d),
+                    );
+                    const leverage_c = Number(
+                      shrinkToken(item.token_c_info.balance, assetDecimals_c),
+                    );
+                    const leverage = leverage_c !== 0 ? leverage_d / leverage_c : 0;
+                    const positionType = getPositionType(item.token_d_info.token_id);
+                    const sizeValue =
+                      positionType.label === "Long"
+                        ? shrinkToken(item.token_p_amount, assetDecimals_c)
+                        : shrinkToken(item.token_d_info.balance, assetDecimals_d);
+                    const netValue = shrinkToken(item.token_c_info.balance, assetDecimals_c);
+                    return (
+                      <Link href={`/trading/${item.token_p_id}`} key={index}>
+                        <tr className="text-base hover:bg-dark-100 cursor-pointer font-normal">
+                          <td className="py-5 pl-5 ">
+                            {assetD.metadata?.symbol} / {assetC.metadata?.symbol}
+                            <span
+                              className={`text-xs ml-1.5 ${
+                                getPositionType(item.token_d_info.token_id).class
+                              }`}
+                            >
+                              {getPositionType(item.token_d_info.token_id).label}
+                              <span className="ml-1.5">
+                                {toInternationalCurrencySystem_number(leverage)}x
+                              </span>
+                            </span>
+                          </td>
+                          <td>${toInternationalCurrencySystem_number(sizeValue)}</td>
+                          <td>${toInternationalCurrencySystem_number(netValue)}</td>
+                          <td>
+                            <div className="flex items-center">
+                              <p className="mr-2.5"> - </p>
+                              {/* <div
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleChangeCollateralButtonClick();
+                                }}
+                              >
+                                <AddCollateral />
+                              </div> */}
+                            </div>
+                          </td>
+                          <td>$-</td>
+                          <td>$-</td>
+                          <td>$-</td>
+                          <td>
+                            <div className="flex items-center">
+                              <p className="text-gray-1000"> -</p>
+                              {/* <span className="text-gray-400 text-xs">-</span> */}
+                            </div>
+                          </td>
+                          <td className="pr-5">
+                            <div
+                              className="text-gray-300 text-sm border border-dark-300 text-center h-6 rounded flex justify-center items-center"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleClosePositionButtonClick();
+                              }}
+                            >
+                              Close
+                            </div>
+                          </td>
+                        </tr>
+                      </Link>
+                    );
+                  })}
                 {isChangeCollateralMobileOpen && (
                   <ChangeCollateralMobile
                     open={isChangeCollateralMobileOpen}
@@ -114,33 +167,6 @@ const TradingTable = () => {
                     action="Long"
                   />
                 )}
-                {/* <tr className="text-base hover:bg-dark-100 cursor-pointer font-normal">
-                  <td className="py-5 pl-5 ">
-                    NEAR/USDC.e <span className="text-red-50 text-xs">Short 1.5X</span>
-                  </td>
-                  <td>$149.35</td>
-                  <td>$100</td>
-                  <td>
-                    <div className="flex items-center">
-                      <p className="mr-2.5"> 100 USDC.e </p>
-                      <AddCollateral />
-                    </div>
-                  </td>
-                  <td>$3.25</td>
-                  <td>$3.24</td>
-                  <td>$1.23</td>
-                  <td>
-                    <div className="flex items-center">
-                      <p className="text-red-150"> -$0.0689</p>
-                      <span className="text-gray-400 text-xs">(-2.01%)</span>
-                    </div>
-                  </td>
-                  <td className="pr-5">
-                    <div className="text-gray-300 text-sm border border-dark-300 text-center h-6 rounded flex justify-center items-center">
-                      Close
-                    </div>
-                  </td>
-                </tr> */}
               </tbody>
             </table>
           )}
@@ -176,21 +202,6 @@ const TradingTable = () => {
                     </td>
                   </tr>
                 </Link>
-                {/* <tr className="text-base hover:bg-dark-100 cursor-pointer font-normal">
-                  <td className="py-5 pl-5 ">NEAR/USDC.e</td>
-                  <td>Open Short</td>
-                  <td className="text-primary">Buy</td>
-                  <td>$3.24</td>
-                  <td>45.2435 NEAR</td>
-                  <td>$0.89</td>
-                  <td>--</td>
-                  <td className="pr-5">
-                    <div>
-                      2024-01-16, 13:23 */}
-                {/* <Export /> */}
-                {/* </div>
-                  </td>
-                </tr> */}
               </tbody>
             </table>
           )}
