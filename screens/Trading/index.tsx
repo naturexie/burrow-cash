@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, createContext } from "react";
 import { fetchAllPools, getStablePools, init_env } from "@ref-finance/ref-sdk";
 import { useRouter } from "next/router";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
@@ -16,44 +16,81 @@ import { decreaseCollateral } from "../../store/marginActions/decreaseCollateral
 import { getAssets } from "../../redux/assetsSelectors";
 import { shrinkToken } from "../../store";
 import { getMarginConfig } from "../../redux/marginConfigSelectors";
+import { formatWithCommas_usd, toInternationalCurrencySystem_number } from "../../utils/uiNumber";
 
 init_env("dev");
+
 const Trading = () => {
   const router = useRouter();
+  const { id }: any = router.query;
   const dispatch = useAppDispatch();
   const assets = useAppSelector(getAssets);
   const marginConfig = useAppSelector(getMarginConfig);
   const [showPopup, setShowPopup] = useState(false);
-  const [selectedItem, setSelectedItem] = useState("USDC");
+  const [selectedItem, setSelectedItem] = useState("");
+  // pools
   const [simplePools, setSimplePools] = useState<any[]>([]);
   const [stablePools, setStablePools] = useState<any[]>([]);
   const [stablePoolsDetail, setStablePoolsDetail] = useState<any[]>([]);
+  //
   const [tokenList, setTokenList] = useState<Array<string>>([]);
+  const [tokenListWithPrice, setTokenListWithPrice] = useState<Array<string>>([]);
+  const [currentToken, setCurrentToken] = useState<any>({});
+  const [longAndShortPosition, setLongAndShortPosition] = useState<any>([]);
+  let timer;
   //
   useEffect(() => {
     getPoolsData();
   }, []);
 
   // computed tokenlist dropdown
-  useMemo(() => {
+  useEffect(() => {
     //
     const { registered_tokens } = marginConfig;
     const tokenArray: string[] = [];
+    const tokenArrayWithPrice: Array<any> = [];
     const filteredKeys: string[] = Object.keys(registered_tokens || {}).filter(
       (key: string) => registered_tokens[key] == 2,
     );
-    //
+
     filteredKeys.forEach((item: string) => {
       // security check
       if (assets && assets.data && assets.data[item] && assets.data[item].metadata) {
         tokenArray.push(assets.data[item].metadata.symbol);
+        tokenArrayWithPrice.push({
+          metadata: assets.data[item].metadata,
+          price: assets.data[item].price,
+        });
       }
     });
     //
+    setSelectedItem(tokenArray[0]);
+
     setTokenList(tokenArray);
 
-    console.log(router.query, assets);
-  }, []);
+    setTokenListWithPrice(tokenArrayWithPrice);
+
+    if (id) setCurrentToken(assets.data[id]);
+
+    // deal long & short position
+    if (id && currentToken?.metadata) {
+      //
+      const { margin_position, metadata, config, margin_debt } = currentToken;
+      const { decimals } = metadata;
+      const { extra_decimals } = config;
+
+      setLongAndShortPosition([
+        // deal big int price
+        toInternationalCurrencySystem_number(
+          shrinkToken(margin_position, decimals + extra_decimals),
+        ),
+        toInternationalCurrencySystem_number(
+          shrinkToken(margin_debt.balance, decimals + extra_decimals),
+        ),
+      ]);
+    }
+    console.log(assets, "ass");
+  }, [id, currentToken]);
 
   async function getPoolsData() {
     const { ratedPools, unRatedPools, simplePools: simplePoolsFromSdk } = await fetchAllPools();
@@ -63,8 +100,8 @@ const Trading = () => {
     setStablePools(stablePoolsFromSdk);
     setStablePoolsDetail(stablePoolsDetailFromSdk);
   }
-  let timer;
 
+  // mouseenter and leave inter
   const handlePopupToggle = () => {
     setShowPopup(!showPopup);
   };
@@ -100,8 +137,20 @@ const Trading = () => {
         <div className="col-span-4 bg-gray-800 border border-dark-50 rounded-md mr-4">
           <div className="flex justify-between items-center border-b border-dark-50 py-6 px-5">
             <div className="flex items-center">
-              <NearIcon />
-              <p className="ml-2 mr-3.5 text-lg">NEAR</p>
+              {currentToken?.metadata?.symbol === "wNEAR" ? (
+                <NearIcon />
+              ) : (
+                <img
+                  alt=""
+                  src={currentToken?.metadata?.icon}
+                  style={{ width: "26px", height: "26px" }}
+                />
+              )}
+              <p className="ml-2 mr-3.5 text-lg">
+                {currentToken?.metadata?.symbol === "wNEAR"
+                  ? "NEAR"
+                  : currentToken?.metadata?.symbol}
+              </p>
               <ShrinkArrow />
             </div>
             <div className="text-sm">
@@ -139,7 +188,7 @@ const Trading = () => {
                   )}
                 </div>
               </div>
-              <span>3.282</span>
+              <span>${currentToken?.price?.usd}</span>
             </div>
             <div className="text-sm">
               <p className="text-gray-300  mb-1.5">Total Volume</p>
@@ -150,15 +199,17 @@ const Trading = () => {
               <span>$13.25K</span>
             </div>
             <div className="text-sm">
-              <p className="text-gray-300 mb-1.5">Long/Short Positions</p>
-              <span>$12.89K / $243.36K</span>
+              <p className="text-gray-300 mb-1.5">Long / Short Positions</p>
+              <span>
+                ${longAndShortPosition[0]}K / ${longAndShortPosition[1]}K
+              </span>
             </div>
           </div>
           <div style={{ height: "520px" }} />
         </div>
         {/* right tradingopts */}
         <div className="col-span-2 bg-gray-800 border border-dark-50 rounded-md">
-          <TradingOperate />
+          <TradingOperate tokenList={tokenListWithPrice} />
         </div>
       </div>
       {/* <TradingTable /> */}
