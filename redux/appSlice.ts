@@ -126,6 +126,7 @@ export const initialState: AppState = {
     oracle_account_id: "",
     owner_id: "",
     x_booster_multiplier_at_maximum_staking_duration: 0,
+    boost_suppress_factor: 0,
     enable_price_oracle: false,
     enable_pyth_oracle: true,
   },

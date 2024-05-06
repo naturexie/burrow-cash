@@ -17,6 +17,7 @@ export interface IConfig {
   oracle_account_id: string;
   owner_id: string;
   x_booster_multiplier_at_maximum_staking_duration: number;
+  boost_suppress_factor: number;
   enable_price_oracle: boolean;
   enable_pyth_oracle: boolean;
 }

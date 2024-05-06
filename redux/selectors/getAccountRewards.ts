@@ -6,7 +6,7 @@ import { omit } from "lodash";
 import { shrinkToken } from "../../store";
 import { RootState } from "../store";
 import { Asset, AssetsState } from "../assetState";
-import { Farm, FarmData, Portfolio, AccountState } from "../accountState";
+import { Farm, FarmData, Portfolio, AccountState, IAccountFarms } from "../accountState";
 import { AppState } from "../appSlice";
 import { getStaking } from "./getStaking";
 import { INetTvlFarmRewards } from "../../interfaces";
@@ -40,6 +40,12 @@ export interface IAccountRewards {
   sumRewards: {
     [tokenId: string]: IPortfolioReward;
   };
+  poolRewards: {
+    [tokenId: string]: IPortfolioReward;
+  };
+  suppliedRewards: IPortfolioReward[];
+  borrowedRewards: IPortfolioReward[];
+  netLiquidityRewards: IPortfolioReward[];
   totalUnClaimUSD: number;
 }
 
@@ -181,6 +187,7 @@ export const computePoolsDailyAmount = (
   xBRRRAmount: number,
   farmData: FarmData,
   boosterDecimals: number,
+  boost_suppress_factor: number,
 ) => {
   const boosterLogBase = Number(
     shrinkToken(farmData.asset_farm_reward.booster_log_base, boosterDecimals),
@@ -188,8 +195,7 @@ export const computePoolsDailyAmount = (
 
   const assetDecimals = asset.metadata.decimals + asset.config.extra_decimals;
   const rewardAssetDecimals = rewardAsset.metadata.decimals + rewardAsset.config.extra_decimals;
-
-  const log = Math.log(xBRRRAmount) / Math.log(boosterLogBase);
+  const log = Math.log(xBRRRAmount / boost_suppress_factor) / Math.log(boosterLogBase);
   const multiplier = log >= 0 ? 1 + log : 1;
 
   const boostedShares = Number(shrinkToken(farmData.boosted_shares, assetDecimals));
@@ -213,7 +219,6 @@ export const computePoolsDailyAmount = (
   const borrowedShares = Number(
     shrinkToken(portfolio.borrowed[asset.token_id]?.shares || 0, assetDecimals),
   );
-
   const shares = type === "supplied" ? suppliedShares + collateralShares : borrowedShares;
   const newBoostedShares = shares * multiplier;
   const newTotalBoostedShares = totalBoostedShares + newBoostedShares - boostedShares;
@@ -225,11 +230,12 @@ export const computePoolsDailyAmount = (
 
 export const computeNetLiquidityDailyAmount = (
   asset: Asset,
-  xBRRRAmount: number,
+  totalxBRRRAmount: number,
   netTvlFarm: INetTvlFarmRewards,
   farmData: FarmData,
   boosterDecimals: number,
-  netLiquidity: number,
+  xBRRR: number,
+  boost_suppress_factor: number,
 ) => {
   const boosterLogBase = Number(
     shrinkToken(farmData.asset_farm_reward.booster_log_base, boosterDecimals),
@@ -237,7 +243,7 @@ export const computeNetLiquidityDailyAmount = (
 
   const assetDecimals = asset.metadata.decimals + asset.config.extra_decimals;
 
-  const log = Math.log(xBRRRAmount) / Math.log(boosterLogBase);
+  const log = Math.log(totalxBRRRAmount / boost_suppress_factor) / Math.log(boosterLogBase);
   const multiplier = log >= 0 ? 1 + log : 1;
 
   const boostedShares = Number(shrinkToken(farmData.boosted_shares, assetDecimals));
@@ -250,14 +256,14 @@ export const computeNetLiquidityDailyAmount = (
   );
 
   const dailyAmount = (boostedShares / totalBoostedShares) * totalRewardsPerDay;
+  const logStaked = Math.log(xBRRR / boost_suppress_factor) / Math.log(boosterLogBase);
+  const multiplierStaked = logStaked >= 0 ? 1 + logStaked : 1;
 
-  const shares =
-    Number(shrinkToken(new Decimal(netLiquidity).mul(10 ** 18).toFixed(), assetDecimals)) || 0;
+  const shares = boostedShares / multiplierStaked;
 
   const newBoostedShares = shares * multiplier;
   const newTotalBoostedShares = totalBoostedShares + newBoostedShares - boostedShares;
   const newDailyAmount = (newBoostedShares / newTotalBoostedShares) * totalRewardsPerDay;
-
   return { dailyAmount, newDailyAmount, multiplier, totalBoostedShares, shares };
 };
 
@@ -299,6 +305,7 @@ export const getAccountRewards = createSelector(
             xBRRRAmount,
             farmData,
             app.config.booster_decimals,
+            app.config.boost_suppress_factor,
           );
 
           return {
@@ -328,7 +335,8 @@ export const getAccountRewards = createSelector(
         assets.netTvlFarm,
         farmData,
         app.config.booster_decimals,
-        netLiquidity,
+        xBRRR,
+        app.config.boost_suppress_factor,
       );
 
       return {
@@ -347,7 +355,6 @@ export const getAccountRewards = createSelector(
 
     const { supplied, borrowed, netTvl } = account.portfolio.farms;
     const hasNetTvlFarm = !!Object.entries(assets.netTvlFarm).length;
-
     const suppliedRewards = Object.entries(supplied).map(computePoolsRewards("supplied")).flat();
     const borrowedRewards = Object.entries(borrowed).map(computePoolsRewards("borrowed")).flat();
 
@@ -379,12 +386,115 @@ export const getAccountRewards = createSelector(
     return {
       brrr: poolRewards[brrrTokenId] || {},
       extra: omit(poolRewards, brrrTokenId) || {},
+      poolRewards: poolRewards || {},
       net: netLiquidityRewards.reduce(
         (rewards, asset) => ({ ...rewards, [asset.tokenId]: asset }),
         {},
       ),
       sumRewards,
       totalUnClaimUSD,
+    } as IAccountRewards;
+  },
+);
+export const getAccountRewardsForApy = createSelector(
+  (state: RootState) => state.assets,
+  (state: RootState) => state.account,
+  (state: RootState) => state.app,
+  getStaking,
+  (assets, account, app, staking) => {
+    const { xBRRR, extraXBRRRAmount } = staking;
+    const xBRRRAmount = xBRRR + extraXBRRRAmount;
+
+    const computePoolsRewards =
+      (type: "supplied" | "borrowed") =>
+      ([tokenId, farm]: [string, Farm]) => {
+        return Object.entries(farm).map(([rewardTokenId, farmData]) => {
+          const asset = assets.data[tokenId];
+          const rewardAsset = assets.data[rewardTokenId];
+          const rewardAssetDecimals =
+            rewardAsset.metadata.decimals + rewardAsset.config.extra_decimals;
+
+          const { icon, symbol, name } = rewardAsset.metadata;
+
+          const unclaimedAmount = Number(
+            shrinkToken(farmData.unclaimed_amount, rewardAssetDecimals),
+          );
+
+          const { dailyAmount, newDailyAmount, multiplier } = computePoolsDailyAmount(
+            type,
+            asset,
+            rewardAsset,
+            account.portfolio,
+            xBRRRAmount,
+            farmData,
+            app.config.booster_decimals,
+            app.config.boost_suppress_factor,
+          );
+
+          return {
+            icon,
+            name,
+            symbol,
+            tokenId: rewardTokenId,
+            unclaimedAmount,
+            dailyAmount,
+            newDailyAmount,
+            multiplier,
+            price: rewardAsset.price?.usd || 0,
+            unclaimedAmountUSD: unclaimedAmount * (rewardAsset.price?.usd || 0),
+          };
+        });
+      };
+
+    const computeNetLiquidityRewards = ([rewardTokenId, farmData]: [string, FarmData]) => {
+      const rewardAsset = assets.data[rewardTokenId];
+      const rewardAssetDecimals = rewardAsset.metadata.decimals + rewardAsset.config.extra_decimals;
+      const { icon, symbol, name } = rewardAsset.metadata;
+      const unclaimedAmount = Number(shrinkToken(farmData.unclaimed_amount, rewardAssetDecimals));
+
+      const { dailyAmount, newDailyAmount, multiplier } = computeNetLiquidityDailyAmount(
+        rewardAsset,
+        xBRRRAmount,
+        assets.netTvlFarm,
+        farmData,
+        app.config.booster_decimals,
+        xBRRR,
+        app.config.boost_suppress_factor,
+      );
+
+      return {
+        icon,
+        name,
+        symbol,
+        tokenId: rewardTokenId,
+        unclaimedAmount,
+        dailyAmount,
+        newDailyAmount,
+        multiplier,
+        price: rewardAsset.price?.usd || 0,
+        unclaimedAmountUSD: unclaimedAmount * (rewardAsset.price?.usd || 0),
+      };
+    };
+
+    const { supplied, borrowed, netTvl } = filterAccountEndedFarms(
+      account.portfolio.farms,
+      assets.allFarms,
+    );
+    const hasNetTvlFarm = !!Object.entries(assets.netTvlFarm).length;
+    const suppliedRewards = Object.entries(supplied).map(computePoolsRewards("supplied")).flat();
+    const borrowedRewards = Object.entries(borrowed).map(computePoolsRewards("borrowed")).flat();
+    const netLiquidityRewards = hasNetTvlFarm
+      ? Object.entries(netTvl).map(computeNetLiquidityRewards)
+      : [];
+    const allRewards = [...suppliedRewards, ...borrowedRewards, ...netLiquidityRewards];
+    let totalUnClaimUSD = 0;
+    allRewards.forEach((d) => {
+      totalUnClaimUSD += d.unclaimedAmountUSD;
+    });
+    return {
+      suppliedRewards,
+      borrowedRewards,
+      netLiquidityRewards,
     } as IAccountRewards;
   },
 );
@@ -501,6 +611,38 @@ export const getAccountDailyRewards = createSelector(
     };
   },
 );
+export function filterAccountEndedFarms(userFarms, allFarms): IAccountFarms {
+  const { supplied, borrowed, netTvl } = Copy(userFarms);
+  const newSupplied = Object.entries(supplied)
+    .map(([tokenId, farmData]: any) => {
+      const marketFarmData = allFarms.supplied[tokenId];
+      const newFarmData = Object.entries(farmData).reduce((sum, [rewardId, rewardData]) => {
+        if (marketFarmData[rewardId]) return { ...sum, ...{ [rewardId]: rewardData } };
+        return sum;
+      }, {});
+      return { [tokenId]: newFarmData };
+    })
+    .reduce((acc, cur) => ({ ...acc, ...cur }), {});
+  const newBorrowed = Object.entries(borrowed)
+    .map(([tokenId, farmData]: any) => {
+      const marketFarmData = allFarms.borrowed[tokenId];
+      const newFarmData = Object.entries(farmData).reduce((sum, [rewardId, rewardData]) => {
+        if (marketFarmData[rewardId]) return { ...sum, ...{ [rewardId]: rewardData } };
+        return sum;
+      }, {});
+      return { [tokenId]: newFarmData };
+    })
+    .reduce((acc, cur) => ({ ...acc, ...cur }), {});
+  const newNetTvl = Object.entries(netTvl).reduce((sum, [rewardId, rewardData]) => {
+    if (allFarms.netTvl[rewardId]) return { ...sum, ...{ [rewardId]: rewardData } };
+    return sum;
+  }, {});
+  return {
+    supplied: newSupplied,
+    borrowed: newBorrowed,
+    netTvl: newNetTvl,
+  };
+}
 function dustProcess({
   accountSource,
   assets,
