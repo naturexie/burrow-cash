@@ -2,12 +2,25 @@ import React, { useState, useContext, useEffect } from "react";
 import { NearIcon } from "../../MarginTrading/components/Icon";
 import { TokenThinArrow, TokenSelected } from "./TradingIcon";
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
-import { setCategoryAssets1, setCategoryAssets2 } from "../../../redux/marginTrading";
+import {
+  setCategoryAssets1,
+  setCategoryAssets2,
+  setReduxcategoryCurrentBalance1,
+  setReduxcategoryCurrentBalance2,
+} from "../../../redux/marginTrading";
+import { shrinkToken } from "../../../store";
+import { toInternationalCurrencySystem_number } from "../../../utils/uiNumber";
 
 const TradingToken = ({ tokenList, type }) => {
   const dispatch = useAppDispatch();
+  const account = useAppSelector((state) => state.account);
   const { ReduxcategoryAssets1, ReduxcategoryAssets2 } = useAppSelector((state) => state.category);
+  const [ownBalance, setOwnBalance] = useState("0");
   const [showModal, setShowModal] = useState(false);
+  /*
+    @type cate1: category.value == 1 
+    @type cate2: category.value == 2 
+  */
   const [selectedItem, setSelectedItem] = useState(
     type == "cate1" ? ReduxcategoryAssets1 || tokenList[0] : ReduxcategoryAssets2 || tokenList[0],
   );
@@ -16,9 +29,27 @@ const TradingToken = ({ tokenList, type }) => {
   //
   useEffect(() => {
     if (type == "cate1") {
+      //
+      const waitUseKey = shrinkToken(
+        (account.balances as any)[ReduxcategoryAssets1.metadata["token_id"]],
+        ReduxcategoryAssets1.metadata.decimals + ReduxcategoryAssets1.config.extra_decimals,
+      );
       setSelectedItem(ReduxcategoryAssets1);
+      console.log(waitUseKey);
+      //
+      if (ReduxcategoryAssets1) setOwnBalance(toInternationalCurrencySystem_number(waitUseKey));
+      dispatch(setReduxcategoryCurrentBalance1(waitUseKey));
     } else if (type == "cate2") {
+      //
+      const waitUseKey = shrinkToken(
+        (account.balances as any)[ReduxcategoryAssets2.metadata["token_id"]],
+        ReduxcategoryAssets2.metadata.decimals + ReduxcategoryAssets2.config.extra_decimals,
+      );
       setSelectedItem(ReduxcategoryAssets2);
+      console.log(waitUseKey);
+      //
+      if (ReduxcategoryAssets2) setOwnBalance(toInternationalCurrencySystem_number(waitUseKey));
+      dispatch(setReduxcategoryCurrentBalance2(waitUseKey));
     }
   }, [ReduxcategoryAssets1, ReduxcategoryAssets2]);
 
@@ -26,6 +57,7 @@ const TradingToken = ({ tokenList, type }) => {
   const handleTokenClick = (item) => {
     if (!item) return;
     setSelectedItem(item);
+    //
     if (type == "cate1") {
       dispatch(setCategoryAssets1(item));
     } else if (type == "cate2") {
@@ -49,7 +81,7 @@ const TradingToken = ({ tokenList, type }) => {
   return (
     <div className="relative cursor-pointer w-fit " onMouseLeave={handleMouseLeave}>
       <div
-        className="flex items-center justify-center hover:bg-gray-1050  p-1.5 rounded-md "
+        className="flex items-center justify-end hover:bg-gray-1050  p-1.5 rounded-md "
         onMouseEnter={handleMouseEnter}
       >
         <div className="w-6 h-6">
@@ -68,9 +100,11 @@ const TradingToken = ({ tokenList, type }) => {
         </div>
         <TokenThinArrow />
       </div>
-      <div className="text-xs text-gray-300">
-        Balance: <span className="text-white border-b border-dashed border-dark-800">123.23</span>
+      <div className="text-xs flex justify-end text-gray-300">
+        Balance:&nbsp;
+        <span className="text-white border-b border-dashed border-dark-800">{ownBalance}</span>
       </div>
+      {/*  */}
       {showModal && (
         <div
           className="absolute top-10 right-0 py-1.5 bg-dark-250 border border-dark-500 rounded-md z-80 w-52"

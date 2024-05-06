@@ -35,8 +35,7 @@ export function useMarginConfigToken() {
     if (assets && assets.data && assets.data[item] && assets.data[item].metadata) {
       // get categoryAssets2
       categoryAssets2.push({
-        metadata: assets.data[item].metadata,
-        price: assets.data[item].price,
+        ...assets.data[item],
       });
     }
   });

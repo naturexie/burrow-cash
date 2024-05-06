@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import _ from "lodash";
 import TradingToken from "./tokenbox";
 import { RefLogoIcon, SetUp, ShrinkArrow } from "./TradingIcon";
@@ -12,7 +12,12 @@ import { setCategoryAssets1, setCategoryAssets2 } from "../../../redux/marginTra
 // main components
 const TradingOperate = () => {
   const { categoryAssets1, categoryAssets2 } = useMarginConfigToken();
-  const { ReduxcategoryAssets1, ReduxcategoryAssets2 } = useAppSelector((state) => state.category);
+  const {
+    ReduxcategoryAssets1,
+    ReduxcategoryAssets2,
+    ReduxcategoryCurrentBalance1,
+    ReduxcategoryCurrentBalance2,
+  } = useAppSelector((state) => state.category);
 
   const dispatch = useAppDispatch();
   const [activeTab, setActiveTab] = useState("long");
@@ -22,10 +27,10 @@ const TradingOperate = () => {
   const [rangeMount, setRangeMount] = useState(1);
 
   //
-  const [longInput, setLongInput] = useState(0);
-  const [longOutput, setLongOutput] = useState(0);
-  const [shortInput, setShortInput] = useState(0);
-  const [shortOutput, setShortOutput] = useState(0);
+  const [longInput, setLongInput] = useState();
+  const [longOutput, setLongOutput] = useState();
+  const [shortInput, setShortInput] = useState();
+  const [shortOutput, setShortOutput] = useState();
   //
   const balance = useAppSelector(getAccountBalance);
   const accountId = useAppSelector(getAccountId);
@@ -66,6 +71,21 @@ const TradingOperate = () => {
   const handleConfirmButtonClick = () => {
     setIsConfirmModalOpen(true);
   };
+  const [isDisabled, setDisabled] = useState(false);
+  // condition btn is disabled
+  useMemo(() => {
+    if (activeTab == "long") {
+      setDisabled(
+        Number(longInput) > Number(ReduxcategoryCurrentBalance2) ||
+          Number(longOutput) > Number(ReduxcategoryCurrentBalance1),
+      );
+    } else {
+      setDisabled(
+        Number(shortInput) > Number(ReduxcategoryCurrentBalance2) ||
+          Number(shortOutput) > Number(ReduxcategoryCurrentBalance1),
+      );
+    }
+  }, [longInput, longOutput, shortInput, shortOutput]);
 
   return (
     <div className="w-full pt-4 px-4 pb-9">
@@ -133,6 +153,7 @@ const TradingOperate = () => {
                 onChange={(e) => inputPriceChange(e.target.value, "longInput")}
                 type="text"
                 value={longInput}
+                placeholder="0"
               />
               <div className="absolute top-2 right-2">
                 <TradingToken tokenList={categoryAssets2} type="cate2" />
@@ -147,6 +168,7 @@ const TradingOperate = () => {
                 onChange={(e) => inputPriceChange(e.target.value, "longOutput")}
                 type="text"
                 value={longOutput}
+                placeholder="0"
               />
               <div className="absolute top-2 right-2">
                 <TradingToken tokenList={categoryAssets1} type="cate1" />
@@ -188,7 +210,7 @@ const TradingOperate = () => {
                   className="flex items-center justify-between bg-primary text-dark-200 text-base rounded-md h-12 text-center cursor-pointer"
                   onClick={handleConfirmButtonClick}
                 >
-                  <div className="flex-grow">Long NEAR 1.5x</div>
+                  <div className="flex-grow">Long NEAR {rangeMount}x</div>
                 </div>
                 {isConfirmModalOpen && (
                   <ConfirmMobile
@@ -208,6 +230,7 @@ const TradingOperate = () => {
                 onChange={(e) => inputPriceChange(e.target.value, "shortInput")}
                 type="text"
                 value={shortInput}
+                placeholder="0"
               />
               <div className="absolute top-2 right-2">
                 <TradingToken tokenList={categoryAssets2} type="cate2" />
@@ -222,6 +245,7 @@ const TradingOperate = () => {
                 onChange={(e) => inputPriceChange(e.target.value, "shortOutput")}
                 type="text"
                 value={shortOutput}
+                placeholder="0"
               />
               <div className="absolute top-2 right-2">
                 <TradingToken tokenList={categoryAssets1} type="cate1" />
@@ -259,7 +283,7 @@ const TradingOperate = () => {
                 </div>
               </div>
               <div className="flex items-center justify-between bg-red-50 text-dark-200 text-base rounded-md h-12 text-center cursor-pointer">
-                <div className="flex-grow">Long NEAR 1.5x</div>
+                <div className="flex-grow">Short NEAR {rangeMount}x</div>
               </div>
             </div>
           </>
