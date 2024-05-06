@@ -85,3 +85,15 @@ export const initialState: AccountState = {
   isClaiming: undefined,
   fetchedAt: undefined,
 };
+
+export interface IAccountFarms {
+  supplied: {
+    [tokenId: string]: Farm;
+  };
+  borrowed: {
+    [tokenId: string]: Farm;
+  };
+  netTvl: {
+    [tokenId: string]: FarmData;
+  };
+}

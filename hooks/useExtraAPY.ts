@@ -83,6 +83,7 @@ export function useExtraAPY({
       xBRRR,
       farmData,
       appConfig.booster_decimals,
+      appConfig.boost_suppress_factor,
     );
 
     const apy =
@@ -108,6 +109,7 @@ export function useExtraAPY({
       xBRRR + extraXBRRRAmount,
       farmData,
       appConfig.booster_decimals,
+      appConfig.boost_suppress_factor,
     );
 
     const rewardAssetPrice = assets.data[rewardTokenId].price?.usd || 0;

@@ -67,7 +67,7 @@ init({
   release: "v1",
 });
 
-const IDLE_INTERVAL = 30e3;
+const IDLE_INTERVAL = 90e3;
 const REFETCH_INTERVAL = 60e3;
 
 const Init = () => {
@@ -77,13 +77,10 @@ const Init = () => {
   const fetchData = () => {
     dispatch(fetchAssets()).then(() => dispatch(fetchRefPrices()));
     dispatch(fetchAccount());
+    dispatch(fetchConfig());
   };
   useEffect(fetchData, []);
-  useEffect(() => {
-    dispatch(fetchConfig());
-  }, []);
-  // useInterval(fetchData, !isIdle ? REFETCH_INTERVAL : null);
-  useInterval(fetchData, REFETCH_INTERVAL);
+  useInterval(fetchData, !isIdle ? REFETCH_INTERVAL : null);
 
   return null;
 };

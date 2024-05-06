@@ -1,15 +1,16 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 import { defaultNetwork, missingPriceTokens, BRRR_TOKEN } from "../utils/config";
-import { initialState } from "./assetState";
-import { transformAssets } from "../transformers/asstets";
+import { transformAssets, transformFarms } from "../transformers/asstets";
 import getAssets from "../api/get-assets";
-import getFarm from "../api/get-farm";
+import getFarm, { getAllFarms } from "../api/get-farm";
+import { initialState } from "./assetState";
 
 export const fetchAssets = createAsyncThunk("assets/fetchAssets", async () => {
   const assets = await getAssets().then(transformAssets);
   const netTvlFarm = await getFarm("NetTvl");
-  return { assets, netTvlFarm };
+  const allFarms = await getAllFarms().then(transformFarms);
+  return { assets, netTvlFarm, allFarms };
 });
 
 export const fetchRefPrices = createAsyncThunk("assets/fetchRefPrices", async () => {
@@ -31,6 +32,7 @@ export const assetSlice = createSlice({
     builder.addCase(fetchAssets.fulfilled, (state, action) => {
       state.data = action.payload.assets;
       state.netTvlFarm = action.payload.netTvlFarm?.rewards || {};
+      state.allFarms = action.payload.allFarms || [];
       state.status = action.meta.requestStatus;
       state.fetchedAt = new Date().toString();
     });

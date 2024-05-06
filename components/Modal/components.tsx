@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Box, Typography, Stack, Alert, Link, useTheme } from "@mui/material";
 import { FcInfo } from "@react-icons/all-files/fc/FcInfo";
 import { BeatLoader } from "react-spinners";
+import { twMerge } from "tailwind-merge";
 import TokenIcon from "../TokenIcon";
 import { actionMapTitle } from "./utils";
 import APYCell from "../Table/common/apy-cell";
@@ -256,7 +257,7 @@ export const SubmitButton = ({ action, disabled, onClick, loading }) => {
   );
 };
 
-export const Alerts = ({ data }) => {
+export const Alerts = ({ data, errorClassName }: any) => {
   const sort = (b: any, a: any) => {
     if (b[1].severity === "error") return 1;
     if (a[1].severity === "error") return -1;
@@ -271,7 +272,13 @@ export const Alerts = ({ data }) => {
           if (data[alert].severity === "warning") {
             return <AlertWarning className="-mt-2" key={alert} title={data[alert].title} />;
           } else {
-            return <AlertError className="pb-5 -mb-7" key={alert} title={data[alert].title} />;
+            return (
+              <AlertError
+                className={twMerge("pb-5 -mb-7", errorClassName || "")}
+                key={alert}
+                title={data[alert].title}
+              />
+            );
           }
         })}
     </div>

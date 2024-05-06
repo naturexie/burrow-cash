@@ -4,7 +4,7 @@ import { Modal as MUIModal, Typography, Box, Stack, useTheme } from "@mui/materi
 import Decimal from "decimal.js";
 import { USD_FORMAT } from "../../store";
 import { useAppSelector, useAppDispatch } from "../../redux/hooks";
-import { hideModal } from "../../redux/appSlice";
+import { hideModal, fetchConfig } from "../../redux/appSlice";
 import { getModalStatus, getAssetData, getSelectedValues } from "../../redux/appSelectors";
 import { getWithdrawMaxAmount } from "../../redux/selectors/getWithdrawMaxAmount";
 import { getAccountId } from "../../redux/accountSelectors";
@@ -86,6 +86,7 @@ const Modal = () => {
   useEffect(() => {
     if (isOpen) {
       dispatch(fetchAssets()).then(() => dispatch(fetchRefPrices()));
+      dispatch(fetchConfig());
     }
   }, [isOpen]);
   if (action === "Adjust") {

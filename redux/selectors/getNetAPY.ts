@@ -13,10 +13,12 @@ export const getNetAPY = ({ isStaking = false }: { isStaking: boolean }) =>
   createSelector(
     (state: RootState) => state.assets,
     (state: RootState) => state.account,
+    (state: RootState) => state.app,
     getExtraDailyTotals({ isStaking }),
-    (assets, account, extraDaily) => {
+    (assets, account, app, extraDaily) => {
       if (!hasAssets(assets)) return 0;
-
+      const { amount } = app.staking;
+      const booster_token_asset = assets.data[app.config.booster_token_id];
       const [gainCollateral, totalCollateral] = getGains(account.portfolio, assets, "collateral");
       const [gainSupplied, totalSupplied] = getGains(account.portfolio, assets, "supplied");
       const [gainBorrowed, totalBorrowed] = getGains(account.portfolio, assets, "borrowed");
@@ -24,7 +26,11 @@ export const getNetAPY = ({ isStaking = false }: { isStaking: boolean }) =>
       const gainExtra = extraDaily * 365;
 
       const netGains = gainCollateral + gainSupplied + gainExtra - gainBorrowed;
-      const netTotals = totalCollateral + totalSupplied - totalBorrowed;
+      const netTotals =
+        totalCollateral +
+        totalSupplied -
+        totalBorrowed -
+        (isStaking ? Number(amount || 0) * (booster_token_asset.price?.usd || 0) : 0);
       const netAPY = (netGains / netTotals) * 100;
 
       return netAPY || 0;
@@ -35,10 +41,12 @@ export const getNetTvlAPY = ({ isStaking = false }) =>
   createSelector(
     (state: RootState) => state.assets,
     (state: RootState) => state.account,
+    (state: RootState) => state.app,
     getAccountRewards,
-    (assets, account, rewards) => {
+    (assets, account, app, rewards) => {
       if (!hasAssets(assets)) return 0;
-
+      const { amount } = app.staking;
+      const booster_token_asset = assets.data[app.config.booster_token_id];
       const [, totalCollateral] = getGains(account.portfolio, assets, "collateral");
       const [, totalSupplied] = getGains(account.portfolio, assets, "supplied");
       const [, totalBorrowed] = getGains(account.portfolio, assets, "borrowed");
@@ -47,7 +55,11 @@ export const getNetTvlAPY = ({ isStaking = false }) =>
         (acc, r) => acc + (isStaking ? r.newDailyAmount : r.dailyAmount) * r.price,
         0,
       );
-      const netLiquidity = totalCollateral + totalSupplied - totalBorrowed;
+      const netLiquidity =
+        totalCollateral +
+        totalSupplied -
+        totalBorrowed -
+        (isStaking ? Number(amount || 0) * (booster_token_asset.price?.usd || 0) : 0);
       let apy;
       if (new Decimal(netLiquidity).gt(0)) {
         apy = ((netTvlRewards * 365) / netLiquidity) * 100;
