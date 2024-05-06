@@ -1,31 +1,37 @@
 import React, { useState, useContext, useEffect } from "react";
 import { NearIcon } from "../../MarginTrading/components/Icon";
 import { TokenThinArrow, TokenSelected } from "./TradingIcon";
+import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
+import { setCategoryAssets1, setCategoryAssets2 } from "../../../redux/marginTrading";
 
-const TradingToken = ({ tokenList }) => {
+const TradingToken = ({ tokenList, type }) => {
+  const dispatch = useAppDispatch();
+  const { ReduxcategoryAssets1, ReduxcategoryAssets2 } = useAppSelector((state) => state.category);
   const [showModal, setShowModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [selectedItemIcon, setSelectedItemIcon] = useState("");
+  const [selectedItem, setSelectedItem] = useState(
+    type == "cate1" ? ReduxcategoryAssets1 || tokenList[0] : ReduxcategoryAssets2 || tokenList[0],
+  );
 
   let timer;
   //
   useEffect(() => {
-    if (tokenList.length > 0) {
-      setSelectedItem(tokenList[0].metadata.symbol);
-      setSelectedItemIcon(tokenList[0].metadata.icon);
+    if (type == "cate1") {
+      setSelectedItem(ReduxcategoryAssets1);
+    } else if (type == "cate2") {
+      setSelectedItem(ReduxcategoryAssets2);
     }
-  }, [tokenList]);
+  }, [ReduxcategoryAssets1, ReduxcategoryAssets2]);
+
   //
   const handleTokenClick = (item) => {
-    if (selectedItem === item.metadata.symbol) {
-      setSelectedItem(null);
-      setSelectedItemIcon("");
-      setShowModal(false);
-    } else {
-      setSelectedItem(item.metadata.symbol);
-      setSelectedItemIcon(item.metadata.icon);
-      setShowModal(false);
+    if (!item) return;
+    setSelectedItem(item);
+    if (type == "cate1") {
+      dispatch(setCategoryAssets1(item));
+    } else if (type == "cate2") {
+      dispatch(setCategoryAssets2(item));
     }
+    setShowModal(false);
   };
 
   const handleMouseEnter = () => {
@@ -47,13 +53,19 @@ const TradingToken = ({ tokenList }) => {
         onMouseEnter={handleMouseEnter}
       >
         <div className="w-6 h-6">
-          {selectedItem == "wNEAR" ? (
+          {selectedItem?.metadata?.symbol == "wNEAR" ? (
             <NearIcon />
           ) : (
-            <img alt="" src={selectedItemIcon} style={{ width: "26px", height: "26px" }} />
+            <img
+              alt=""
+              src={selectedItem?.metadata?.icon}
+              style={{ width: "26px", height: "26px" }}
+            />
           )}
         </div>
-        <div className="mx-1.5 text-base">{selectedItem || "NEAR"}</div>
+        <div className="mx-1.5 text-base">
+          {selectedItem?.metadata?.symbol == "wNEAR" ? "NEAR" : selectedItem?.metadata?.symbol}
+        </div>
         <TokenThinArrow />
       </div>
       <div className="text-xs text-gray-300">
@@ -71,13 +83,15 @@ const TradingToken = ({ tokenList }) => {
               className="py-2 px-3.5 hover:bg-gray-950 flex items-center w-full rounded-md"
               onClick={() => handleTokenClick(token)}
             >
-              {token?.metadata?.symbol === "wNEAR" ? (
+              {token?.metadata?.symbol == "wNEAR" ? (
                 <NearIcon />
               ) : (
                 <img alt="" src={token?.metadata?.icon} style={{ width: "26px", height: "26px" }} />
               )}
-              <p className="ml-1.5 mr-2 text-sm">{token.metadata.symbol}</p>
-              {selectedItem === token.metadata.symbol && <TokenSelected />}
+              <p className="ml-1.5 mr-2 text-sm">
+                {token?.metadata?.symbol === "wNEAR" ? "NEAR" : token?.metadata?.symbol}
+              </p>
+              {selectedItem?.metadata?.symbol === token.metadata.symbol && <TokenSelected />}
               <p className="ml-auto text-sm">${token.price?.usd}</p>
             </div>
           ))}

@@ -17,65 +17,51 @@ import { getAssets } from "../../redux/assetsSelectors";
 import { shrinkToken } from "../../store";
 import { getMarginConfig } from "../../redux/marginConfigSelectors";
 import { formatWithCommas_usd, toInternationalCurrencySystem_number } from "../../utils/uiNumber";
+import { useMarginConfigToken } from "../../hooks/useMarginConfig";
+import { setCategoryAssets1, setCategoryAssets2 } from "../../redux/marginTrading";
 
 init_env("dev");
 
 const Trading = () => {
+  const { categoryAssets1, categoryAssets2 } = useMarginConfigToken();
+  const { ReduxcategoryAssets1, ReduxcategoryAssets2 } = useAppSelector((state) => state.category);
+
   const router = useRouter();
   const { id }: any = router.query;
   const dispatch = useAppDispatch();
   const assets = useAppSelector(getAssets);
-  const marginConfig = useAppSelector(getMarginConfig);
-  const [showPopup, setShowPopup] = useState(false);
-  const [selectedItem, setSelectedItem] = useState("");
+  const [showPopupCate1, setShowPopup1] = useState(false);
+  const [showPopupCate2, setShowPopup2] = useState(false);
   // pools
   const [simplePools, setSimplePools] = useState<any[]>([]);
   const [stablePools, setStablePools] = useState<any[]>([]);
   const [stablePoolsDetail, setStablePoolsDetail] = useState<any[]>([]);
   //
-  const [tokenList, setTokenList] = useState<Array<string>>([]);
-  const [tokenListWithPrice, setTokenListWithPrice] = useState<Array<string>>([]);
-  const [currentToken, setCurrentToken] = useState<any>({});
+  const [currentTokenCate1, setCurrentTokenCate1] = useState<any>({});
+  const [currentTokenCate2, setCurrentTokenCate2] = useState<any>(categoryAssets2[0]);
+
   const [longAndShortPosition, setLongAndShortPosition] = useState<any>([]);
   let timer;
+
+  // deal category1,2
+
   //
   useEffect(() => {
     getPoolsData();
   }, []);
 
-  // computed tokenlist dropdown
+  // computed currentTokenCate1 dropdown
   useEffect(() => {
-    //
-    const { registered_tokens } = marginConfig;
-    const tokenArray: string[] = [];
-    const tokenArrayWithPrice: Array<any> = [];
-    const filteredKeys: string[] = Object.keys(registered_tokens || {}).filter(
-      (key: string) => registered_tokens[key] == 2,
-    );
-
-    filteredKeys.forEach((item: string) => {
-      // security check
-      if (assets && assets.data && assets.data[item] && assets.data[item].metadata) {
-        tokenArray.push(assets.data[item].metadata.symbol);
-        tokenArrayWithPrice.push({
-          metadata: assets.data[item].metadata,
-          price: assets.data[item].price,
-        });
-      }
-    });
-    //
-    setSelectedItem(tokenArray[0]);
-
-    setTokenList(tokenArray);
-
-    setTokenListWithPrice(tokenArrayWithPrice);
-
-    if (id) setCurrentToken(assets.data[id]);
+    if (id) {
+      setCurrentTokenCate1(assets.data[id]);
+      dispatch(setCategoryAssets1(assets.data[id]));
+      dispatch(setCategoryAssets2(currentTokenCate2));
+    }
 
     // deal long & short position
-    if (id && currentToken?.metadata) {
+    if (id && currentTokenCate1?.metadata) {
       //
-      const { margin_position, metadata, config, margin_debt } = currentToken;
+      const { margin_position, metadata, config, margin_debt } = currentTokenCate1;
       const { decimals } = metadata;
       const { extra_decimals } = config;
 
@@ -89,8 +75,15 @@ const Trading = () => {
         ),
       ]);
     }
-    console.log(assets, "ass");
-  }, [id, currentToken]);
+  }, [id, currentTokenCate1]);
+
+  useMemo(() => {
+    setCurrentTokenCate1(ReduxcategoryAssets1);
+  }, [ReduxcategoryAssets1]);
+
+  useMemo(() => {
+    setCurrentTokenCate2(ReduxcategoryAssets2);
+  }, [ReduxcategoryAssets2]);
 
   async function getPoolsData() {
     const { ratedPools, unRatedPools, simplePools: simplePoolsFromSdk } = await fetchAllPools();
@@ -103,22 +96,39 @@ const Trading = () => {
 
   // mouseenter and leave inter
   const handlePopupToggle = () => {
-    setShowPopup(!showPopup);
+    setShowPopup2(!showPopupCate2);
   };
 
-  const handleTokenSelect = (item) => {
-    setSelectedItem(item);
-    setShowPopup(false);
+  const handleTokenSelectCate1 = (item) => {
+    dispatch(setCategoryAssets1(item));
+    setCurrentTokenCate1(item);
+    setShowPopup1(false);
   };
 
-  const handleMouseEnter = () => {
+  const handleTokenSelectCate2 = (item) => {
+    // setSelectedItem(item);
+    dispatch(setCategoryAssets2(item));
+    setCurrentTokenCate2(item);
+    setShowPopup2(false);
+  };
+
+  const handleMouseEnter = (category) => {
     clearTimeout(timer);
-    setShowPopup(true);
+
+    if (category === "1") {
+      setShowPopup1(true);
+    } else if (category === "2") {
+      setShowPopup2(true);
+    }
   };
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = (category) => {
     timer = setTimeout(() => {
-      setShowPopup(false);
+      if (category === "1") {
+        setShowPopup1(false);
+      } else if (category === "2") {
+        setShowPopup2(false);
+      }
     }, 200);
   };
   //
@@ -136,68 +146,105 @@ const Trading = () => {
         {/* left charts */}
         <div className="col-span-4 bg-gray-800 border border-dark-50 rounded-md mr-4">
           <div className="flex justify-between items-center border-b border-dark-50 py-6 px-5">
-            <div className="flex items-center">
-              {currentToken?.metadata?.symbol === "wNEAR" ? (
-                <NearIcon />
-              ) : (
-                <img
-                  alt=""
-                  src={currentToken?.metadata?.icon}
-                  style={{ width: "26px", height: "26px" }}
-                />
+            {/* cate1 */}
+            <div onMouseLeave={() => handleMouseLeave("1")} className="cursor-pointer relative ">
+              <div onMouseEnter={() => handleMouseEnter("1")} className="flex items-center">
+                {currentTokenCate1?.metadata?.symbol === "wNEAR" ? (
+                  <NearIcon />
+                ) : (
+                  <img
+                    alt=""
+                    src={currentTokenCate1?.metadata?.icon}
+                    style={{ width: "26px", height: "26px" }}
+                  />
+                )}
+                <p className="ml-2 mr-3.5 text-lg">
+                  {currentTokenCate1?.metadata?.symbol === "wNEAR"
+                    ? "NEAR"
+                    : currentTokenCate1?.metadata?.symbol}
+                </p>
+                <TokenArrow />
+              </div>
+              {showPopupCate1 && (
+                <div
+                  onMouseEnter={() => handleMouseEnter("1")}
+                  onMouseLeave={() => handleMouseLeave("1")}
+                  className=" bg-dark-250 border border-dark-500 rounded-sm absolute top-8 left-0 right-0 pt-0.5 text-gray-300 text-xs pb-1.5"
+                >
+                  {categoryAssets1.map((item, index) => (
+                    <div
+                      key={index}
+                      className="py-1 pl-1.5 hover:bg-gray-950"
+                      onClick={() => handleTokenSelectCate1(item)}
+                    >
+                      <div className="flex items-center">
+                        {item?.metadata?.symbol === "wNEAR" ? (
+                          <NearIcon />
+                        ) : (
+                          <img
+                            alt=""
+                            src={item?.metadata?.icon}
+                            style={{ width: "26px", height: "26px" }}
+                          />
+                        )}
+                        <p className="ml-2 mr-3.5 text-sm">
+                          {item?.metadata?.symbol === "wNEAR" ? "NEAR" : item?.metadata?.symbol}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
-              <p className="ml-2 mr-3.5 text-lg">
-                {currentToken?.metadata?.symbol === "wNEAR"
-                  ? "NEAR"
-                  : currentToken?.metadata?.symbol}
-              </p>
-              <ShrinkArrow />
             </div>
+            {/* cate2 */}
             <div className="text-sm">
               <div className="flex justify-center items-center">
                 <p className="text-gray-300 mr-1.5">Price</p>
                 {/* drop down */}
                 <div
                   className="relative hover:bg-gray-300 hover:bg-opacity-20 py-1 px-1.5 rounded-sm cursor-pointer min-w-24"
-                  onMouseLeave={handleMouseLeave}
+                  onMouseLeave={() => handleMouseLeave("2")}
                 >
                   <div
-                    onMouseEnter={handleMouseEnter}
+                    onMouseEnter={() => handleMouseEnter("2")}
                     onClick={handlePopupToggle}
                     className="flex justify-center items-center"
                   >
-                    <p className="mr-1">{selectedItem}</p>
+                    <p className="mr-1">{currentTokenCate2?.metadata?.symbol}</p>
                     <TokenArrow />
                   </div>
-                  {showPopup && (
+                  {showPopupCate2 && (
                     <div
-                      onMouseEnter={handleMouseEnter}
-                      onMouseLeave={handleMouseLeave}
+                      onMouseEnter={() => handleMouseEnter("2")}
+                      onMouseLeave={() => handleMouseLeave("2")}
                       className="bg-dark-250 border border-dark-500 rounded-sm absolute top-8 left-0 right-0 pt-0.5 text-gray-300 text-xs pb-1.5"
                     >
-                      {tokenList.map((token, index) => (
+                      {categoryAssets2.map((item, index) => (
                         <div
                           key={index}
                           className="py-1 pl-1.5 hover:bg-gray-950"
-                          onClick={() => handleTokenSelect(token)}
+                          onClick={() => handleTokenSelectCate2(item)}
                         >
-                          {token}
+                          {item?.metadata?.symbol === "wNEAR" ? "NEAR" : item?.metadata?.symbol}
                         </div>
                       ))}
                     </div>
                   )}
                 </div>
               </div>
-              <span>${currentToken?.price?.usd}</span>
+              <span>${currentTokenCate1?.price?.usd}</span>
             </div>
+            {/* total v */}
             <div className="text-sm">
               <p className="text-gray-300  mb-1.5">Total Volume</p>
               <span>$23.25M</span>
             </div>
+            {/* 24h v */}
             <div className="text-sm">
               <p className="text-gray-300 mb-1.5">24H Volume</p>
               <span>$13.25K</span>
             </div>
+            {/* long short */}
             <div className="text-sm">
               <p className="text-gray-300 mb-1.5">Long / Short Positions</p>
               <span>
@@ -209,7 +256,7 @@ const Trading = () => {
         </div>
         {/* right tradingopts */}
         <div className="col-span-2 bg-gray-800 border border-dark-50 rounded-md">
-          <TradingOperate tokenList={tokenListWithPrice} />
+          <TradingOperate />
         </div>
       </div>
       {/* <TradingTable /> */}

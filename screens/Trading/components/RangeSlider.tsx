@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { twMerge } from "tailwind-merge";
 
-const RangeSlider = ({ defaultValue, action }) => {
+const RangeSlider = ({ defaultValue, action, setRangeMount }) => {
   const allowedValues = [1, 1.25, 1.5, 1.75, 2];
   const [value, setValue] = useState(defaultValue);
   const [splitList, setSplitList] = useState(allowedValues);
@@ -28,6 +28,7 @@ const RangeSlider = ({ defaultValue, action }) => {
     });
     setValue(nearestValue);
     setSelectedItem(nearestValue);
+    setRangeMount(nearestValue);
   }
   const actionShowRedColor = action === "Long";
   return (

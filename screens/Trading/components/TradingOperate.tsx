@@ -6,14 +6,20 @@ import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
 import RangeSlider from "./RangeSlider";
 import ConfirmMobile from "./ConfirmMobile";
 import { getAccountBalance, getAccountId } from "../../../redux/accountSelectors";
+import { useMarginConfigToken } from "../../../hooks/useMarginConfig";
+import { setCategoryAssets1, setCategoryAssets2 } from "../../../redux/marginTrading";
 
 // main components
-const TradingOperate = ({ tokenList }) => {
+const TradingOperate = () => {
+  const { categoryAssets1, categoryAssets2 } = useMarginConfigToken();
+  const { ReduxcategoryAssets1, ReduxcategoryAssets2 } = useAppSelector((state) => state.category);
+
   const dispatch = useAppDispatch();
   const [activeTab, setActiveTab] = useState("long");
   const [showSetUpPopup, setShowSetUpPopup] = useState(false);
   const [selectedSetUpOption, setSelectedSetUpOption] = useState("auto");
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [rangeMount, setRangeMount] = useState(1);
 
   //
   const [longInput, setLongInput] = useState(0);
@@ -129,7 +135,7 @@ const TradingOperate = ({ tokenList }) => {
                 value={longInput}
               />
               <div className="absolute top-2 right-2">
-                <TradingToken tokenList={tokenList} />
+                <TradingToken tokenList={categoryAssets2} type="cate2" />
               </div>
               <p className="text-gray-300 mt-2 text-xs">Use: $0.00</p>
             </div>
@@ -143,11 +149,11 @@ const TradingOperate = ({ tokenList }) => {
                 value={longOutput}
               />
               <div className="absolute top-2 right-2">
-                <TradingToken tokenList={tokenList} />
+                <TradingToken tokenList={categoryAssets1} type="cate1" />
               </div>
               <p className="text-gray-300 mt-2 text-xs">Long: $0.00</p>
             </div>
-            <RangeSlider defaultValue={1.5} action="Long" />
+            <RangeSlider defaultValue={rangeMount} action="Long" setRangeMount={setRangeMount} />
             {accountId && (
               <div className="mt-5">
                 <div className="flex items-center justify-between text-sm mb-4">
@@ -204,7 +210,7 @@ const TradingOperate = ({ tokenList }) => {
                 value={shortInput}
               />
               <div className="absolute top-2 right-2">
-                <TradingToken tokenList={tokenList} />
+                <TradingToken tokenList={categoryAssets2} type="cate2" />
               </div>
               <p className="text-gray-300 mt-2 text-xs">Use: $0.00</p>
             </div>
@@ -218,11 +224,11 @@ const TradingOperate = ({ tokenList }) => {
                 value={shortOutput}
               />
               <div className="absolute top-2 right-2">
-                <TradingToken tokenList={tokenList} />
+                <TradingToken tokenList={categoryAssets1} type="cate1" />
               </div>
               <p className="text-gray-300 mt-2 text-xs">Long: $0.00</p>
             </div>
-            <RangeSlider defaultValue={1.75} action="Short" />
+            <RangeSlider defaultValue={rangeMount} action="Short" setRangeMount={setRangeMount} />
             <div className="mt-5">
               <div className="flex items-center justify-between text-sm mb-4">
                 <div className="text-gray-300">Position Size</div>

@@ -7,15 +7,39 @@ export function useMarginConfigToken() {
   const marginConfigTokens = useAppSelector(getMarginConfig);
   const assetsData = assets.data;
 
-  const filteredMarginConfigTokens = Object.entries(marginConfigTokens.registered_tokens)
+  // add by LuKe
+  const categoryAssets1: Array<any> = [];
+  const categoryAssets2: Array<any> = [];
+
+  const filteredMarginConfigTokens1 = Object.entries(marginConfigTokens.registered_tokens)
     .filter(([token, value]) => value === 1)
     .map(([token]) => token);
 
-  const filterMarginConfigList = filteredMarginConfigTokens.reduce((item, token) => {
+  const filteredMarginConfigTokens2 = Object.entries(marginConfigTokens.registered_tokens)
+    .filter(([token, value]) => value === 2)
+    .map(([token]) => token);
+
+  const filterMarginConfigList = filteredMarginConfigTokens1.reduce((item, token) => {
     if (assetsData[token]) {
       item[token] = assetsData[token];
+      // get categoryAssets1
+      categoryAssets1.push({
+        ...assetsData[token],
+      });
     }
     return item;
   }, {});
-  return { filterMarginConfigList, marginConfigTokens };
+
+  filteredMarginConfigTokens2.forEach((item: string) => {
+    // security check
+    if (assets && assets.data && assets.data[item] && assets.data[item].metadata) {
+      // get categoryAssets2
+      categoryAssets2.push({
+        metadata: assets.data[item].metadata,
+        price: assets.data[item].price,
+      });
+    }
+  });
+
+  return { filterMarginConfigList, marginConfigTokens, categoryAssets1, categoryAssets2 };
 }
