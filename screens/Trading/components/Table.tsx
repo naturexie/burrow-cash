@@ -68,84 +68,17 @@ const TradingTable = ({ positionsList }) => {
               </thead>
               <tbody>
                 {positionsList &&
-                  Object.values(positionsList as Record<string, any>).map((item, index) => {
-                    // console.log(item);
-                    const assetD = getAssetById(item.token_d_info.token_id);
-                    const assetC = getAssetById(item.token_c_info.token_id);
-                    const assetDecimals_d =
-                      (assetD.metadata?.decimals ?? 0) + (assetD.config?.extra_decimals ?? 0);
-                    const assetDecimals_c =
-                      (assetC.metadata?.decimals ?? 0) + (assetC.config?.extra_decimals ?? 0);
-                    const leverage_d = Number(
-                      shrinkToken(item.token_d_info.balance, assetDecimals_d),
-                    );
-                    const leverage_c = Number(
-                      shrinkToken(item.token_c_info.balance, assetDecimals_c),
-                    );
-                    const leverage = leverage_c !== 0 ? leverage_d / leverage_c : 0;
-                    const positionType = getPositionType(item.token_d_info.token_id);
-                    const sizeValue =
-                      positionType.label === "Long"
-                        ? shrinkToken(item.token_p_amount, assetDecimals_c)
-                        : shrinkToken(item.token_d_info.balance, assetDecimals_d);
-                    const netValue = shrinkToken(item.token_c_info.balance, assetDecimals_c);
-                    return (
-                      <Link href={`/trading/${item.token_p_id}`} key={index}>
-                        <tr className="text-base hover:bg-dark-100 cursor-pointer font-normal">
-                          <td className="py-5 pl-5 ">
-                            {assetD.metadata?.symbol} / {assetC.metadata?.symbol}
-                            <span
-                              className={`text-xs ml-1.5 ${
-                                getPositionType(item.token_d_info.token_id).class
-                              }`}
-                            >
-                              {getPositionType(item.token_d_info.token_id).label}
-                              <span className="ml-1.5">
-                                {toInternationalCurrencySystem_number(leverage)}x
-                              </span>
-                            </span>
-                          </td>
-                          <td>${toInternationalCurrencySystem_number(sizeValue)}</td>
-                          <td>${toInternationalCurrencySystem_number(netValue)}</td>
-                          <td>
-                            <div className="flex items-center">
-                              <p className="mr-2.5"> - </p>
-                              {/* <div
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  handleChangeCollateralButtonClick();
-                                }}
-                              >
-                                <AddCollateral />
-                              </div> */}
-                            </div>
-                          </td>
-                          <td>$-</td>
-                          <td>$-</td>
-                          <td>$-</td>
-                          <td>
-                            <div className="flex items-center">
-                              <p className="text-gray-1000"> -</p>
-                              {/* <span className="text-gray-400 text-xs">-</span> */}
-                            </div>
-                          </td>
-                          <td className="pr-5">
-                            <div
-                              className="text-gray-300 text-sm border border-dark-300 text-center h-6 rounded flex justify-center items-center"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                handleClosePositionButtonClick();
-                              }}
-                            >
-                              Close
-                            </div>
-                          </td>
-                        </tr>
-                      </Link>
-                    );
-                  })}
+                  Object.values(positionsList).map((item, index) => (
+                    <PositionRow
+                      index={index}
+                      key={index}
+                      item={item}
+                      getAssetById={getAssetById}
+                      getPositionType={getPositionType}
+                      handleChangeCollateralButtonClick={handleChangeCollateralButtonClick}
+                      handleClosePositionButtonClick={handleClosePositionButtonClick}
+                    />
+                  ))}
                 {isChangeCollateralMobileOpen && (
                   <ChangeCollateralMobile
                     open={isChangeCollateralMobileOpen}
@@ -220,5 +153,118 @@ const Tab = ({ tabName, isSelected, onClick }) => (
     {tabName}
   </div>
 );
+
+const replaceSymbol = (symbol) => {
+  return symbol === "wNEAR" ? "NEAR" : symbol;
+};
+const parseTokenValue = (tokenAmount, decimals) => {
+  if (!tokenAmount || !decimals) return 0;
+  return Number(shrinkToken(tokenAmount, decimals));
+};
+const getAssetDetails = (asset) => {
+  const price = asset?.price?.usd;
+  const symbol = replaceSymbol(asset.metadata?.symbol);
+  const decimals = (asset.metadata?.decimals ?? 0) + (asset.config?.extra_decimals ?? 0);
+  return { price, symbol, decimals };
+};
+const calculateLeverage = (leverageD, priceD, leverageC, priceC) => {
+  return (priceD ? leverageD * priceD : 0) / (priceC ? leverageC * priceC : 0);
+};
+
+const PositionRow = ({
+  index,
+  item,
+  getAssetById,
+  getPositionType,
+  handleChangeCollateralButtonClick,
+  handleClosePositionButtonClick,
+}) => {
+  // console.log(item, index);
+  const assetD = getAssetById(item.token_d_info.token_id);
+  const assetC = getAssetById(item.token_c_info.token_id);
+  const assetP = getAssetById(item.token_p_id);
+
+  const { price: priceD, symbol: symbolD, decimals: decimalsD } = getAssetDetails(assetD);
+  const { price: priceC, symbol: symbolC, decimals: decimalsC } = getAssetDetails(assetC);
+  const { price: priceP, symbol: symbolP, decimals: decimalsP } = getAssetDetails(assetP);
+
+  const leverageD = parseTokenValue(item.token_d_info.balance, decimalsD);
+  const leverageC = parseTokenValue(item.token_c_info.balance, decimalsC);
+  const leverage = calculateLeverage(leverageD, priceD, leverageC, priceC);
+
+  const positionType = getPositionType(item.token_d_info.token_id);
+  const marketTitle =
+    positionType.label === "Long" ? `${symbolP}/${symbolC}` : `${symbolD}/${symbolC}`;
+
+  const sizeValueLong = parseTokenValue(item.token_p_amount, decimalsP);
+  const sizeValueShort = parseTokenValue(item.token_d_info.balance, decimalsD);
+  const sizeValue =
+    positionType.label === "Long" ? sizeValueLong * (priceP || 0) : sizeValueShort * (priceD || 0);
+
+  const netValue = parseTokenValue(item.token_c_info.balance, decimalsC) * (priceC || 0);
+  const collateral = parseTokenValue(item.token_c_info.balance, decimalsC);
+  const entryPrice =
+    positionType.label === "Long"
+      ? sizeValueLong === 0
+        ? 0
+        : (leverageD * priceD) / sizeValueLong
+      : sizeValueShort === 0
+      ? 0
+      : netValue / sizeValueShort;
+  const indexPrice = positionType.label === "Long" ? priceP : priceD;
+  return (
+    <Link href={`/trading/${item.token_p_id}`} key={index}>
+      <tr className="text-base hover:bg-dark-100 cursor-pointer font-normal">
+        <td className="py-5 pl-5 ">
+          {marketTitle}
+          <span className={`text-xs ml-1.5 ${getPositionType(item.token_d_info.token_id).class}`}>
+            {getPositionType(item.token_d_info.token_id).label}
+            <span className="ml-1.5">{toInternationalCurrencySystem_number(leverage)}x</span>
+          </span>
+        </td>
+        <td>${toInternationalCurrencySystem_number(sizeValue)}</td>
+        <td>${toInternationalCurrencySystem_number(netValue)}</td>
+        <td>
+          <div className="flex items-center">
+            <p className="mr-2.5">
+              {toInternationalCurrencySystem_number(collateral)}
+              <span className="ml-1">{assetC.metadata?.symbol}</span>
+            </p>
+            <div
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleChangeCollateralButtonClick();
+              }}
+            >
+              <AddCollateral />
+            </div>
+          </div>
+        </td>
+        <td>${toInternationalCurrencySystem_number(entryPrice)}</td>
+        <td>${toInternationalCurrencySystem_number(indexPrice)}</td>
+        <td>$-</td>
+        <td>
+          <div className="flex items-center">
+            <p className="text-gray-1000"> -</p>
+            {/* <span className="text-gray-400 text-xs">-</span> */}
+          </div>
+        </td>
+        <td className="pr-5">
+          <div
+            className="text-gray-300 text-sm border border-dark-300 text-center h-6 rounded flex justify-center items-center"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleClosePositionButtonClick();
+            }}
+          >
+            Close
+          </div>
+        </td>
+      </tr>
+    </Link>
+  );
+};
 
 export default TradingTable;
