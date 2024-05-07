@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-import { defaultNetwork, missingPriceTokens } from "../utils/config";
+import { defaultNetwork, missingPriceTokens, BRRR_TOKEN } from "../utils/config";
 import { transformAssets, transformFarms } from "../transformers/asstets";
 import getAssets from "../api/get-assets";
 import getFarm, { getAllFarms } from "../api/get-farm";
@@ -45,11 +45,20 @@ export const assetSlice = createSlice({
       missingPriceTokens.forEach((missingToken) => {
         const missingTokenId = missingToken[defaultNetwork];
         if (missingTokenId && state.data[missingTokenId] && !state.data[missingTokenId]["price"]) {
-          state.data[missingTokenId]["price"] = {
-            decimals: action.payload[missingToken.mainnet].decimal,
-            usd: Number(action.payload[missingToken.mainnet].price),
-            multiplier: "1",
-          };
+          if (missingTokenId === "brrr.ft.ref-labs.testnet") {
+            // for pubtestnet env
+            state.data[missingTokenId]["price"] = {
+              decimals: action.payload[BRRR_TOKEN.mainnet].decimal,
+              usd: Number(action.payload[BRRR_TOKEN.mainnet].price),
+              multiplier: "1",
+            };
+          } else {
+            state.data[missingTokenId]["price"] = {
+              decimals: action.payload[missingToken.mainnet].decimal,
+              usd: Number(action.payload[missingToken.mainnet].price),
+              multiplier: "1",
+            };
+          }
         }
       });
     });
