@@ -1,5 +1,6 @@
 import { parseResponse, URLForEndpoint } from "./request";
 import getConfig, { defaultNetwork } from "../utils/config";
+import { getAuthenticationHeaders } from "../utils/signature";
 
 const config = getConfig(defaultNetwork);
 
@@ -18,6 +19,7 @@ class DataSource {
     headers.append("Content-Type", "application/json");
     headers.append("pragma", "no-cache");
     headers.append("cache-control", "no-cache");
+    headers.append("Authentication", getAuthenticationHeaders(endPoint));
 
     const request = {
       headers,
