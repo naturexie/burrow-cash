@@ -40,5 +40,19 @@ export function useMarginConfigToken() {
     }
   });
 
-  return { filterMarginConfigList, marginConfigTokens, categoryAssets1, categoryAssets2 };
+  const getPositionType = (token_id) => {
+    const type = marginConfigTokens.registered_tokens[token_id];
+    return {
+      label: type === 1 ? "Short" : "Long",
+      class: type === 1 ? "text-red-50" : "text-primary",
+    };
+  };
+
+  return {
+    filterMarginConfigList,
+    marginConfigTokens,
+    categoryAssets1,
+    categoryAssets2,
+    getPositionType,
+  };
 }
