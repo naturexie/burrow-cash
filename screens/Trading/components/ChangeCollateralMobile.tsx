@@ -11,26 +11,22 @@ import { toInternationalCurrencySystem_number } from "../../../utils/uiNumber";
 
 export const ModalContext = createContext(null) as any;
 const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
-  const { getAssetDetails } = useMarginAccount();
+  const { getAssetDetails, parseTokenValue } = useMarginAccount();
   const {
     positionType,
     leverage,
     assetC,
     assetD,
     assetP,
-    collateral,
     entryPrice,
     sizeValue,
     netValue,
+    token_p_amount,
+    token_d_amount,
   } = rowData;
-  const {
-    price: priceC,
-    symbol: symbolC,
-    decimals: decimalsC,
-    icon: iconC,
-  } = getAssetDetails(assetC);
-  console.log(rowData);
-  const dispatch = useAppDispatch();
+  const { decimals: decimalsD } = getAssetDetails(assetD);
+  const { decimals: decimalsP } = getAssetDetails(assetP);
+  const { symbol: symbolC, icon: iconC } = getAssetDetails(assetC);
   const theme = useTheme();
   const [selectedCollateralType, setSelectedCollateralType] = useState(DEFAULT_POSITION);
   const [ChangeCollateralTab, setChangeCollateralTab] = useState("Add");
@@ -141,7 +137,22 @@ const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
                   <div className="flex items-center justify-between text-sm mb-4">
                     <div className="text-gray-300">Position Size</div>
                     <div>
-                      -
+                      {positionType.label === "Long"
+                        ? toInternationalCurrencySystem_number(
+                            parseTokenValue(token_p_amount, decimalsP),
+                          )
+                        : toInternationalCurrencySystem_number(
+                            parseTokenValue(token_d_amount, decimalsD),
+                          )}
+                      <span className="ml-1.5">
+                        {positionType.label === "Long"
+                          ? assetP.metadata?.symbol === "wNEAR"
+                            ? "NEAR"
+                            : assetP.metadata?.symbol
+                          : assetD.metadata?.symbol === "wNEAR"
+                          ? "NEAR"
+                          : assetD.metadata?.symbol}
+                      </span>
                       <span className="text-xs text-gray-300 ml-1.5">
                         (${toInternationalCurrencySystem_number(sizeValue)})
                       </span>

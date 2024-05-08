@@ -207,6 +207,8 @@ const PositionRow = ({
     sizeValue,
     netValue,
     entryPrice,
+    token_p_amount: item.token_p_amount,
+    token_d_amount: item.token_d_info.balance,
   };
   return (
     <Link href={`/trading/${item.token_p_id}`} key={index}>
