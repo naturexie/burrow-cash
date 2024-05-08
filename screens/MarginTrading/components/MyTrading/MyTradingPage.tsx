@@ -33,8 +33,8 @@ const MyMarginTradingPage = () => {
       } else {
         shortTotal += sizeValue;
       }
-      const collateral = parseTokenValue(item.token_c_info.balance, decimalsC);
-      collateralTotal += collateral;
+      const netValue = parseTokenValue(item.token_c_info.balance, decimalsC) * (priceC || 0);
+      collateralTotal += netValue;
     });
     setTotalLongSizeValue(longTotal);
     setTotalShortSizeValue(shortTotal);
@@ -94,15 +94,17 @@ const MyMarginTradingPage = () => {
                       icon: iconC,
                       symbol: symbolC,
                       decimals: decimalsC,
+                      price: priceC,
                     } = getAssetDetails(assetC);
-                    const collateral = parseTokenValue(item.token_c_info.balance, decimalsC);
+                    const netValue =
+                      parseTokenValue(item.token_c_info.balance, decimalsC) * (priceC || 0);
 
                     return (
                       <div key={index} className="flex items-center justify-center mb-3">
                         <img src={iconC} alt="" className="w-4 h-4" />
                         <p className="ml-2 mr-8 text-xs text-gray-300">{symbolC}</p>
                         <div className="text-xs ml-auto">
-                          ${toInternationalCurrencySystem_number(collateral)}
+                          ${toInternationalCurrencySystem_number(netValue)}
                         </div>
                       </div>
                     );

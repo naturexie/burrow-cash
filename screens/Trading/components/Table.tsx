@@ -11,6 +11,7 @@ const TradingTable = ({ positionsList }) => {
   const [selectedTab, setSelectedTab] = useState("positions");
   const [isClosePositionModalOpen, setIsClosePositionMobileOpen] = useState(false);
   const [isChangeCollateralMobileOpen, setIsChangeCollateralMobileOpen] = useState(false);
+  const [selectedRowData, setSelectedRowData] = useState(null);
   const {
     useMarginAccountList,
     parseTokenValue,
@@ -25,7 +26,8 @@ const TradingTable = ({ positionsList }) => {
   const handleClosePositionButtonClick = () => {
     setIsClosePositionMobileOpen(true);
   };
-  const handleChangeCollateralButtonClick = () => {
+  const handleChangeCollateralButtonClick = (rowData) => {
+    setSelectedRowData(rowData);
     setIsChangeCollateralMobileOpen(true);
   };
   return (
@@ -83,6 +85,7 @@ const TradingTable = ({ positionsList }) => {
                       e.stopPropagation();
                       setIsChangeCollateralMobileOpen(false);
                     }}
+                    rowData={selectedRowData}
                   />
                 )}
                 {isClosePositionModalOpen && (
@@ -120,11 +123,14 @@ const TradingTable = ({ positionsList }) => {
                     <td>-</td>
                     <td className="text-red-50">-</td>
                     <td>$-</td>
-                    <td>- -</td>
-                    <td>$-</td>
+                    <td>100 NEAR</td>
+                    <td>$1.80</td>
                     <td>--</td>
                     <td className="pr-5">
-                      <div>-{/* <Export /> */}</div>
+                      <div>
+                        2024-01-16, 13:23
+                        {/* <Export /> */}
+                      </div>
                     </td>
                   </tr>
                 </Link>
@@ -191,6 +197,17 @@ const PositionRow = ({
       ? 0
       : netValue / sizeValueShort;
   const indexPrice = positionType.label === "Long" ? priceP : priceD;
+  const rowData = {
+    positionType,
+    leverage,
+    assetC,
+    assetP,
+    assetD,
+    collateral,
+    sizeValue,
+    netValue,
+    entryPrice,
+  };
   return (
     <Link href={`/trading/${item.token_p_id}`} key={index}>
       <tr className="text-base hover:bg-dark-100 cursor-pointer font-normal">
@@ -213,7 +230,7 @@ const PositionRow = ({
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                handleChangeCollateralButtonClick();
+                handleChangeCollateralButtonClick(rowData);
               }}
             >
               <AddCollateral />

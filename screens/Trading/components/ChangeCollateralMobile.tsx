@@ -6,9 +6,30 @@ import { DEFAULT_POSITION } from "../../../utils/config";
 import { CloseIcon } from "../../../components/Modal/svg";
 import { RefLogoIcon, RightArrow, RightShoulder } from "./TradingIcon";
 import { NearIcon } from "../../MarginTrading/components/Icon";
+import { useMarginAccount } from "../../../hooks/useMarginAccount";
+import { toInternationalCurrencySystem_number } from "../../../utils/uiNumber";
 
 export const ModalContext = createContext(null) as any;
-const ChangeCollateralMobile = ({ open, onClose }) => {
+const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
+  const { getAssetDetails } = useMarginAccount();
+  const {
+    positionType,
+    leverage,
+    assetC,
+    assetD,
+    assetP,
+    collateral,
+    entryPrice,
+    sizeValue,
+    netValue,
+  } = rowData;
+  const {
+    price: priceC,
+    symbol: symbolC,
+    decimals: decimalsC,
+    icon: iconC,
+  } = getAssetDetails(assetC);
+  console.log(rowData);
   const dispatch = useAppDispatch();
   const theme = useTheme();
   const [selectedCollateralType, setSelectedCollateralType] = useState(DEFAULT_POSITION);
@@ -26,7 +47,9 @@ const ChangeCollateralMobile = ({ open, onClose }) => {
     { label: "75%", value: "75" },
     { label: "Max", value: "Max" },
   ];
-
+  const handleChange = (e) => {
+    console.log(e);
+  };
   return (
     <MUIModal open={open} onClose={onClose}>
       <Wrapper
@@ -45,8 +68,21 @@ const ChangeCollateralMobile = ({ open, onClose }) => {
             <div className="flex items-center justify-between">
               <div className="flex items-center justify-center">
                 <p className="text-lg mr-2">Change Collateral</p>
-                <div className="bg-opacity-10  text-xs py-0.5 pl-2.5 pr-1.5 rounded bg-primary text-primary ">
-                  Long NEAR
+                <div
+                  className={`bg-opacity-10  text-xs py-0.5 pl-2.5 pr-1.5 rounded text-primary ${
+                    positionType.class
+                  } ${positionType.label === "Long" ? "bg-primary" : "bg-red-50"}`}
+                >
+                  {positionType.label}
+                  <span className="ml-1.5">
+                    {positionType.label === "Long"
+                      ? assetP.metadata?.symbol === "wNEAR"
+                        ? "NEAR"
+                        : assetP.metadata?.symbol
+                      : assetD.metadata?.symbol === "wNEAR"
+                      ? "NEAR"
+                      : assetD.metadata?.symbol}
+                  </span>
                 </div>
               </div>
               <div className="cursor-pointer">
@@ -76,16 +112,16 @@ const ChangeCollateralMobile = ({ open, onClose }) => {
                 <div className="py-2">
                   <div className=" bg-dark-600 border border-dark-500 pt-3 pb-2.5 pr-3 pl-2.5 rounded-md flex items-center justify-between mb-1.5">
                     <div>
-                      <input type="text" value={0} />
-                      <p className="text-gray-300 text-xs mt-1.5">Add: $0.00</p>
+                      <input type="text" value={0} onChange={handleChange} />
+                      <p className="text-gray-300 text-xs mt-1.5">Add: $-</p>
                     </div>
                     <div>
                       <div className="flex items-center justify-end">
-                        <NearIcon />
-                        <p className="text-base ml-1">USDC</p>
+                        <img src={iconC} alt="" className="w-4 h-4" />
+                        <p className="text-base ml-1">{symbolC}</p>
                       </div>
                       <p className="text-xs text-gray-300 mt-1.5">
-                        Max Available: <span className="text-white">123.23</span>
+                        Max Available: <span className="text-white">-</span>
                       </p>
                     </div>
                   </div>
@@ -105,25 +141,27 @@ const ChangeCollateralMobile = ({ open, onClose }) => {
                   <div className="flex items-center justify-between text-sm mb-4">
                     <div className="text-gray-300">Position Size</div>
                     <div>
-                      45.2435 NEAR
-                      <span className="text-xs text-gray-300 ml-1.5">($149.35)</span>
+                      -
+                      <span className="text-xs text-gray-300 ml-1.5">
+                        (${toInternationalCurrencySystem_number(sizeValue)})
+                      </span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between text-sm mb-4">
-                    <div className="text-gray-300">Collateral (USDC)</div>
-                    <div>$1.23</div>
+                    <div className="text-gray-300">Collateral ({symbolC})</div>
+                    <div>${toInternationalCurrencySystem_number(netValue)}</div>
                   </div>
                   <div className="flex items-center justify-between text-sm mb-4">
                     <div className="text-gray-300">Leverage</div>
-                    <div>1.5X</div>
+                    <div>{toInternationalCurrencySystem_number(leverage)}X</div>
                   </div>
                   <div className="flex items-center justify-between text-sm mb-4">
                     <div className="text-gray-300">Entry Price</div>
-                    <div>$3.23</div>
+                    <div>${toInternationalCurrencySystem_number(entryPrice)}</div>
                   </div>
                   <div className="flex items-center justify-between text-sm mb-4">
                     <div className="text-gray-300">Liq. Price</div>
-                    <div>$1.78</div>
+                    <div>$-</div>
                   </div>
                   <div className="flex items-center bg-primary justify-between text-dark-200 text-base rounded-md h-12 text-center cursor-pointer">
                     <div className="flex-grow">Add Collateral</div>
@@ -134,16 +172,16 @@ const ChangeCollateralMobile = ({ open, onClose }) => {
                 <div className="py-2">
                   <div className=" bg-dark-600 border border-dark-500 pt-3 pb-2.5 pr-3 pl-2.5 rounded-md flex items-center justify-between mb-1.5">
                     <div>
-                      <input type="text" value={0} />
-                      <p className="text-gray-300 text-xs mt-1.5">Add: $0.00</p>
+                      <input type="text" value={0} onChange={handleChange} />
+                      <p className="text-gray-300 text-xs mt-1.5">Add: $-</p>
                     </div>
                     <div>
                       <div className="flex items-center justify-end">
-                        <NearIcon />
-                        <p className="text-base ml-1">USDC</p>
+                        <img src={iconC} alt="" className="w-4 h-4" />
+                        <p className="text-base ml-1">{symbolC}</p>
                       </div>
                       <p className="text-xs text-gray-300 mt-1.5">
-                        Max Available: <span className="text-white">123.23</span>
+                        Max Available: <span className="text-white">-</span>
                       </p>
                     </div>
                   </div>
@@ -163,36 +201,38 @@ const ChangeCollateralMobile = ({ open, onClose }) => {
                   <div className="flex items-center justify-between text-sm mb-4">
                     <div className="text-gray-300">Position Size</div>
                     <div>
-                      45.2435 NEAR
-                      <span className="text-xs text-gray-300 ml-1.5">($149.35)</span>
+                      -
+                      <span className="text-xs text-gray-300 ml-1.5">
+                        (${toInternationalCurrencySystem_number(sizeValue)})
+                      </span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between text-sm mb-4">
-                    <div className="text-gray-300">Collateral</div>
+                    <div className="text-gray-300">Collateral ({symbolC})</div>
                     <div className="flex items-center justify-center">
-                      <span className="text-gray-300 mr-2 line-through">$101.23</span>
-                      <RightArrow />
-                      <p className="ml-2">$1.23</p>
+                      {/* <span className="text-gray-300 mr-2 line-through">$101.23</span> */}
+                      {/* <RightArrow /> */}
+                      <p className="ml-2">${toInternationalCurrencySystem_number(netValue)}</p>
                     </div>
                   </div>
                   <div className="flex items-center justify-between text-sm mb-4">
                     <div className="text-gray-300">Leverage</div>
                     <div className="flex items-center justify-center">
-                      <span className="text-gray-300 mr-2 line-through">1.1X</span>
-                      <RightArrow />
-                      <p className="ml-2">1.5X</p>
+                      {/* <span className="text-gray-300 mr-2 line-through">1.1X</span>
+                      <RightArrow /> */}
+                      <p className="ml-2">{toInternationalCurrencySystem_number(leverage)}X</p>
                     </div>
                   </div>
                   <div className="flex items-center justify-between text-sm mb-4">
                     <div className="text-gray-300">Entry Price</div>
-                    <div>$3.23</div>
+                    <div>${toInternationalCurrencySystem_number(entryPrice)}</div>
                   </div>
                   <div className="flex items-center justify-between text-sm mb-4">
                     <div className="text-gray-300">Liq. Price</div>
                     <div className="flex items-center justify-center">
-                      <span className="text-gray-300 mr-2 line-through">$1.78</span>
-                      <RightArrow />
-                      <p className="ml-2">$3.02</p>
+                      {/* <span className="text-gray-300 mr-2 line-through">$-</span>
+                      <RightArrow /> */}
+                      <p className="ml-2">$-</p>
                     </div>
                   </div>
                   <div className="flex items-center bg-red-50 justify-between text-dark-200 text-base rounded-md h-12 text-center cursor-pointer">
