@@ -12,9 +12,10 @@ import { getAssets } from "../../../redux/assetsSelectors";
 import { useMarginConfigToken } from "../../../hooks/useMarginConfig";
 import { getMarginConfig } from "../../../redux/marginConfigSelectors";
 import { setCategoryAssets1, setCategoryAssets2 } from "../../../redux/marginTrading";
-import { toInternationalCurrencySystem_number } from "../../../utils/uiNumber";
+import { toInternationalCurrencySystem_number, toDecimal } from "../../../utils/uiNumber";
 import { useEstimateSwap } from "../../../hooks/useEstimateSwap";
 import { NearIcon } from "../../MarginTrading/components/Icon";
+
 // main components
 const TradingOperate = () => {
   const assets = useAppSelector(getAssets);
@@ -126,44 +127,16 @@ const TradingOperate = () => {
   // condition btn iswhether disabled
   useEffect(() => {
     const setDisableBasedOnInputs = () => {
-      const currentBalance1 = Number(ReduxcategoryCurrentBalance1) || 0;
       const currentBalance2 = Number(ReduxcategoryCurrentBalance2) || 0;
 
-      let inputValue;
-      let outputValue;
-      if (activeTab === "long") {
-        inputValue = longInput;
-        outputValue = longOutput;
-      } else {
-        inputValue = shortInput;
-        outputValue = shortOutput;
-      }
+      const inputValue = activeTab === "long" ? longInput : shortInput;
 
       const isValidInput = isValidDecimalString(inputValue);
-      const isValidOutput = isValidDecimalString(outputValue);
-      console.log(
-        isValidInput,
-        isValidOutput,
-        Number(inputValue) < currentBalance2,
-        Number(outputValue) < currentBalance1,
-      );
-      setIsDisabled(
-        !isValidInput ||
-          !isValidOutput ||
-          !(Number(inputValue) < currentBalance2) ||
-          !(Number(outputValue) < currentBalance1),
-      );
+
+      setIsDisabled(!isValidInput || !(Number(inputValue) <= currentBalance2));
     };
     setDisableBasedOnInputs();
-  }, [
-    activeTab,
-    ReduxcategoryCurrentBalance1,
-    ReduxcategoryCurrentBalance2,
-    longInput,
-    longOutputUsd,
-    shortInput,
-    shortOutputUsd,
-  ]);
+  }, [activeTab, ReduxcategoryCurrentBalance2, longInput, shortInput]);
 
   const isValidDecimalString = (str) => {
     if (str <= 0) return false;
@@ -191,11 +164,12 @@ const TradingOperate = () => {
 
   // get cate1 amount start
   const [tokenInAmount, setTokenInAmount] = useState(0);
-  console.log(tokenInAmount, "176>>>>>>>>>>>");
   const estimateData = useEstimateSwap({
-    tokenIn_id: ReduxcategoryAssets2?.token_id,
-    tokenOut_id: ReduxcategoryAssets1?.token_id,
-    tokenIn_amount: String(tokenInAmount),
+    tokenIn_id:
+      activeTab == "long" ? ReduxcategoryAssets2?.token_id : ReduxcategoryAssets1?.token_id,
+    tokenOut_id:
+      activeTab == "long" ? ReduxcategoryAssets1?.token_id : ReduxcategoryAssets2?.token_id,
+    tokenIn_amount: toDecimal(tokenInAmount),
     account_id: accountId,
     simplePools,
     stablePools,
@@ -204,64 +178,73 @@ const TradingOperate = () => {
   });
 
   // long & short input change fn.
-  const inputPriceChange = _.debounce((value) => {
-    if (activeTab == "long") {
-      setLongInput(value); // amount
-    } else {
-      setShortInput(value);
-    }
+  const inputPriceChange = _.debounce((newValue) => {
+    // eslint-disable-next-line no-unused-expressions
+    activeTab === "long" ? setLongInput(newValue) : setShortInput(newValue);
   }, 50);
 
   /**
    * longInput shortInput deal start
    *  */
   useEffect(() => {
-    // func getAssetPrice
     const inputUsdCharcate1 = getAssetPrice(ReduxcategoryAssets1);
     const inputUsdCharcate2 = getAssetPrice(ReduxcategoryAssets2);
 
-    // func updateOutput
     if (inputUsdCharcate1 && estimateData) {
       updateOutput(activeTab, inputUsdCharcate1);
     }
 
-    // func updateInputAmounts
     if (inputUsdCharcate2) {
-      updateInputAmounts(activeTab, inputUsdCharcate2);
+      updateInputAmounts(activeTab, inputUsdCharcate2, inputUsdCharcate1);
     }
-    //
-  }, [longInput, shortInput, rangeMount, estimateData, slippageTolerance, estimateData]);
+  }, [longInput, shortInput, rangeMount, estimateData, slippageTolerance]);
 
   function getAssetPrice(categoryId) {
     return categoryId ? assets.data[categoryId["token_id"]].price?.usd : 0;
   }
 
   function updateOutput(tab, inputUsdCharcate) {
+    /**
+     * @param inputUsdCharcate  category1 current price
+     */
     const input = tab === "long" ? longInput : shortInput;
     const inputUsd = tab === "long" ? longInputUsd : shortInputUsd;
+    // set output
     const outputSetter = tab === "long" ? setLongOutput : setShortOutput;
+    // set output usd
     const outputUsdSetter = tab === "long" ? setLongOutputUsd : setShortOutputUsd;
-
+    //
     if (input == undefined || inputUsd == 0) {
       outputSetter(undefined);
       outputUsdSetter(0);
-    } else {
+    } else if (tab == "long") {
       outputSetter(estimateData?.amount_out || 0);
       outputUsdSetter(inputUsdCharcate * (estimateData.amount_out || 0));
+    } else if (tab == "short") {
+      outputSetter(tokenInAmount as any);
+      outputUsdSetter(inputUsdCharcate * tokenInAmount);
     }
   }
 
-  function updateInputAmounts(tab, inputUsdCharcate) {
+  function updateInputAmounts(tab, inputUsdCharcate2, inputUsdCharcate1) {
+    /**
+     * @param inputUsdCharcate2  category2 current price
+     */
     const input = tab === "long" ? longInput : shortInput;
     const inputAmount = input ? Number(input) : 0;
     const openFeeAmount = (inputAmount * config.open_position_fee_rate) / 10000;
+    const adjustedInputAmount = (inputAmount - openFeeAmount) * inputUsdCharcate2 * rangeMount;
 
     const inputUsdSetter = tab === "long" ? setLongInputUsd : setShortInputUsd;
 
-    inputUsdSetter(inputUsdCharcate * inputAmount);
-    setTokenInAmount((inputAmount - openFeeAmount) * inputUsdCharcate * rangeMount);
+    // set input usd
+    inputUsdSetter(inputUsdCharcate2 * inputAmount);
 
-    console.log(inputAmount, "inputUsdCharcate", openFeeAmount, inputUsdCharcate, rangeMount);
+    if (tab === "long") {
+      setTokenInAmount(adjustedInputAmount / inputUsdCharcate2);
+    } else {
+      setTokenInAmount(adjustedInputAmount / inputUsdCharcate1);
+    }
   }
 
   // end
@@ -437,6 +420,7 @@ const TradingOperate = () => {
                       longInputName: ReduxcategoryAssets2,
                       longOutputName: ReduxcategoryAssets1,
                       assets,
+                      tokenInAmount,
                     }}
                   />
                 )}
@@ -548,6 +532,7 @@ const TradingOperate = () => {
                     longInputName: ReduxcategoryAssets2,
                     longOutputName: ReduxcategoryAssets1,
                     assets,
+                    tokenInAmount,
                   }}
                 />
               )}

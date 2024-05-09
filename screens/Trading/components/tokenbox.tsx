@@ -68,7 +68,7 @@ const TradingToken: React.FC<TradingTokenInter> = ({ tokenList, type, setOwnBanl
       return;
     }
 
-    const decimals = selectedAsset.metadata.decimals + selectedAsset.config.extra_decimals;
+    const { decimals } = selectedAsset.metadata;
     const waitUseKey = shrinkToken(account.balances[tokenId], decimals);
     setOwnBalance(toInternationalCurrencySystem_number(waitUseKey));
     setOwnBalanceDetail(waitUseKey);
@@ -131,10 +131,13 @@ const TradingToken: React.FC<TradingTokenInter> = ({ tokenList, type, setOwnBanl
         </div>
         <TokenThinArrow />
       </div>
-      <div onClick={sendBalance} className="text-xs flex justify-end text-gray-300">
-        Balance:&nbsp;
-        <span className="text-white border-b border-dashed border-dark-800">{ownBalance}</span>
-      </div>
+
+      {type == "cate2" && (
+        <div onClick={sendBalance} className="text-xs flex justify-end text-gray-300">
+          Balance:&nbsp;
+          <span className="text-white border-b border-dashed border-dark-800">{ownBalance}</span>
+        </div>
+      )}
       {/*  */}
       {showModal && (
         <div

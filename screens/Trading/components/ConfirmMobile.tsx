@@ -5,7 +5,7 @@ import { Wrapper } from "../../../components/Modal/style";
 import { DEFAULT_POSITION } from "../../../utils/config";
 import { CloseIcon } from "../../../components/Modal/svg";
 import { RefLogoIcon, RightShoulder } from "./TradingIcon";
-import { toInternationalCurrencySystem_number } from "../../../utils/uiNumber";
+import { toInternationalCurrencySystem_number, toDecimal } from "../../../utils/uiNumber";
 import { openPosition } from "../../../store/marginActions/openPosition";
 
 export const ModalContext = createContext(null) as any;
@@ -18,20 +18,10 @@ const ConfirmMobile = ({ open, onClose, action, confirmInfo }) => {
   const confirmOpenPosition = async () => {
     if (action == "Long") {
       try {
-        console.log({
-          token_c_amount: confirmInfo.longInput,
-          token_c_id: confirmInfo.longInputName?.token_id,
-          token_d_amount: confirmInfo.longInputUsd,
-          token_d_id: confirmInfo.longInputName?.token_id,
-          token_p_id: confirmInfo.longOutputName?.token_id,
-          min_token_p_amount: confirmInfo.estimateData.min_amount_out,
-          swap_indication: confirmInfo.estimateData.swap_indication,
-          assets: confirmInfo.assets.data,
-        });
         await openPosition({
           token_c_amount: confirmInfo.longInput,
           token_c_id: confirmInfo.longInputName?.token_id,
-          token_d_amount: confirmInfo.longInputUsd,
+          token_d_amount: confirmInfo.tokenInAmount,
           token_d_id: confirmInfo.longInputName?.token_id,
           token_p_id: confirmInfo.longOutputName?.token_id,
           min_token_p_amount: confirmInfo.estimateData.min_amount_out,
@@ -46,9 +36,9 @@ const ConfirmMobile = ({ open, onClose, action, confirmInfo }) => {
         await openPosition({
           token_c_amount: confirmInfo.longInput,
           token_c_id: confirmInfo.longInputName?.token_id,
-          token_d_amount: confirmInfo.longOutputUsd,
+          token_d_amount: confirmInfo.tokenInAmount,
           token_d_id: confirmInfo.longOutputName?.token_id,
-          token_p_id: confirmInfo.longOutputName?.token_id,
+          token_p_id: confirmInfo.longInputName?.token_id,
           min_token_p_amount: confirmInfo.estimateData.min_amount_out,
           swap_indication: confirmInfo.estimateData.swap_indication,
           assets: confirmInfo.assets.data,
