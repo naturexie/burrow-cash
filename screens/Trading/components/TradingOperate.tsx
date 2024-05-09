@@ -64,10 +64,28 @@ const TradingOperate = () => {
     }
   };
 
+  // for tab change
+  const initCateState = (tabString) => {
+    setRangeMount(1);
+    if (tabString == "long") {
+      console.log(tabString);
+      setShortInput(undefined);
+      setShortInputUsd(0);
+      setShortOutput(undefined);
+      setShortOutputUsd(0);
+    } else {
+      setLongInput(undefined);
+      setLongInputUsd(0);
+      setLongOutput(undefined);
+      setLongOutputUsd(0);
+    }
+  };
   // tab click event
   const handleTabClick = (tabString) => {
     setActiveTab(tabString);
+    initCateState(tabString);
   };
+
   const getTabClassName = (tabName) => {
     return activeTab === tabName
       ? "bg-primary text-dark-200 py-2.5 pl-6 pr-8 rounded-md"
@@ -206,11 +224,21 @@ const TradingOperate = () => {
       : 0;
     if (inputUsdCharcate1 && estimateData) {
       if (activeTab == "long") {
-        setLongOutput(estimateData?.amount_out || 0); // set cate1 amount
-        setLongOutputUsd(inputUsdCharcate1 * estimateData.amount_out || 0); // amount price
-      } else {
-        setShortOutput(estimateData?.amount_out || 0);
-        setShortOutputUsd(inputUsdCharcate1 * estimateData.amount_out || 0); // amount price
+        if (longInput == undefined || longInputUsd == 0) {
+          setLongOutput(undefined);
+          setLongOutputUsd(0);
+        } else {
+          setLongOutput(estimateData?.amount_out || 0); // set cate1 amount
+          setLongOutputUsd(inputUsdCharcate1 * estimateData.amount_out || 0); // amount price
+        }
+      } else if (activeTab == "short") {
+        if (shortInput == undefined || shortInputUsd == 0) {
+          setShortOutput(undefined);
+          setShortOutputUsd(0);
+        } else {
+          setShortOutput(estimateData?.amount_out || 0);
+          setShortOutputUsd(inputUsdCharcate1 * estimateData.amount_out || 0); // amount price
+        }
       }
     }
 
@@ -437,15 +465,17 @@ const TradingOperate = () => {
               <div className="absolute top-2 right-2">
                 <TradingToken tokenList={categoryAssets1} type="cate1" />
               </div>
-              <p className="text-gray-300 mt-2 text-xs">Long: ${shortOutputUsd}</p>
+              <p className="text-gray-300 mt-2 text-xs">Short: ${shortOutputUsd}</p>
             </div>
             <RangeSlider defaultValue={rangeMount} action="Short" setRangeMount={setRangeMount} />
             <div className="mt-5">
               <div className="flex items-center justify-between text-sm mb-4">
                 <div className="text-gray-300">Position Size</div>
                 <div>
-                  45.2435 NEAR
-                  <span className="text-xs text-gray-300 ml-1.5">($149.35)</span>
+                  {toInternationalCurrencySystem_number(shortOutput)} NEAR
+                  <span className="text-xs text-gray-300 ml-1.5">
+                    (${toInternationalCurrencySystem_number(shortOutputUsd)})
+                  </span>
                 </div>
               </div>
               <div className="flex items-center justify-between text-sm mb-4">
@@ -463,19 +493,57 @@ const TradingOperate = () => {
               <div className="flex items-center justify-between text-sm mb-4">
                 <div className="text-gray-300">Route</div>
                 <div className="flex items-center justify-center">
-                  <div className="border-r mr-1.5 pr-1.5 border-dark-800">
-                    <RefLogoIcon />
-                  </div>
-                  NEAR &gt; USDT.e &gt; USDC.e
+                  {estimateData?.tokensPerRoute[0].map((item, index) => {
+                    return (
+                      <>
+                        <div
+                          key={item.token_id + index}
+                          className="border-r mr-1.5 pr-1.5 border-dark-800"
+                        >
+                          {item.symbol === "wNEAR" ? (
+                            ""
+                          ) : (
+                            <img alt="" src={item.icon} style={{ width: "16px", height: "16px" }} />
+                          )}
+                        </div>
+                        <span>{item.symbol == "wNEAR" ? "NEAR" : item.symbol}</span>
+                        {index + 1 < estimateData?.tokensPerRoute[0].length ? (
+                          <span className="mx-2">&gt;</span>
+                        ) : (
+                          ""
+                        )}
+                      </>
+                    );
+                  })}
                 </div>
               </div>
               <div
                 className={`flex items-center justify-between  text-dark-200 text-base rounded-md h-12 text-center  ${
                   isDisabled ? "bg-slate-700 cursor-default" : "bg-red-50 cursor-pointer"
                 }`}
+                onClick={handleConfirmButtonClick}
               >
                 <div className="flex-grow">Short NEAR {rangeMount}x</div>
               </div>
+              {isConfirmModalOpen && (
+                <ConfirmMobile
+                  open={isConfirmModalOpen}
+                  onClose={() => setIsConfirmModalOpen(false)}
+                  action="Short"
+                  confirmInfo={{
+                    longInput: shortInput,
+                    longInputUsd: shortInputUsd,
+                    longOutput: shortOutput,
+                    longOutputUsd: shortOutputUsd,
+                    rangeMount,
+                    estimateData,
+                    indexPrice: assets.data[ReduxcategoryAssets1["token_id"]].price?.usd,
+                    longInputName: ReduxcategoryAssets2,
+                    longOutputName: ReduxcategoryAssets1,
+                    assets,
+                  }}
+                />
+              )}
             </div>
           </>
         )}

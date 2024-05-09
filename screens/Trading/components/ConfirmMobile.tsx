@@ -16,7 +16,6 @@ const ConfirmMobile = ({ open, onClose, action, confirmInfo }) => {
   const actionShowRedColor = action === "Long";
 
   const confirmOpenPosition = async () => {
-    console.log(confirmInfo);
     if (action == "Long") {
       try {
         console.log({
@@ -34,6 +33,21 @@ const ConfirmMobile = ({ open, onClose, action, confirmInfo }) => {
           token_c_id: confirmInfo.longInputName?.token_id,
           token_d_amount: confirmInfo.longInputUsd,
           token_d_id: confirmInfo.longInputName?.token_id,
+          token_p_id: confirmInfo.longOutputName?.token_id,
+          min_token_p_amount: confirmInfo.estimateData.min_amount_out,
+          swap_indication: confirmInfo.estimateData.swap_indication,
+          assets: confirmInfo.assets.data,
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    } else {
+      try {
+        await openPosition({
+          token_c_amount: confirmInfo.longInput,
+          token_c_id: confirmInfo.longInputName?.token_id,
+          token_d_amount: confirmInfo.longOutputUsd,
+          token_d_id: confirmInfo.longOutputName?.token_id,
           token_p_id: confirmInfo.longOutputName?.token_id,
           min_token_p_amount: confirmInfo.estimateData.min_amount_out,
           swap_indication: confirmInfo.estimateData.swap_indication,
@@ -67,7 +81,7 @@ const ConfirmMobile = ({ open, onClose, action, confirmInfo }) => {
                     actionShowRedColor ? "bg-primary text-primary" : "bg-red-50 text-red-50"
                   }`}
                 >
-                  Long NEAR {confirmInfo.rangeMount}X
+                  {action} NEAR {confirmInfo.rangeMount}X
                 </div>
               </div>
               <div className="cursor-pointer">
@@ -93,7 +107,7 @@ const ConfirmMobile = ({ open, onClose, action, confirmInfo }) => {
                     : confirmInfo.longOutputName?.metadata.symbol}
                 </p>
                 <span className="text-xs text-gray-300">
-                  Long ${toInternationalCurrencySystem_number(confirmInfo.longOutputUsd)}
+                  {action} ${toInternationalCurrencySystem_number(confirmInfo.longOutputUsd)}
                 </span>
               </div>
             </div>
@@ -153,7 +167,7 @@ const ConfirmMobile = ({ open, onClose, action, confirmInfo }) => {
               }`}
             >
               <div onClick={confirmOpenPosition} className="flex-grow">
-                Confirm Long NEAR {confirmInfo.rangeMount}X
+                Confirm {action} NEAR {confirmInfo.rangeMount}X
               </div>
             </div>
           </Box>
