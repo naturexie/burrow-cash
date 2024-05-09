@@ -77,7 +77,14 @@ export const useEstimateSwap = ({
         stablePools,
         stablePoolsDetail,
       },
+    }).catch((e) => {
+      return e;
     });
+    if (swapTodos.message) {
+      return {
+        swapError: swapTodos.message,
+      };
+    }
     console.log(swapTodos, "swapTodos>>>>>>>>81");
     const amountOut: string = getExpectedOutputFromSwapTodos(
       swapTodos,
