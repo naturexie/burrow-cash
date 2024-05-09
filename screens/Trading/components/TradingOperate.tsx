@@ -212,52 +212,59 @@ const TradingOperate = () => {
     }
   }, 50);
 
+  /**
+   * longInput shortInput deal start
+   *  */
   useEffect(() => {
-    let openFeeAmount;
-    let inputAmount;
-    const inputUsdCharcate2 = ReduxcategoryAssets2
-      ? assets.data[ReduxcategoryAssets2["token_id"]].price?.usd
-      : 0;
+    // func getAssetPrice
+    const inputUsdCharcate1 = getAssetPrice(ReduxcategoryAssets1);
+    const inputUsdCharcate2 = getAssetPrice(ReduxcategoryAssets2);
 
-    const inputUsdCharcate1 = ReduxcategoryAssets1
-      ? assets.data[ReduxcategoryAssets1["token_id"]].price?.usd
-      : 0;
+    // func updateOutput
     if (inputUsdCharcate1 && estimateData) {
-      if (activeTab == "long") {
-        if (longInput == undefined || longInputUsd == 0) {
-          setLongOutput(undefined);
-          setLongOutputUsd(0);
-        } else {
-          setLongOutput(estimateData?.amount_out || 0); // set cate1 amount
-          setLongOutputUsd(inputUsdCharcate1 * estimateData.amount_out || 0); // amount price
-        }
-      } else if (activeTab == "short") {
-        if (shortInput == undefined || shortInputUsd == 0) {
-          setShortOutput(undefined);
-          setShortOutputUsd(0);
-        } else {
-          setShortOutput(estimateData?.amount_out || 0);
-          setShortOutputUsd(inputUsdCharcate1 * estimateData.amount_out || 0); // amount price
-        }
-      }
+      updateOutput(activeTab, inputUsdCharcate1);
     }
 
+    // func updateInputAmounts
     if (inputUsdCharcate2) {
-      if (activeTab == "long") {
-        inputAmount = longInput ? Number(longInput) : 0;
-        openFeeAmount = (inputAmount * config.open_position_fee_rate) / 10000;
-        setLongInputUsd(inputUsdCharcate2 * inputAmount); // amount price
-        setTokenInAmount((inputAmount - openFeeAmount) * inputUsdCharcate2 * rangeMount); // calcaute
-        console.log(inputAmount, "inputUsdCharcate1", openFeeAmount, inputUsdCharcate2, rangeMount);
-      } else {
-        inputAmount = shortInput ? Number(shortInput) : 0;
-        openFeeAmount = (inputAmount * config.open_position_fee_rate) / 10000;
-        setShortInputUsd(inputUsdCharcate2 * inputAmount);
-        setTokenInAmount((inputAmount - openFeeAmount) * inputUsdCharcate2 * rangeMount);
-      }
+      updateInputAmounts(activeTab, inputUsdCharcate2);
     }
     //
-  }, [longInput, shortInput, rangeMount, estimateData, slippageTolerance]);
+  }, [longInput, shortInput, rangeMount, estimateData, slippageTolerance, estimateData]);
+
+  function getAssetPrice(categoryId) {
+    return categoryId ? assets.data[categoryId["token_id"]].price?.usd : 0;
+  }
+
+  function updateOutput(tab, inputUsdCharcate) {
+    const input = tab === "long" ? longInput : shortInput;
+    const inputUsd = tab === "long" ? longInputUsd : shortInputUsd;
+    const outputSetter = tab === "long" ? setLongOutput : setShortOutput;
+    const outputUsdSetter = tab === "long" ? setLongOutputUsd : setShortOutputUsd;
+
+    if (input == undefined || inputUsd == 0) {
+      outputSetter(undefined);
+      outputUsdSetter(0);
+    } else {
+      outputSetter(estimateData?.amount_out || 0);
+      outputUsdSetter(inputUsdCharcate * (estimateData.amount_out || 0));
+    }
+  }
+
+  function updateInputAmounts(tab, inputUsdCharcate) {
+    const input = tab === "long" ? longInput : shortInput;
+    const inputAmount = input ? Number(input) : 0;
+    const openFeeAmount = (inputAmount * config.open_position_fee_rate) / 10000;
+
+    const inputUsdSetter = tab === "long" ? setLongInputUsd : setShortInputUsd;
+
+    inputUsdSetter(inputUsdCharcate * inputAmount);
+    setTokenInAmount((inputAmount - openFeeAmount) * inputUsdCharcate * rangeMount);
+
+    console.log(inputAmount, "inputUsdCharcate", openFeeAmount, inputUsdCharcate, rangeMount);
+  }
+
+  // end
 
   return (
     <div className="w-full pt-4 px-4 pb-9">
