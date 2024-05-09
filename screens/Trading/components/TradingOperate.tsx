@@ -158,8 +158,8 @@ const TradingOperate = () => {
   // get cate1 amount start
   const [tokenInAmount, setTokenInAmount] = useState(0);
   const estimateData = useEstimateSwap({
-    tokenIn_id: ReduxcategoryAssets2.token_id,
-    tokenOut_id: ReduxcategoryAssets1.token_id,
+    tokenIn_id: ReduxcategoryAssets2?.token_id,
+    tokenOut_id: ReduxcategoryAssets1?.token_id,
     tokenIn_amount: String(tokenInAmount),
     account_id: accountId,
     simplePools,
@@ -180,7 +180,9 @@ const TradingOperate = () => {
   useEffect(() => {
     let openFeeAmount;
     let inputAmount;
-    const inputUsdChar = assets.data[ReduxcategoryAssets2["token_id"]].price?.usd;
+    const inputUsdChar = ReduxcategoryAssets2
+      ? assets.data[ReduxcategoryAssets2["token_id"]].price?.usd
+      : 0;
 
     if (inputUsdChar) {
       if (activeTab == "long") {
