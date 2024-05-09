@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import _ from "lodash";
 import { fetchAllPools, getStablePools, init_env } from "@ref-finance/ref-sdk";
+import { display } from "@mui/system";
 import TradingToken from "./tokenbox";
 import { RefLogoIcon, SetUp, ShrinkArrow } from "./TradingIcon";
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
@@ -27,7 +28,10 @@ const TradingOperate = () => {
 
   const dispatch = useAppDispatch();
   const [activeTab, setActiveTab] = useState("long");
-  const [showSetUpPopup, setShowSetUpPopup] = useState(false);
+
+  // for slip
+  // const [showSetUpPopup, setShowSetUpPopup] = useState(false);
+
   const [selectedSetUpOption, setSelectedSetUpOption] = useState("auto");
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [rangeMount, setRangeMount] = useState(1);
@@ -36,6 +40,8 @@ const TradingOperate = () => {
   //
   const [longInput, setLongInput] = useState();
   const [shortInput, setShortInput] = useState();
+  const [longOutput, setLongOnput] = useState();
+  const [shortOutput, setShortOutput] = useState();
 
   // amount
   const [longInputUsd, setLongInputUsd] = useState(0);
@@ -57,18 +63,18 @@ const TradingOperate = () => {
       : "text-gray-300 py-2.5 pl-8 pr-10";
   };
 
-  // mouse leave and enter event
-  let timer;
-  const handleMouseEnter = () => {
-    clearTimeout(timer);
-    setShowSetUpPopup(true);
-  };
-  const handleMouseLeave = () => {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      setShowSetUpPopup(false);
-    }, 200);
-  };
+  // mouse leave and enter event for slip
+  // let timer;
+  // const handleMouseEnter = () => {
+  //   clearTimeout(timer);
+  //   setShowSetUpPopup(true);
+  // };
+  // const handleMouseLeave = () => {
+  //   clearTimeout(timer);
+  //   timer = setTimeout(() => {
+  //     setShowSetUpPopup(false);
+  //   }, 200);
+  // };
 
   // slippageTolerance change ecent
   const [slippageTolerance, setSlippageTolerance] = useState(0.5);
@@ -88,7 +94,7 @@ const TradingOperate = () => {
     setIsConfirmModalOpen(true);
   };
 
-  // condition btn is disabled
+  // condition btn iswhether disabled
   useEffect(() => {
     const setDisableBasedOnInputs = () => {
       const currentBalance1 = Number(ReduxcategoryCurrentBalance1) || 0;
@@ -149,8 +155,8 @@ const TradingOperate = () => {
   }
   // pools end
 
+  // get cate1 amount start
   const [tokenInAmount, setTokenInAmount] = useState(0);
-  // get cate1 amount
   const estimateData = useEstimateSwap({
     tokenIn_id: ReduxcategoryAssets2.token_id,
     tokenOut_id: ReduxcategoryAssets1.token_id,
@@ -159,67 +165,48 @@ const TradingOperate = () => {
     simplePools,
     stablePools,
     stablePoolsDetail,
-    slippageTolerance: slippageTolerance / 100, // test
+    slippageTolerance: slippageTolerance / 100,
   });
-  //
-  // useEffect(() => {
-  //   const longInputUsdChar = assets.data[ReduxcategoryAssets2["token_id"]].price?.usd;
-
-  //   let openFeeAmount;
-  //   let tknc;
-  //   if (activeTab == "long") {
-  //     if (longInputUsdChar && longInput) {
-  //       setLongInputUsd(longInputUsdChar * Number(longInput));
-  //       openFeeAmount = (longInput * config.open_position_fee_rate) / 10000;
-  //       tknc = (longInput - openFeeAmount) * longInputUsdChar * rangeMount;
-  //     }
-  //     setTokenInAmount(tknc);
-  //   } else if (longInputUsdChar && shortInput) {
-  //     setShortInputUsd(longInputUsdChar * Number(shortInput));
-  //     openFeeAmount = (shortInput * config.open_position_fee_rate) / 10000;
-  //     tknc = (shortInput - openFeeAmount) * longInputUsdChar * rangeMount;
-  //     setTokenInAmount(tknc);
-  //   }
-  //   //
-  // }, [longInput, shortInput]);
 
   // long & short input change fn.
   const inputPriceChange = (value) => {
+    if (activeTab == "long") {
+      setLongInput(value); // amount
+    } else {
+      setShortInput(value);
+    }
+  };
+
+  useEffect(() => {
     let openFeeAmount;
     let inputAmount;
     const inputUsdChar = assets.data[ReduxcategoryAssets2["token_id"]].price?.usd;
 
     if (inputUsdChar) {
       if (activeTab == "long") {
-        inputAmount = Number(value);
+        inputAmount = longInput ? Number(longInput) : 0;
         openFeeAmount = (inputAmount * config.open_position_fee_rate) / 10000;
-        setLongInput(inputAmount); // amount
         setLongInputUsd(inputUsdChar * inputAmount); // amount price
         setTokenInAmount((inputAmount - openFeeAmount) * inputUsdChar * rangeMount); // calcaute
-        setLongOutputUsd(estimateData?.amount_out); // set cate1 amount
+        console.log(estimateData, "estimateData>>tradingoperate191");
+        setLongOutputUsd(estimateData?.amount_out || 0); // set cate1 amount
 
         /* *
          * wait set cate1 price
          * */
       } else {
-        inputAmount = Number(value);
+        inputAmount = shortInput ? Number(shortInput) : 0;
         openFeeAmount = (inputAmount * config.open_position_fee_rate) / 10000;
-        setShortInput(inputAmount);
         setShortInputUsd(inputUsdChar * inputAmount);
         setTokenInAmount((inputAmount - openFeeAmount) * inputUsdChar * rangeMount);
-        setShortOutputUsd(estimateData?.amount_out);
+        setShortOutputUsd(estimateData?.amount_out || 0);
         /* *
          * wait set cate1 price
          * */
       }
     }
-
-    // const obj = {
-    //   longInput: setLongInput,
-    //   shortInput: setShortInput,
-    // };
-    // return obj[flag](value);
-  };
+    //
+  }, [longInput, shortInput, rangeMount]);
 
   return (
     <div className="w-full pt-4 px-4 pb-9">
@@ -239,51 +226,48 @@ const TradingOperate = () => {
             Short NEAR
           </div>
         </div>
-        <div
-          className="relative z-40 cursor-pointer "
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
+        {/* slip start */}
+        <div className="relative z-40 cursor-pointer slip-fater">
           <SetUp />
-          {showSetUpPopup && (
-            <div
-              onMouseLeave={handleMouseLeave}
-              className="absolute top-10 right-0 bg-dark-250 border border-dark-500 rounded-md py-6 px-4"
-            >
-              <p className="text-base mb-6">Max. Slippage Setting</p>
-              <div className="flex items-center justify-between h-10">
-                <div className="bg-dark-200 p-1 rounded-md flex items-center mr-3.5">
-                  <div
-                    className={`py-2 px-5 ${
-                      selectedSetUpOption === "auto" ? "bg-gray-400 rounded " : ""
-                    }`}
-                    onClick={() => handleSetUpOptionClick("auto")}
-                  >
-                    Auto
-                  </div>
-                  <div
-                    className={`py-2 px-5 ${
-                      selectedSetUpOption === "custom" ? "bg-gray-400 rounded " : ""
-                    }`}
-                    onClick={() => handleSetUpOptionClick("custom")}
-                  >
-                    Custom
-                  </div>
+
+          <div className="slip-child absolute top-8 right-0 bg-dark-250 border border-dark-500 rounded-md py-6 px-4">
+            <p className="text-base mb-6">Max. Slippage Setting</p>
+            <div className="flex items-center justify-between h-10">
+              <div className="bg-dark-200 p-1 rounded-md flex items-center mr-3.5">
+                <div
+                  className={`py-2 px-5 ${
+                    selectedSetUpOption === "auto" ? "bg-gray-400 rounded " : ""
+                  }`}
+                  onClick={() => handleSetUpOptionClick("auto")}
+                >
+                  Auto
                 </div>
-                <div className="bg-dark-600 rounded-md py-2.5 px-4 flex items-center justify-between">
-                  <input
-                    disabled={selectedSetUpOption === "auto"}
-                    type="number"
-                    onChange={(e) => slippageToleranceChange(e.target.value)}
-                    value={slippageTolerance}
-                    style={{ width: "32px" }}
-                  />
-                  <div>%</div>
+                <div
+                  className={`py-2 px-5 ${
+                    selectedSetUpOption === "custom" ? "bg-gray-400 rounded " : ""
+                  }`}
+                  onClick={() => handleSetUpOptionClick("custom")}
+                >
+                  Custom
+                </div>
+              </div>
+              <div className="bg-dark-600 rounded-md py-2.5 px-4 flex items-center justify-between">
+                <input
+                  disabled={selectedSetUpOption === "auto"}
+                  type="number"
+                  onChange={(e) => slippageToleranceChange(e.target.value)}
+                  value={slippageTolerance}
+                  style={{ width: "32px" }}
+                  className={selectedSetUpOption === "auto" ? "text-gray-700" : "text-white"}
+                />
+                <div className={selectedSetUpOption === "auto" ? "text-gray-700" : "text-white"}>
+                  %
                 </div>
               </div>
             </div>
-          )}
+          </div>
         </div>
+        {/* slip end */}
       </div>
       <div className="mt-5">
         {activeTab === "long" && (
@@ -305,7 +289,7 @@ const TradingOperate = () => {
             </div>
             <div className="relative bg-dark-600 border border-dark-500 pt-3 pb-2.5 pr-3 pl-2.5 rounded-md z-20">
               {/* long out  */}
-              <input disabled type="text" value={estimateData?.amount_out} placeholder="0" />
+              <input disabled type="text" value={longOutput} placeholder="0" />
               {/*  */}
               <div className="absolute top-2 right-2">
                 <TradingToken tokenList={categoryAssets1} type="cate1" />
@@ -381,7 +365,7 @@ const TradingOperate = () => {
             </div>
             <div className="relative bg-dark-600 border border-dark-500 pt-3 pb-2.5 pr-3 pl-2.5 rounded-md z-20">
               {/* short out */}
-              <input disabled type="text" value={estimateData?.amount_out} placeholder="0" />
+              <input disabled type="text" value={shortOutput} placeholder="0" />
               {/*  */}
               <div className="absolute top-2 right-2">
                 <TradingToken tokenList={categoryAssets1} type="cate1" />

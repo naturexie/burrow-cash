@@ -21,6 +21,7 @@ import { fetchConfig } from "../redux/appSlice";
 import { fetchMarginAccount } from "../redux/marginAccountSlice";
 import { fetchMarginConfig } from "../redux/marginConfigSlice";
 import { ToastMessage } from "../components/ToastMessage";
+import "./slip.css";
 
 const SENTRY_ORG = process.env.NEXT_PUBLIC_SENTRY_ORG as string;
 const SENTRY_PID = process.env.NEXT_PUBLIC_SENTRY_PID as unknown as number;
