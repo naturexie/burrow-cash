@@ -5,36 +5,31 @@ import ClosePositionMobile from "./ClosePositionMobile";
 import ChangeCollateralMobile from "./ChangeCollateralMobile";
 import { useMarginAccount } from "../../../hooks/useMarginAccount";
 import { useMarginConfigToken } from "../../../hooks/useMarginConfig";
-import { shrinkToken } from "../../../store/helper";
 import { toInternationalCurrencySystem_number } from "../../../utils/uiNumber";
 
 const TradingTable = ({ positionsList }) => {
   const [selectedTab, setSelectedTab] = useState("positions");
   const [isClosePositionModalOpen, setIsClosePositionMobileOpen] = useState(false);
   const [isChangeCollateralMobileOpen, setIsChangeCollateralMobileOpen] = useState(false);
-  const { marginConfigTokens } = useMarginConfigToken();
-  const { assets } = useMarginAccount();
+  const [selectedRowData, setSelectedRowData] = useState(null);
+  const {
+    useMarginAccountList,
+    parseTokenValue,
+    getAssetDetails,
+    getAssetById,
+    calculateLeverage,
+  } = useMarginAccount();
+  const { getPositionType } = useMarginConfigToken();
   const handleTabClick = (tabNumber) => {
     setSelectedTab(tabNumber);
   };
   const handleClosePositionButtonClick = () => {
     setIsClosePositionMobileOpen(true);
   };
-  const handleChangeCollateralButtonClick = () => {
+  const handleChangeCollateralButtonClick = (rowData) => {
+    setSelectedRowData(rowData);
     setIsChangeCollateralMobileOpen(true);
   };
-  const getAssetById = (id) => {
-    const assetsData = assets.data;
-    return assetsData[id];
-  };
-  const getPositionType = (token_id) => {
-    const type = marginConfigTokens.registered_tokens[token_id];
-    return {
-      label: type === 1 ? "Short" : "Long",
-      class: type === 1 ? "text-red-50" : "text-primary",
-    };
-  };
-
   return (
     <div className="flex flex-col items-center justify-center w-full">
       <div className="w-full border border-dark-50 bg-gray-800 rounded-md">
@@ -77,6 +72,9 @@ const TradingTable = ({ positionsList }) => {
                       getPositionType={getPositionType}
                       handleChangeCollateralButtonClick={handleChangeCollateralButtonClick}
                       handleClosePositionButtonClick={handleClosePositionButtonClick}
+                      getAssetDetails={getAssetDetails}
+                      parseTokenValue={parseTokenValue}
+                      calculateLeverage={calculateLeverage}
                     />
                   ))}
                 {isChangeCollateralMobileOpen && (
@@ -87,6 +85,7 @@ const TradingTable = ({ positionsList }) => {
                       e.stopPropagation();
                       setIsChangeCollateralMobileOpen(false);
                     }}
+                    rowData={selectedRowData}
                   />
                 )}
                 {isClosePositionModalOpen && (
@@ -120,10 +119,10 @@ const TradingTable = ({ positionsList }) => {
               <tbody>
                 <Link href="/trading">
                   <tr className="text-base hover:bg-dark-100 cursor-pointer font-normal">
-                    <td className="py-5 pl-5 ">NEAR/USDC.e</td>
-                    <td>Open Short</td>
-                    <td className="text-red-50">Sell</td>
-                    <td>$3.24</td>
+                    <td className="py-5 pl-5 ">-/-</td>
+                    <td>-</td>
+                    <td className="text-red-50">-</td>
+                    <td>$-</td>
                     <td>100 NEAR</td>
                     <td>$1.80</td>
                     <td>--</td>
@@ -154,23 +153,6 @@ const Tab = ({ tabName, isSelected, onClick }) => (
   </div>
 );
 
-const replaceSymbol = (symbol) => {
-  return symbol === "wNEAR" ? "NEAR" : symbol;
-};
-const parseTokenValue = (tokenAmount, decimals) => {
-  if (!tokenAmount || !decimals) return 0;
-  return Number(shrinkToken(tokenAmount, decimals));
-};
-const getAssetDetails = (asset) => {
-  const price = asset?.price?.usd;
-  const symbol = replaceSymbol(asset.metadata?.symbol);
-  const decimals = (asset.metadata?.decimals ?? 0) + (asset.config?.extra_decimals ?? 0);
-  return { price, symbol, decimals };
-};
-const calculateLeverage = (leverageD, priceD, leverageC, priceC) => {
-  return (priceD ? leverageD * priceD : 0) / (priceC ? leverageC * priceC : 0);
-};
-
 const PositionRow = ({
   index,
   item,
@@ -178,6 +160,9 @@ const PositionRow = ({
   getPositionType,
   handleChangeCollateralButtonClick,
   handleClosePositionButtonClick,
+  getAssetDetails,
+  parseTokenValue,
+  calculateLeverage,
 }) => {
   // console.log(item, index);
   const assetD = getAssetById(item.token_d_info.token_id);
@@ -212,6 +197,19 @@ const PositionRow = ({
       ? 0
       : netValue / sizeValueShort;
   const indexPrice = positionType.label === "Long" ? priceP : priceD;
+  const rowData = {
+    positionType,
+    leverage,
+    assetC,
+    assetP,
+    assetD,
+    collateral,
+    sizeValue,
+    netValue,
+    entryPrice,
+    token_p_amount: item.token_p_amount,
+    token_d_amount: item.token_d_info.balance,
+  };
   return (
     <Link href={`/trading/${item.token_p_id}`} key={index}>
       <tr className="text-base hover:bg-dark-100 cursor-pointer font-normal">
@@ -228,13 +226,13 @@ const PositionRow = ({
           <div className="flex items-center">
             <p className="mr-2.5">
               {toInternationalCurrencySystem_number(collateral)}
-              <span className="ml-1">{assetC.metadata?.symbol}</span>
+              <span className="ml-1">{symbolC}</span>
             </p>
             <div
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                handleChangeCollateralButtonClick();
+                handleChangeCollateralButtonClick(rowData);
               }}
             >
               <AddCollateral />
