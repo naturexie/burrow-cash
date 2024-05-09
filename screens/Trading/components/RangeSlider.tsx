@@ -35,7 +35,7 @@ const RangeSlider = ({ defaultValue, action, setRangeMount }) => {
   const [selectedItem, setSelectedItem] = useState(defaultValue);
 
   useEffect(() => {
-    if (valueRef.current) {
+    if (valueRef.current && allowedValues.length > 0) {
       const nearestValue = allowedValues.reduce((prev, curr) => {
         return Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev;
       });

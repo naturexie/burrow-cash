@@ -5,13 +5,45 @@ import { Wrapper } from "../../../components/Modal/style";
 import { DEFAULT_POSITION } from "../../../utils/config";
 import { CloseIcon } from "../../../components/Modal/svg";
 import { RefLogoIcon, RightShoulder } from "./TradingIcon";
+import { toInternationalCurrencySystem_number } from "../../../utils/uiNumber";
+import { openPosition } from "../../../store/marginActions/openPosition";
 
 export const ModalContext = createContext(null) as any;
-const ConfirmMobile = ({ open, onClose, action }) => {
+const ConfirmMobile = ({ open, onClose, action, confirmInfo }) => {
   const dispatch = useAppDispatch();
   const theme = useTheme();
   const [selectedCollateralType, setSelectedCollateralType] = useState(DEFAULT_POSITION);
   const actionShowRedColor = action === "Long";
+
+  const confirmOpenPosition = async () => {
+    console.log(confirmInfo);
+    if (action == "Long") {
+      try {
+        console.log({
+          token_c_amount: confirmInfo.longInput,
+          token_c_id: confirmInfo.longInputName?.token_id,
+          token_d_amount: confirmInfo.longInputUsd,
+          token_d_id: confirmInfo.longInputName?.token_id,
+          token_p_id: confirmInfo.longOutputName?.token_id,
+          min_token_p_amount: confirmInfo.estimateData.min_amount_out,
+          swap_indication: confirmInfo.estimateData.swap_indication,
+          assets: confirmInfo.assets.data,
+        });
+        await openPosition({
+          token_c_amount: confirmInfo.longInput,
+          token_c_id: confirmInfo.longInputName?.token_id,
+          token_d_amount: confirmInfo.longInputUsd,
+          token_d_id: confirmInfo.longInputName?.token_id,
+          token_p_id: confirmInfo.longOutputName?.token_id,
+          min_token_p_amount: confirmInfo.estimateData.min_amount_out,
+          swap_indication: confirmInfo.estimateData.swap_indication,
+          assets: confirmInfo.assets.data,
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  };
   return (
     <MUIModal open={open} onClose={onClose}>
       <Wrapper
@@ -35,7 +67,7 @@ const ConfirmMobile = ({ open, onClose, action }) => {
                     actionShowRedColor ? "bg-primary text-primary" : "bg-red-50 text-red-50"
                   }`}
                 >
-                  Long NEAR 1.5X
+                  Long NEAR {confirmInfo.rangeMount}X
                 </div>
               </div>
               <div className="cursor-pointer">
@@ -44,32 +76,44 @@ const ConfirmMobile = ({ open, onClose, action }) => {
             </div>
             <div className="pt-10 pb-8 flex items-center justify-around  border-b border-dark-700 -mx-5 px-5 mb-5">
               <div className="text-center leading-3">
-                <p className="text-lg">100 USDC</p>
-                <span className="text-xs text-gray-300">Use $100</span>
+                <p className="text-lg">
+                  {toInternationalCurrencySystem_number(confirmInfo.longInput)}{" "}
+                  {confirmInfo.longInputName?.metadata.symbol}
+                </p>
+                <span className="text-xs text-gray-300">
+                  Usd ${toInternationalCurrencySystem_number(confirmInfo.longInputUsd)}
+                </span>
               </div>
               <RightShoulder />
               <div className="text-center leading-3">
-                <p className="text-lg">45.2435 NEAR</p>
-                <span className="text-xs text-gray-300">Long $149.35</span>
+                <p className="text-lg">
+                  {toInternationalCurrencySystem_number(confirmInfo.longOutput)}{" "}
+                  {confirmInfo.longOutputName?.metadata.symbol == "wNEAR"
+                    ? "NEAR"
+                    : confirmInfo.longOutputName?.metadata.symbol}
+                </p>
+                <span className="text-xs text-gray-300">
+                  Long ${toInternationalCurrencySystem_number(confirmInfo.longOutputUsd)}
+                </span>
               </div>
             </div>
             <div className="flex items-center justify-between text-sm mb-4">
               <div className="text-gray-300">Index Price</div>
-              <div>$3.24</div>
+              <div>${confirmInfo.indexPrice}</div>
             </div>
-            <div className="flex items-center justify-between text-sm mb-4">
-              <div className="text-gray-300">Market Price</div>
-              <div>$3.23</div>
-            </div>
+
             <div className="flex items-center justify-between text-sm mb-4">
               <div className="text-gray-300">Leverage</div>
-              <div>1.5X</div>
+              <div>{confirmInfo.rangeMount}X</div>
             </div>
             <div className="flex items-center justify-between text-sm mb-4">
               <div className="text-gray-300">Collateral</div>
-              <div>
-                100 USDC
-                <span className="text-xs text-gray-300 ml-1.5">($99.99)</span>
+              <div className="text-right flex">
+                {toInternationalCurrencySystem_number(confirmInfo.longInput)}{" "}
+                {confirmInfo.longInputName?.metadata.symbol}
+                <span className="text-xs text-gray-300 ml-1.5">
+                  (${toInternationalCurrencySystem_number(confirmInfo.longInputUsd)})
+                </span>
               </div>
             </div>
             <div className="flex items-center justify-between text-sm mb-4">
@@ -79,10 +123,28 @@ const ConfirmMobile = ({ open, onClose, action }) => {
             <div className="flex items-center justify-between text-sm mb-4">
               <div className="text-gray-300">Route</div>
               <div className="flex items-center justify-center">
-                <div className="border-r mr-1.5 pr-1.5 border-dark-800">
-                  <RefLogoIcon />
-                </div>
-                NEAR &gt; USDT.e &gt; USDC.e
+                {confirmInfo.estimateData?.tokensPerRoute[0].map((item, index) => {
+                  return (
+                    <>
+                      <div
+                        key={item.token_id + index}
+                        className="border-r mr-1.5 pr-1.5 border-dark-800"
+                      >
+                        {item.symbol === "wNEAR" ? (
+                          ""
+                        ) : (
+                          <img alt="" src={item.icon} style={{ width: "16px", height: "16px" }} />
+                        )}
+                      </div>
+                      <span>{item.symbol == "wNEAR" ? "NEAR" : item.symbol}</span>
+                      {index + 1 < confirmInfo.estimateData?.tokensPerRoute[0].length ? (
+                        <span className="mx-2">&gt;</span>
+                      ) : (
+                        ""
+                      )}
+                    </>
+                  );
+                })}
               </div>
             </div>
             <div
@@ -90,7 +152,9 @@ const ConfirmMobile = ({ open, onClose, action }) => {
                 actionShowRedColor ? "bg-primary" : "bg-red-50"
               }`}
             >
-              <div className="flex-grow">Confirm Long NEAR 1.5X</div>
+              <div onClick={confirmOpenPosition} className="flex-grow">
+                Confirm Long NEAR {confirmInfo.rangeMount}X
+              </div>
             </div>
           </Box>
         </ModalContext.Provider>

@@ -38,7 +38,6 @@ export const useEstimateSwap = ({
   stablePoolsDetail: any[];
 }) => {
   console.log(tokenIn_id, tokenOut_id, tokenIn_amount, slippageTolerance, account_id, "useest");
-
   const assets = useAppSelector(getAssets);
   const marginConfig = useAppSelector(getMarginConfig);
   const [estimateData, setEstimateData] = useState<any>();
@@ -47,7 +46,8 @@ export const useEstimateSwap = ({
       !isEmpty(assets) &&
       !isEmpty(simplePools) &&
       !isEmpty(stablePools) &&
-      !isEmpty(stablePoolsDetail)
+      !isEmpty(stablePoolsDetail) &&
+      Number(tokenIn_amount) > 0
     ) {
       getEstimateSwapData();
     }
@@ -66,6 +66,7 @@ export const useEstimateSwap = ({
       assets.data[tokenIn_id],
       assets.data[tokenOut_id],
     ]);
+    console.log(tokenIn_amount, "tokenOut_metadata");
     const swapTodos = await estimateSwap({
       tokenIn: tokenIn_metadata,
       tokenOut: tokenOut_metadata,
@@ -77,10 +78,12 @@ export const useEstimateSwap = ({
         stablePoolsDetail,
       },
     });
+    console.log(swapTodos, "swapTodos>>>>>>>>81");
     const amountOut: string = getExpectedOutputFromSwapTodos(
       swapTodos,
       tokenOut_metadata.id,
     ).toFixed();
+    console.log(amountOut, "amountOut>>>>>>>85");
     const transactionsRef: Transaction[] = await instantSwap({
       tokenIn: tokenIn_metadata,
       tokenOut: tokenOut_metadata,
@@ -112,6 +115,25 @@ export const useEstimateSwap = ({
     const identicalRoutes = separateRoutes(
       swapTodos,
       swapTodos[swapTodos.length - 1]?.outputToken || "",
+    );
+    console.log(
+      {
+        amount_out: amountOut,
+        min_amount_out: expandTokenDecimal(
+          min_amount_out,
+          assets.data[tokenOut_id].config.extra_decimals,
+        ).toFixed(),
+        swap_indication: {
+          dex_id,
+          swap_action_text: msg,
+          client_echo: null,
+        },
+        fee,
+        tokensPerRoute,
+        identicalRoutes,
+        priceImpact,
+      },
+      "set133>>>>>",
     );
     setEstimateData({
       amount_out: amountOut,

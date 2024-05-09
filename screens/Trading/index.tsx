@@ -130,6 +130,7 @@ const Trading = () => {
       }
     }, 200);
   };
+
   //
   return (
     <LayoutBox>
@@ -209,7 +210,9 @@ const Trading = () => {
                     onClick={handlePopupToggle}
                     className="flex justify-center items-center"
                   >
-                    <p className="mr-1">{currentTokenCate2?.metadata?.symbol}</p>
+                    <p className="mr-1">
+                      {currentTokenCate2?.metadata?.symbol || categoryAssets2[0].metadata.symbol}
+                    </p>
                     <TokenArrow />
                   </div>
                   {showPopupCate2 && (

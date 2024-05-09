@@ -13,13 +13,19 @@ import {
 import { shrinkToken } from "../../../store";
 import { toInternationalCurrencySystem_number } from "../../../utils/uiNumber";
 
-const TradingToken = ({ tokenList, type }) => {
+interface TradingTokenInter {
+  tokenList: any;
+  type: any;
+  setOwnBanlance?: (key) => void;
+}
+const TradingToken: React.FC<TradingTokenInter> = ({ tokenList, type, setOwnBanlance }) => {
   let timer;
   const dispatch = useAppDispatch();
   const account = useAppSelector((state) => state.account);
   const assets = useAppSelector(getAssets);
   const { ReduxcategoryAssets1, ReduxcategoryAssets2 } = useAppSelector((state) => state.category);
   const [ownBalance, setOwnBalance] = useState("-");
+  const [ownBalanceDetail, setOwnBalanceDetail] = useState("");
   const [showModal, setShowModal] = useState(false);
   const accountId = useAppSelector(getAccountId);
   /*
@@ -28,6 +34,11 @@ const TradingToken = ({ tokenList, type }) => {
   */
   const [selectedItem, setSelectedItem] = useState(tokenList[0]);
 
+  const sendBalance = () => {
+    if (setOwnBanlance) {
+      setOwnBanlance(ownBalanceDetail);
+    }
+  };
   //
   useEffect(() => {
     let selectedAsset: any = null;
@@ -44,7 +55,7 @@ const TradingToken = ({ tokenList, type }) => {
     }
 
     if (!selectedAsset) {
-      setSelectedItem(null);
+      setSelectedItem(tokenList[0]);
       setOwnBalance("-");
       return;
     }
@@ -60,6 +71,7 @@ const TradingToken = ({ tokenList, type }) => {
     const decimals = selectedAsset.metadata.decimals + selectedAsset.config.extra_decimals;
     const waitUseKey = shrinkToken(account.balances[tokenId], decimals);
     setOwnBalance(toInternationalCurrencySystem_number(waitUseKey));
+    setOwnBalanceDetail(waitUseKey);
     setReduxcategoryCurrentBalance(waitUseKey);
     setSelectedItem(selectedAsset);
   }, [type, accountId, account.balances, ReduxcategoryAssets1, ReduxcategoryAssets2]);
@@ -119,7 +131,7 @@ const TradingToken = ({ tokenList, type }) => {
         </div>
         <TokenThinArrow />
       </div>
-      <div className="text-xs flex justify-end text-gray-300">
+      <div onClick={sendBalance} className="text-xs flex justify-end text-gray-300">
         Balance:&nbsp;
         <span className="text-white border-b border-dashed border-dark-800">{ownBalance}</span>
       </div>

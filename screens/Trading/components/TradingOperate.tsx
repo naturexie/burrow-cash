@@ -14,6 +14,7 @@ import { getMarginConfig } from "../../../redux/marginConfigSelectors";
 import { setCategoryAssets1, setCategoryAssets2 } from "../../../redux/marginTrading";
 import { toInternationalCurrencySystem_number } from "../../../utils/uiNumber";
 import { useEstimateSwap } from "../../../hooks/useEstimateSwap";
+import { NearIcon } from "../../MarginTrading/components/Icon";
 // main components
 const TradingOperate = () => {
   const assets = useAppSelector(getAssets);
@@ -35,12 +36,12 @@ const TradingOperate = () => {
   const [selectedSetUpOption, setSelectedSetUpOption] = useState("auto");
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [rangeMount, setRangeMount] = useState(1);
-  const [isDisabled, setDisabled] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
 
   //
   const [longInput, setLongInput] = useState();
   const [shortInput, setShortInput] = useState();
-  const [longOutput, setLongOnput] = useState();
+  const [longOutput, setLongOutput] = useState();
   const [shortOutput, setShortOutput] = useState();
 
   // amount
@@ -52,6 +53,16 @@ const TradingOperate = () => {
   //
   const balance = useAppSelector(getAccountBalance);
   const accountId = useAppSelector(getAccountId);
+
+  //
+
+  const setOwnBanlance = (key) => {
+    if (activeTab == "long") {
+      setLongInput(key);
+    } else {
+      setShortInput(key);
+    }
+  };
 
   // tab click event
   const handleTabClick = (tabString) => {
@@ -104,20 +115,25 @@ const TradingOperate = () => {
       let outputValue;
       if (activeTab === "long") {
         inputValue = longInput;
-        outputValue = longOutputUsd;
+        outputValue = longOutput;
       } else {
         inputValue = shortInput;
-        outputValue = shortOutputUsd;
+        outputValue = shortOutput;
       }
 
       const isValidInput = isValidDecimalString(inputValue);
       const isValidOutput = isValidDecimalString(outputValue);
-
-      setDisabled(
+      console.log(
+        isValidInput,
+        isValidOutput,
+        Number(inputValue) < currentBalance2,
+        Number(outputValue) < currentBalance1,
+      );
+      setIsDisabled(
         !isValidInput ||
-          // !isValidOutput ||
-          Number(inputValue) > currentBalance2 ||
-          Number(outputValue) > currentBalance1,
+          !isValidOutput ||
+          !(Number(inputValue) < currentBalance2) ||
+          !(Number(outputValue) < currentBalance1),
       );
     };
     setDisableBasedOnInputs();
@@ -132,7 +148,7 @@ const TradingOperate = () => {
   ]);
 
   const isValidDecimalString = (str) => {
-    if (str == 0) return false;
+    if (str <= 0) return false;
     // const regex = /^(?![0]+$)\d+(\.\d+)?$/;
     const regex = /^\d+(\.\d+)?$/;
     return regex.test(str);
@@ -148,7 +164,7 @@ const TradingOperate = () => {
   async function getPoolsData() {
     const { ratedPools, unRatedPools, simplePools: simplePoolsFromSdk } = await fetchAllPools();
     const stablePoolsFromSdk = unRatedPools.concat(ratedPools);
-    const stablePoolsDetailFromSdk = await getStablePools(stablePools);
+    const stablePoolsDetailFromSdk = await getStablePools(stablePoolsFromSdk);
     setSimplePools(simplePoolsFromSdk);
     setStablePools(stablePoolsFromSdk);
     setStablePoolsDetail(stablePoolsDetailFromSdk);
@@ -157,6 +173,7 @@ const TradingOperate = () => {
 
   // get cate1 amount start
   const [tokenInAmount, setTokenInAmount] = useState(0);
+  console.log(tokenInAmount, "176>>>>>>>>>>>");
   const estimateData = useEstimateSwap({
     tokenIn_id: ReduxcategoryAssets2?.token_id,
     tokenOut_id: ReduxcategoryAssets1?.token_id,
@@ -169,46 +186,50 @@ const TradingOperate = () => {
   });
 
   // long & short input change fn.
-  const inputPriceChange = (value) => {
+  const inputPriceChange = _.debounce((value) => {
     if (activeTab == "long") {
       setLongInput(value); // amount
     } else {
       setShortInput(value);
     }
-  };
+  }, 50);
 
   useEffect(() => {
     let openFeeAmount;
     let inputAmount;
-    const inputUsdChar = ReduxcategoryAssets2
+    const inputUsdCharcate2 = ReduxcategoryAssets2
       ? assets.data[ReduxcategoryAssets2["token_id"]].price?.usd
       : 0;
 
-    if (inputUsdChar) {
+    const inputUsdCharcate1 = ReduxcategoryAssets1
+      ? assets.data[ReduxcategoryAssets1["token_id"]].price?.usd
+      : 0;
+    if (inputUsdCharcate1 && estimateData) {
+      if (activeTab == "long") {
+        setLongOutput(estimateData?.amount_out || 0); // set cate1 amount
+        setLongOutputUsd(inputUsdCharcate1 * estimateData.amount_out || 0); // amount price
+      } else {
+        setShortOutput(estimateData?.amount_out || 0);
+        setShortOutputUsd(inputUsdCharcate1 * estimateData.amount_out || 0); // amount price
+      }
+    }
+
+    if (inputUsdCharcate2) {
       if (activeTab == "long") {
         inputAmount = longInput ? Number(longInput) : 0;
         openFeeAmount = (inputAmount * config.open_position_fee_rate) / 10000;
-        setLongInputUsd(inputUsdChar * inputAmount); // amount price
-        setTokenInAmount((inputAmount - openFeeAmount) * inputUsdChar * rangeMount); // calcaute
-        console.log(estimateData, "estimateData>>tradingoperate191");
-        setLongOutputUsd(estimateData?.amount_out || 0); // set cate1 amount
-
-        /* *
-         * wait set cate1 price
-         * */
+        setLongInputUsd(inputUsdCharcate2 * inputAmount); // amount price
+        setTokenInAmount((inputAmount - openFeeAmount) * inputUsdCharcate2 * rangeMount); // calcaute
+        console.log(inputAmount, "inputUsdCharcate1", openFeeAmount, inputUsdCharcate2, rangeMount);
       } else {
         inputAmount = shortInput ? Number(shortInput) : 0;
         openFeeAmount = (inputAmount * config.open_position_fee_rate) / 10000;
-        setShortInputUsd(inputUsdChar * inputAmount);
-        setTokenInAmount((inputAmount - openFeeAmount) * inputUsdChar * rangeMount);
-        setShortOutputUsd(estimateData?.amount_out || 0);
-        /* *
-         * wait set cate1 price
-         * */
+        setShortInputUsd(inputUsdCharcate2 * inputAmount);
+        setTokenInAmount((inputAmount - openFeeAmount) * inputUsdCharcate2 * rangeMount);
       }
     }
     //
-  }, [longInput, shortInput, rangeMount]);
+  }, [longInput, shortInput, rangeMount, estimateData, slippageTolerance]);
 
   return (
     <div className="w-full pt-4 px-4 pb-9">
@@ -282,7 +303,11 @@ const TradingOperate = () => {
                 placeholder="0"
               />
               <div className="absolute top-2 right-2">
-                <TradingToken tokenList={categoryAssets2} type="cate2" />
+                <TradingToken
+                  setOwnBanlance={setOwnBanlance}
+                  tokenList={categoryAssets2}
+                  type="cate2"
+                />
               </div>
               <p className="text-gray-300 mt-2 text-xs">Usd: ${longInputUsd}</p>
             </div>
@@ -303,9 +328,11 @@ const TradingOperate = () => {
               <div className="mt-5">
                 <div className="flex items-center justify-between text-sm mb-4">
                   <div className="text-gray-300">Position Size</div>
-                  <div>
-                    45.2435 NEAR
-                    <span className="text-xs text-gray-300 ml-1.5">($149.35)</span>
+                  <div className="text-right">
+                    {toInternationalCurrencySystem_number(longOutput)} NEAR
+                    <span className="text-xs text-gray-300 ml-1.5">
+                      (${toInternationalCurrencySystem_number(longOutputUsd)})
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between text-sm mb-4">
@@ -323,10 +350,32 @@ const TradingOperate = () => {
                 <div className="flex items-center justify-between text-sm mb-4">
                   <div className="text-gray-300">Route</div>
                   <div className="flex items-center justify-center">
-                    <div className="border-r mr-1.5 pr-1.5 border-dark-800">
-                      <RefLogoIcon />
-                    </div>
-                    NEAR &gt; USDT.e &gt; USDC.e
+                    {estimateData?.tokensPerRoute[0].map((item, index) => {
+                      return (
+                        <>
+                          <div
+                            key={item.token_id + index}
+                            className="border-r mr-1.5 pr-1.5 border-dark-800"
+                          >
+                            {item.symbol === "wNEAR" ? (
+                              ""
+                            ) : (
+                              <img
+                                alt=""
+                                src={item.icon}
+                                style={{ width: "16px", height: "16px" }}
+                              />
+                            )}
+                          </div>
+                          <span>{item.symbol == "wNEAR" ? "NEAR" : item.symbol}</span>
+                          {index + 1 < estimateData?.tokensPerRoute[0].length ? (
+                            <span className="mx-2">&gt;</span>
+                          ) : (
+                            ""
+                          )}
+                        </>
+                      );
+                    })}
                   </div>
                 </div>
                 <div
@@ -342,6 +391,18 @@ const TradingOperate = () => {
                     open={isConfirmModalOpen}
                     onClose={() => setIsConfirmModalOpen(false)}
                     action="Long"
+                    confirmInfo={{
+                      longInput,
+                      longInputUsd,
+                      longOutput,
+                      longOutputUsd,
+                      rangeMount,
+                      estimateData,
+                      indexPrice: assets.data[ReduxcategoryAssets1["token_id"]].price?.usd,
+                      longInputName: ReduxcategoryAssets2,
+                      longOutputName: ReduxcategoryAssets1,
+                      assets,
+                    }}
                   />
                 )}
               </div>
@@ -358,7 +419,11 @@ const TradingOperate = () => {
                 placeholder="0"
               />
               <div className="absolute top-2 right-2">
-                <TradingToken tokenList={categoryAssets2} type="cate2" />
+                <TradingToken
+                  setOwnBanlance={setOwnBanlance}
+                  tokenList={categoryAssets2}
+                  type="cate2"
+                />
               </div>
               <p className="text-gray-300 mt-2 text-xs">Usd: ${shortInputUsd}</p>
             </div>
