@@ -47,7 +47,7 @@ const TradingOperate = () => {
   const balance = useAppSelector(getAccountBalance);
   const accountId = useAppSelector(getAccountId);
 
-  //
+  // tab click event
   const handleTabClick = (tabString) => {
     setActiveTab(tabString);
   };
@@ -56,6 +56,8 @@ const TradingOperate = () => {
       ? "bg-primary text-dark-200 py-2.5 pl-6 pr-8 rounded-md"
       : "text-gray-300 py-2.5 pl-8 pr-10";
   };
+
+  // mouse leave and enter event
   let timer;
   const handleMouseEnter = () => {
     clearTimeout(timer);
@@ -67,13 +69,25 @@ const TradingOperate = () => {
       setShowSetUpPopup(false);
     }, 200);
   };
+
+  // slippageTolerance change ecent
+  const [slippageTolerance, setSlippageTolerance] = useState(0.5);
   const handleSetUpOptionClick = (option) => {
     setSelectedSetUpOption(option);
+    if (option == "auto") {
+      setSlippageTolerance(0.5);
+    }
   };
+  const slippageToleranceChange = (e) => {
+    setSlippageTolerance(e);
+  };
+
+  // open position btn click eve.
   const handleConfirmButtonClick = () => {
     if (isDisabled) return;
     setIsConfirmModalOpen(true);
   };
+
   // condition btn is disabled
   useEffect(() => {
     const setDisableBasedOnInputs = () => {
@@ -100,7 +114,6 @@ const TradingOperate = () => {
           Number(outputValue) > currentBalance1,
       );
     };
-
     setDisableBasedOnInputs();
   }, [
     activeTab,
@@ -112,7 +125,6 @@ const TradingOperate = () => {
     shortOutputUsd,
   ]);
 
-  //
   const isValidDecimalString = (str) => {
     if (str == 0) return false;
     // const regex = /^(?![0]+$)\d+(\.\d+)?$/;
@@ -147,7 +159,7 @@ const TradingOperate = () => {
     simplePools,
     stablePools,
     stablePoolsDetail,
-    slippageTolerance: 0.05, // test
+    slippageTolerance: slippageTolerance / 100, // test
   });
   //
   // useEffect(() => {
@@ -259,7 +271,13 @@ const TradingOperate = () => {
                   </div>
                 </div>
                 <div className="bg-dark-600 rounded-md py-2.5 px-4 flex items-center justify-between">
-                  <input type="text" value={0.5} style={{ width: "32px" }} />
+                  <input
+                    disabled={selectedSetUpOption === "auto"}
+                    type="number"
+                    onChange={(e) => slippageToleranceChange(e.target.value)}
+                    value={slippageTolerance}
+                    style={{ width: "32px" }}
+                  />
                   <div>%</div>
                 </div>
               </div>
