@@ -37,6 +37,8 @@ export const useEstimateSwap = ({
   stablePools: any[];
   stablePoolsDetail: any[];
 }) => {
+  console.log(tokenIn_id, tokenOut_id, tokenIn_amount, slippageTolerance, account_id, "useest");
+
   const assets = useAppSelector(getAssets);
   const marginConfig = useAppSelector(getMarginConfig);
   const [estimateData, setEstimateData] = useState<any>();

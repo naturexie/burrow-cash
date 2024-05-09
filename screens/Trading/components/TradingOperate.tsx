@@ -35,9 +35,7 @@ const TradingOperate = () => {
 
   //
   const [longInput, setLongInput] = useState();
-  const [longOutput, setLongOutput] = useState();
   const [shortInput, setShortInput] = useState();
-  const [shortOutput, setShortOutput] = useState();
 
   // amount
   const [longInputUsd, setLongInputUsd] = useState(0);
@@ -48,17 +46,6 @@ const TradingOperate = () => {
   //
   const balance = useAppSelector(getAccountBalance);
   const accountId = useAppSelector(getAccountId);
-
-  // long & short input change fn.
-  const inputPriceChange = (value, flag) => {
-    const obj = {
-      longInput: setLongInput,
-      longOutput: setLongOutput,
-      shortInput: setShortInput,
-      shortOutput: setShortOutput,
-    };
-    return obj[flag](value);
-  };
 
   //
   const handleTabClick = (tabString) => {
@@ -97,10 +84,10 @@ const TradingOperate = () => {
       let outputValue;
       if (activeTab === "long") {
         inputValue = longInput;
-        outputValue = longOutput;
+        outputValue = longOutputUsd;
       } else {
         inputValue = shortInput;
-        outputValue = shortOutput;
+        outputValue = shortOutputUsd;
       }
 
       const isValidInput = isValidDecimalString(inputValue);
@@ -120,9 +107,9 @@ const TradingOperate = () => {
     ReduxcategoryCurrentBalance1,
     ReduxcategoryCurrentBalance2,
     longInput,
-    longOutput,
+    longOutputUsd,
     shortInput,
-    shortOutput,
+    shortOutputUsd,
   ]);
 
   //
@@ -132,8 +119,6 @@ const TradingOperate = () => {
     const regex = /^\d+(\.\d+)?$/;
     return regex.test(str);
   };
-
-  const [tokenInAmount, setTokenInAmount] = useState(0);
 
   // get pools detail
   const [simplePools, setSimplePools] = useState<any[]>([]);
@@ -152,29 +137,7 @@ const TradingOperate = () => {
   }
   // pools end
 
-  //
-  useEffect(() => {
-    const longInputUsdChar = assets.data[ReduxcategoryAssets2["token_id"]].price?.usd;
-
-    let openFeeAmount;
-    let tknc;
-    if (activeTab == "long") {
-      if (longInputUsdChar && longInput) {
-        setLongInputUsd(longInputUsdChar * Number(longInput));
-        openFeeAmount = (longInput * config.open_position_fee_rate) / 10000;
-        tknc = (longInput - openFeeAmount) * longInputUsdChar * rangeMount;
-      }
-      setTokenInAmount(tknc);
-    } else if (longInputUsdChar && shortInput) {
-      setLongInputUsd(longInputUsdChar * Number(shortInput));
-      openFeeAmount = (shortInput * config.open_position_fee_rate) / 10000;
-      tknc = (shortInput - openFeeAmount) * longInputUsdChar * rangeMount;
-      setTokenInAmount(tknc);
-    }
-
-    //
-  }, [longInput, shortInput]);
-
+  const [tokenInAmount, setTokenInAmount] = useState(0);
   // get cate1 amount
   const estimateData = useEstimateSwap({
     tokenIn_id: ReduxcategoryAssets2.token_id,
@@ -186,8 +149,65 @@ const TradingOperate = () => {
     stablePoolsDetail,
     slippageTolerance: 0.05, // test
   });
-
   //
+  // useEffect(() => {
+  //   const longInputUsdChar = assets.data[ReduxcategoryAssets2["token_id"]].price?.usd;
+
+  //   let openFeeAmount;
+  //   let tknc;
+  //   if (activeTab == "long") {
+  //     if (longInputUsdChar && longInput) {
+  //       setLongInputUsd(longInputUsdChar * Number(longInput));
+  //       openFeeAmount = (longInput * config.open_position_fee_rate) / 10000;
+  //       tknc = (longInput - openFeeAmount) * longInputUsdChar * rangeMount;
+  //     }
+  //     setTokenInAmount(tknc);
+  //   } else if (longInputUsdChar && shortInput) {
+  //     setShortInputUsd(longInputUsdChar * Number(shortInput));
+  //     openFeeAmount = (shortInput * config.open_position_fee_rate) / 10000;
+  //     tknc = (shortInput - openFeeAmount) * longInputUsdChar * rangeMount;
+  //     setTokenInAmount(tknc);
+  //   }
+  //   //
+  // }, [longInput, shortInput]);
+
+  // long & short input change fn.
+  const inputPriceChange = (value) => {
+    let openFeeAmount;
+    let inputAmount;
+    const inputUsdChar = assets.data[ReduxcategoryAssets2["token_id"]].price?.usd;
+
+    if (inputUsdChar) {
+      if (activeTab == "long") {
+        inputAmount = Number(value);
+        openFeeAmount = (inputAmount * config.open_position_fee_rate) / 10000;
+        setLongInput(inputAmount); // amount
+        setLongInputUsd(inputUsdChar * inputAmount); // amount price
+        setTokenInAmount((inputAmount - openFeeAmount) * inputUsdChar * rangeMount); // calcaute
+        setLongOutputUsd(estimateData?.amount_out); // set cate1 amount
+
+        /* *
+         * wait set cate1 price
+         * */
+      } else {
+        inputAmount = Number(value);
+        openFeeAmount = (inputAmount * config.open_position_fee_rate) / 10000;
+        setShortInput(inputAmount);
+        setShortInputUsd(inputUsdChar * inputAmount);
+        setTokenInAmount((inputAmount - openFeeAmount) * inputUsdChar * rangeMount);
+        setShortOutputUsd(estimateData?.amount_out);
+        /* *
+         * wait set cate1 price
+         * */
+      }
+    }
+
+    // const obj = {
+    //   longInput: setLongInput,
+    //   shortInput: setShortInput,
+    // };
+    // return obj[flag](value);
+  };
 
   return (
     <div className="w-full pt-4 px-4 pb-9">
@@ -252,7 +272,7 @@ const TradingOperate = () => {
           <>
             <div className="relative bg-dark-600 border border-dark-500 pt-3 pb-2.5 pr-3 pl-2.5 rounded-md z-30">
               <input
-                onChange={(e) => inputPriceChange(e.target.value, "longInput")}
+                onChange={(e) => inputPriceChange(e.target.value)}
                 type="number"
                 value={longInput}
                 placeholder="0"
@@ -266,13 +286,9 @@ const TradingOperate = () => {
               <ShrinkArrow />
             </div>
             <div className="relative bg-dark-600 border border-dark-500 pt-3 pb-2.5 pr-3 pl-2.5 rounded-md z-20">
-              <input
-                disabled
-                onChange={(e) => inputPriceChange(e.target.value, "longOutput")}
-                type="text"
-                value={longOutput}
-                placeholder="0"
-              />
+              {/* long out  */}
+              <input disabled type="text" value={estimateData?.amount_out} placeholder="0" />
+              {/*  */}
               <div className="absolute top-2 right-2">
                 <TradingToken tokenList={categoryAssets1} type="cate1" />
               </div>
@@ -332,7 +348,7 @@ const TradingOperate = () => {
           <>
             <div className="relative bg-dark-600 border border-dark-500 pt-3 pb-2.5 pr-3 pl-2.5 rounded-md z-30">
               <input
-                onChange={(e) => inputPriceChange(e.target.value, "shortInput")}
+                onChange={(e) => inputPriceChange(e.target.value)}
                 type="number"
                 value={shortInput}
                 placeholder="0"
@@ -346,13 +362,9 @@ const TradingOperate = () => {
               <ShrinkArrow />
             </div>
             <div className="relative bg-dark-600 border border-dark-500 pt-3 pb-2.5 pr-3 pl-2.5 rounded-md z-20">
-              <input
-                disabled
-                onChange={(e) => inputPriceChange(e.target.value, "shortOutput")}
-                type="text"
-                value={shortOutput}
-                placeholder="0"
-              />
+              {/* short out */}
+              <input disabled type="text" value={estimateData?.amount_out} placeholder="0" />
+              {/*  */}
               <div className="absolute top-2 right-2">
                 <TradingToken tokenList={categoryAssets1} type="cate1" />
               </div>
