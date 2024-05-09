@@ -15,7 +15,7 @@ import { decreaseCollateral } from "../../../store/marginActions/decreaseCollate
 export const ModalContext = createContext(null) as any;
 const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
   // console.log(rowData);
-  const { getPositionType } = useMarginConfigToken();
+  const { marginConfigTokens, getPositionType } = useMarginConfigToken();
   const { parseTokenValue, getAssetDetails, getAssetById, calculateLeverage } = useMarginAccount();
   const theme = useTheme();
   const [selectedCollateralType, setSelectedCollateralType] = useState(DEFAULT_POSITION);
@@ -36,7 +36,7 @@ const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
     { label: "75%", value: "75" },
     { label: "Max", value: "Max" },
   ];
-  const handleChange = (event) => {
+  const handleAddChange = (event) => {
     const value = parseFloat(event.target.value);
     const tokenCInfoBalance = parseTokenValue(rowData.data.token_c_info.balance, decimalsC);
     const newNetValue = (tokenCInfoBalance + value) * priceC;
@@ -44,6 +44,25 @@ const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
     const leverageC = parseTokenValue(rowData.data.token_c_info.balance, decimalsC);
     const newLeverage = calculateLeverage(tokenDInfoBalance, priceD, leverageC + value, priceC);
     if (newLeverage < 1) {
+      return;
+    }
+
+    setAddedValue(newNetValue);
+    setAddLeverage(newLeverage);
+    setInputValue(value);
+    if (event.target.value === "") {
+      setAddedValue(0);
+      setAddLeverage(0);
+    }
+  };
+  const handleDeleteChange = (event) => {
+    const value = parseFloat(event.target.value);
+    const tokenCInfoBalance = parseTokenValue(rowData.data.token_c_info.balance, decimalsC);
+    const newNetValue = (tokenCInfoBalance - value) * priceC;
+    const tokenDInfoBalance = parseTokenValue(rowData.data.token_d_info.balance, decimalsD);
+    const leverageC = parseTokenValue(rowData.data.token_c_info.balance, decimalsC);
+    const newLeverage = calculateLeverage(tokenDInfoBalance, priceD, leverageC - value, priceC);
+    if (newLeverage > marginConfigTokens.max_leverage_rate) {
       return;
     }
 
@@ -169,7 +188,7 @@ const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
                         type="number"
                         step="any"
                         value={inputValue}
-                        onChange={handleChange}
+                        onChange={handleAddChange}
                         placeholder="0"
                       />
                       <p className="text-gray-300 text-xs mt-1.5">
@@ -284,10 +303,12 @@ const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
                         type="number"
                         step="any"
                         value={inputValue}
-                        onChange={handleChange}
+                        onChange={handleDeleteChange}
                         placeholder="0"
                       />
-                      <p className="text-gray-300 text-xs mt-1.5">Add: ${inputValue * priceC}</p>
+                      <p className="text-gray-300 text-xs mt-1.5">
+                        Delete: ${Number.isNaN(inputValue) ? 0 : inputValue * priceC}
+                      </p>
                     </div>
                     <div>
                       <div className="flex items-center justify-end">
