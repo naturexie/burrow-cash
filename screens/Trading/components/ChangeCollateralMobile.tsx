@@ -1,35 +1,28 @@
 import { useState, createContext } from "react";
 import { Modal as MUIModal, Box, useTheme } from "@mui/material";
-import { useAppDispatch } from "../../../redux/hooks";
 import { Wrapper } from "../../../components/Modal/style";
 import { DEFAULT_POSITION } from "../../../utils/config";
 import { CloseIcon } from "../../../components/Modal/svg";
-import { RefLogoIcon, RightArrow, RightShoulder } from "./TradingIcon";
-import { NearIcon } from "../../MarginTrading/components/Icon";
 import { useMarginAccount } from "../../../hooks/useMarginAccount";
 import { toInternationalCurrencySystem_number } from "../../../utils/uiNumber";
+import { useMarginConfigToken } from "../../../hooks/useMarginConfig";
+import { RightArrow } from "./TradingIcon";
+import { increaseCollateral } from "../../../store/marginActions/increaseCollateral";
+import { useAppSelector } from "../../../redux/hooks";
+import { getAssets } from "../../../redux/assetsSelectors";
+import { decreaseCollateral } from "../../../store/marginActions/decreaseCollateral";
 
 export const ModalContext = createContext(null) as any;
 const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
-  const { getAssetDetails, parseTokenValue } = useMarginAccount();
-  const {
-    positionType,
-    leverage,
-    assetC,
-    assetD,
-    assetP,
-    entryPrice,
-    sizeValue,
-    netValue,
-    token_p_amount,
-    token_d_amount,
-  } = rowData;
-  const { decimals: decimalsD } = getAssetDetails(assetD);
-  const { decimals: decimalsP } = getAssetDetails(assetP);
-  const { symbol: symbolC, icon: iconC } = getAssetDetails(assetC);
+  // console.log(rowData);
+  const { getPositionType } = useMarginConfigToken();
+  const { parseTokenValue, getAssetDetails, getAssetById, calculateLeverage } = useMarginAccount();
   const theme = useTheme();
   const [selectedCollateralType, setSelectedCollateralType] = useState(DEFAULT_POSITION);
   const [ChangeCollateralTab, setChangeCollateralTab] = useState("Add");
+  const [inputValue, setInputValue] = useState(0);
+  const [addedValue, setAddedValue] = useState(0);
+  const [addLeverage, setAddLeverage] = useState(0);
   const handleChangeCollateralTabClick = (tab) => {
     setChangeCollateralTab(tab);
   };
@@ -43,8 +36,72 @@ const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
     { label: "75%", value: "75" },
     { label: "Max", value: "Max" },
   ];
-  const handleChange = (e) => {
-    console.log(e);
+  const handleChange = (event) => {
+    const value = parseFloat(event.target.value);
+    const tokenCInfoBalance = parseTokenValue(rowData.data.token_c_info.balance, decimalsC);
+    const newNetValue = (tokenCInfoBalance + value) * priceC;
+    const tokenDInfoBalance = parseTokenValue(rowData.data.token_d_info.balance, decimalsD);
+    const leverageC = parseTokenValue(rowData.data.token_c_info.balance, decimalsC);
+    const newLeverage = calculateLeverage(tokenDInfoBalance, priceD, leverageC + value, priceC);
+    if (newLeverage < 1) {
+      return;
+    }
+
+    setAddedValue(newNetValue);
+    setAddLeverage(newLeverage);
+    setInputValue(value);
+    if (event.target.value === "") {
+      setAddedValue(0);
+      setAddLeverage(0);
+    }
+  };
+
+  const assetD = getAssetById(rowData.data.token_d_info.token_id);
+  const assetC = getAssetById(rowData.data.token_c_info.token_id);
+  const assetP = getAssetById(rowData.data.token_p_id);
+  const { price: priceD, symbol: symbolD, decimals: decimalsD } = getAssetDetails(assetD);
+  const {
+    price: priceC,
+    symbol: symbolC,
+    icon: iconC,
+    decimals: decimalsC,
+  } = getAssetDetails(assetC);
+  const { price: priceP, symbol: symbolP, decimals: decimalsP } = getAssetDetails(assetP);
+  const leverageD = parseTokenValue(rowData.data.token_d_info.balance, decimalsD);
+  const leverageC = parseTokenValue(rowData.data.token_c_info.balance, decimalsC);
+  const leverage = calculateLeverage(leverageD, priceD, leverageC, priceC);
+  const positionType = getPositionType(rowData.data.token_d_info.token_id);
+  const sizeValueLong = parseTokenValue(rowData.data.token_p_amount, decimalsP);
+  const sizeValueShort = parseTokenValue(rowData.data.token_d_info.balance, decimalsD);
+  const sizeValue =
+    positionType.label === "Long" ? sizeValueLong * (priceP || 0) : sizeValueShort * (priceD || 0);
+  const netValue = parseTokenValue(rowData.data.token_c_info.balance, decimalsC) * (priceC || 0);
+  const entryPrice =
+    positionType.label === "Long"
+      ? sizeValueLong === 0
+        ? 0
+        : (leverageD * priceD) / sizeValueLong
+      : sizeValueShort === 0
+      ? 0
+      : netValue / sizeValueShort;
+  const { pos_id } = rowData;
+  const token_c_id = rowData.data.token_c_info.token_id;
+  const amount = `${inputValue}`;
+  const getAssetsdata = useAppSelector(getAssets);
+  const assets = getAssetsdata.data;
+  const handleAddCollateralClick = async () => {
+    try {
+      await increaseCollateral({ pos_id, token_c_id, amount, assets });
+    } catch (error) {
+      console.error("Error adding collateral:", error);
+    }
+  };
+  const handleDeleteCollateralClick = async () => {
+    try {
+      await decreaseCollateral({ pos_id, token_c_id, amount, assets });
+    } catch (error) {
+      console.error("Error deleted collateral:", error);
+    }
   };
   return (
     <MUIModal open={open} onClose={onClose}>
@@ -108,8 +165,16 @@ const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
                 <div className="py-2">
                   <div className=" bg-dark-600 border border-dark-500 pt-3 pb-2.5 pr-3 pl-2.5 rounded-md flex items-center justify-between mb-1.5">
                     <div>
-                      <input type="text" value={0} onChange={handleChange} />
-                      <p className="text-gray-300 text-xs mt-1.5">Add: $-</p>
+                      <input
+                        type="number"
+                        step="any"
+                        value={inputValue}
+                        onChange={handleChange}
+                        placeholder="0"
+                      />
+                      <p className="text-gray-300 text-xs mt-1.5">
+                        Add: ${Number.isNaN(inputValue) ? 0 : inputValue * priceC}
+                      </p>
                     </div>
                     <div>
                       <div className="flex items-center justify-end">
@@ -138,12 +203,8 @@ const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
                     <div className="text-gray-300">Position Size</div>
                     <div>
                       {positionType.label === "Long"
-                        ? toInternationalCurrencySystem_number(
-                            parseTokenValue(token_p_amount, decimalsP),
-                          )
-                        : toInternationalCurrencySystem_number(
-                            parseTokenValue(token_d_amount, decimalsD),
-                          )}
+                        ? toInternationalCurrencySystem_number(sizeValueLong)
+                        : toInternationalCurrencySystem_number(leverageD)}
                       <span className="ml-1.5">
                         {positionType.label === "Long"
                           ? assetP.metadata?.symbol === "wNEAR"
@@ -160,11 +221,40 @@ const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
                   </div>
                   <div className="flex items-center justify-between text-sm mb-4">
                     <div className="text-gray-300">Collateral ({symbolC})</div>
-                    <div>${toInternationalCurrencySystem_number(netValue)}</div>
+                    <div className="flex items-center justify-center">
+                      {addedValue ? (
+                        <>
+                          <span className="text-gray-300 mr-2 line-through">
+                            ${toInternationalCurrencySystem_number(netValue)}
+                          </span>
+                          <RightArrow />
+                          <p className="ml-2">
+                            ${toInternationalCurrencySystem_number(addedValue)}
+                          </p>
+                        </>
+                      ) : (
+                        <p>${toInternationalCurrencySystem_number(netValue)}</p>
+                      )}
+                    </div>
                   </div>
+
                   <div className="flex items-center justify-between text-sm mb-4">
                     <div className="text-gray-300">Leverage</div>
-                    <div>{toInternationalCurrencySystem_number(leverage)}X</div>
+                    <div className="flex items-center justify-center">
+                      {addLeverage ? (
+                        <>
+                          <span className="text-gray-300 mr-2 line-through">
+                            {toInternationalCurrencySystem_number(leverage)}X
+                          </span>
+                          <RightArrow />
+                          <p className="ml-2">
+                            {toInternationalCurrencySystem_number(addLeverage)}X
+                          </p>
+                        </>
+                      ) : (
+                        <p>{toInternationalCurrencySystem_number(leverage)}X</p>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center justify-between text-sm mb-4">
                     <div className="text-gray-300">Entry Price</div>
@@ -174,7 +264,14 @@ const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
                     <div className="text-gray-300">Liq. Price</div>
                     <div>$-</div>
                   </div>
-                  <div className="flex items-center bg-primary justify-between text-dark-200 text-base rounded-md h-12 text-center cursor-pointer">
+                  <div
+                    className={`flex items-center bg-primary justify-between text-dark-200 text-base rounded-md h-12 text-center cursor-pointer ${
+                      inputValue === 0 || Number.isNaN(inputValue)
+                        ? "opacity-50 pointer-events-none"
+                        : "opacity-100"
+                    }`}
+                    onClick={handleAddCollateralClick}
+                  >
                     <div className="flex-grow">Add Collateral</div>
                   </div>
                 </div>
@@ -183,8 +280,14 @@ const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
                 <div className="py-2">
                   <div className=" bg-dark-600 border border-dark-500 pt-3 pb-2.5 pr-3 pl-2.5 rounded-md flex items-center justify-between mb-1.5">
                     <div>
-                      <input type="text" value={0} onChange={handleChange} />
-                      <p className="text-gray-300 text-xs mt-1.5">Add: $-</p>
+                      <input
+                        type="number"
+                        step="any"
+                        value={inputValue}
+                        onChange={handleChange}
+                        placeholder="0"
+                      />
+                      <p className="text-gray-300 text-xs mt-1.5">Add: ${inputValue * priceC}</p>
                     </div>
                     <div>
                       <div className="flex items-center justify-end">
@@ -212,7 +315,18 @@ const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
                   <div className="flex items-center justify-between text-sm mb-4">
                     <div className="text-gray-300">Position Size</div>
                     <div>
-                      -
+                      {positionType.label === "Long"
+                        ? toInternationalCurrencySystem_number(sizeValueLong)
+                        : toInternationalCurrencySystem_number(leverageD)}
+                      <span className="ml-1.5">
+                        {positionType.label === "Long"
+                          ? assetP.metadata?.symbol === "wNEAR"
+                            ? "NEAR"
+                            : assetP.metadata?.symbol
+                          : assetD.metadata?.symbol === "wNEAR"
+                          ? "NEAR"
+                          : assetD.metadata?.symbol}
+                      </span>
                       <span className="text-xs text-gray-300 ml-1.5">
                         (${toInternationalCurrencySystem_number(sizeValue)})
                       </span>
@@ -221,17 +335,38 @@ const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
                   <div className="flex items-center justify-between text-sm mb-4">
                     <div className="text-gray-300">Collateral ({symbolC})</div>
                     <div className="flex items-center justify-center">
-                      {/* <span className="text-gray-300 mr-2 line-through">$101.23</span> */}
-                      {/* <RightArrow /> */}
-                      <p className="ml-2">${toInternationalCurrencySystem_number(netValue)}</p>
+                      {addedValue ? (
+                        <>
+                          <span className="text-gray-300 mr-2 line-through">
+                            ${toInternationalCurrencySystem_number(netValue)}
+                          </span>
+                          <RightArrow />
+                          <p className="ml-2">
+                            ${toInternationalCurrencySystem_number(addedValue)}
+                          </p>
+                        </>
+                      ) : (
+                        <p>${toInternationalCurrencySystem_number(netValue)}</p>
+                      )}
                     </div>
                   </div>
+
                   <div className="flex items-center justify-between text-sm mb-4">
                     <div className="text-gray-300">Leverage</div>
                     <div className="flex items-center justify-center">
-                      {/* <span className="text-gray-300 mr-2 line-through">1.1X</span>
-                      <RightArrow /> */}
-                      <p className="ml-2">{toInternationalCurrencySystem_number(leverage)}X</p>
+                      {addLeverage ? (
+                        <>
+                          <span className="text-gray-300 mr-2 line-through">
+                            {toInternationalCurrencySystem_number(leverage)}X
+                          </span>
+                          <RightArrow />
+                          <p className="ml-2">
+                            {toInternationalCurrencySystem_number(addLeverage)}X
+                          </p>
+                        </>
+                      ) : (
+                        <p>{toInternationalCurrencySystem_number(leverage)}X</p>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center justify-between text-sm mb-4">
@@ -240,13 +375,16 @@ const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
                   </div>
                   <div className="flex items-center justify-between text-sm mb-4">
                     <div className="text-gray-300">Liq. Price</div>
-                    <div className="flex items-center justify-center">
-                      {/* <span className="text-gray-300 mr-2 line-through">$-</span>
-                      <RightArrow /> */}
-                      <p className="ml-2">$-</p>
-                    </div>
+                    <div>$-</div>
                   </div>
-                  <div className="flex items-center bg-red-50 justify-between text-dark-200 text-base rounded-md h-12 text-center cursor-pointer">
+                  <div
+                    className={`flex items-center bg-red-50 justify-between text-dark-200 text-base rounded-md h-12 text-center cursor-pointer ${
+                      inputValue === 0 || Number.isNaN(inputValue)
+                        ? "opacity-50 pointer-events-none"
+                        : "opacity-100"
+                    }`}
+                    onClick={handleDeleteCollateralClick}
+                  >
                     <div className="flex-grow">Remove Collateral</div>
                   </div>
                 </div>

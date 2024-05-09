@@ -63,11 +63,12 @@ const TradingTable = ({ positionsList }) => {
               </thead>
               <tbody>
                 {positionsList &&
-                  Object.values(positionsList).map((item, index) => (
+                  Object.entries(positionsList).map(([key, item], index) => (
                     <PositionRow
                       index={index}
-                      key={index}
+                      key={key}
                       item={item}
+                      itemKey={key}
                       getAssetById={getAssetById}
                       getPositionType={getPositionType}
                       handleChangeCollateralButtonClick={handleChangeCollateralButtonClick}
@@ -154,6 +155,7 @@ const Tab = ({ tabName, isSelected, onClick }) => (
 );
 
 const PositionRow = ({
+  itemKey,
   index,
   item,
   getAssetById,
@@ -164,7 +166,7 @@ const PositionRow = ({
   parseTokenValue,
   calculateLeverage,
 }) => {
-  // console.log(item, index);
+  // console.log(itemKey, item, index);
   const assetD = getAssetById(item.token_d_info.token_id);
   const assetC = getAssetById(item.token_c_info.token_id);
   const assetP = getAssetById(item.token_p_id);
@@ -198,17 +200,8 @@ const PositionRow = ({
       : netValue / sizeValueShort;
   const indexPrice = positionType.label === "Long" ? priceP : priceD;
   const rowData = {
-    positionType,
-    leverage,
-    assetC,
-    assetP,
-    assetD,
-    collateral,
-    sizeValue,
-    netValue,
-    entryPrice,
-    token_p_amount: item.token_p_amount,
-    token_d_amount: item.token_d_info.balance,
+    pos_id: itemKey,
+    data: item,
   };
   return (
     <Link href={`/trading/${item.token_p_id}`} key={index}>
