@@ -2,6 +2,8 @@ import React, { useState, useContext, useEffect } from "react";
 import { NearIcon } from "../../MarginTrading/components/Icon";
 import { TokenThinArrow, TokenSelected } from "./TradingIcon";
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
+import { getAssets } from "../../../redux/assetsSelectors";
+import { getAccountId } from "../../../redux/accountSelectors";
 import {
   setCategoryAssets1,
   setCategoryAssets2,
@@ -12,57 +14,74 @@ import { shrinkToken } from "../../../store";
 import { toInternationalCurrencySystem_number } from "../../../utils/uiNumber";
 
 const TradingToken = ({ tokenList, type }) => {
+  let timer;
   const dispatch = useAppDispatch();
   const account = useAppSelector((state) => state.account);
+  const assets = useAppSelector(getAssets);
   const { ReduxcategoryAssets1, ReduxcategoryAssets2 } = useAppSelector((state) => state.category);
-  const [ownBalance, setOwnBalance] = useState("0");
+  const [ownBalance, setOwnBalance] = useState("-");
   const [showModal, setShowModal] = useState(false);
+  const accountId = useAppSelector(getAccountId);
   /*
     @type cate1: category.value == 1 
     @type cate2: category.value == 2 
   */
-  const [selectedItem, setSelectedItem] = useState(
-    type == "cate1" ? ReduxcategoryAssets1 || tokenList[0] : ReduxcategoryAssets2 || tokenList[0],
-  );
+  const [selectedItem, setSelectedItem] = useState(tokenList[0]);
 
-  let timer;
   //
   useEffect(() => {
-    if (type == "cate1") {
-      //
-      const waitUseKey = shrinkToken(
-        (account.balances as any)[ReduxcategoryAssets1.metadata["token_id"]],
-        ReduxcategoryAssets1.metadata.decimals + ReduxcategoryAssets1.config.extra_decimals,
-      );
-      setSelectedItem(ReduxcategoryAssets1);
-      console.log(waitUseKey);
-      //
-      if (ReduxcategoryAssets1) setOwnBalance(toInternationalCurrencySystem_number(waitUseKey));
-      dispatch(setReduxcategoryCurrentBalance1(waitUseKey));
-    } else if (type == "cate2") {
-      //
-      const waitUseKey = shrinkToken(
-        (account.balances as any)[ReduxcategoryAssets2.metadata["token_id"]],
-        ReduxcategoryAssets2.metadata.decimals + ReduxcategoryAssets2.config.extra_decimals,
-      );
-      setSelectedItem(ReduxcategoryAssets2);
-      console.log(waitUseKey);
-      //
-      if (ReduxcategoryAssets2) setOwnBalance(toInternationalCurrencySystem_number(waitUseKey));
-      dispatch(setReduxcategoryCurrentBalance2(waitUseKey));
+    let selectedAsset: any = null;
+    let setReduxcategoryCurrentBalance: any = null;
+
+    if (type === "cate1" && ReduxcategoryAssets1) {
+      selectedAsset = ReduxcategoryAssets1;
+      setReduxcategoryCurrentBalance = (value: any) =>
+        dispatch(setReduxcategoryCurrentBalance1(value));
+    } else if (type === "cate2" && ReduxcategoryAssets2) {
+      selectedAsset = ReduxcategoryAssets2;
+      setReduxcategoryCurrentBalance = (value: any) =>
+        dispatch(setReduxcategoryCurrentBalance2(value));
     }
-  }, [ReduxcategoryAssets1, ReduxcategoryAssets2]);
+
+    if (!selectedAsset) {
+      setSelectedItem(null);
+      setOwnBalance("-");
+      return;
+    }
+
+    const tokenId = selectedAsset.metadata["token_id"];
+    if (!tokenId || !account.balances[tokenId]) {
+      setOwnBalance("-");
+      setReduxcategoryCurrentBalance("-");
+      setSelectedItem(selectedAsset);
+      return;
+    }
+
+    const decimals = selectedAsset.metadata.decimals + selectedAsset.config.extra_decimals;
+    const waitUseKey = shrinkToken(account.balances[tokenId], decimals);
+    setOwnBalance(toInternationalCurrencySystem_number(waitUseKey));
+    setReduxcategoryCurrentBalance(waitUseKey);
+    setSelectedItem(selectedAsset);
+  }, [type, accountId, account.balances, ReduxcategoryAssets1, ReduxcategoryAssets2]);
 
   //
   const handleTokenClick = (item) => {
     if (!item) return;
+
     setSelectedItem(item);
-    //
-    if (type == "cate1") {
-      dispatch(setCategoryAssets1(item));
-    } else if (type == "cate2") {
-      dispatch(setCategoryAssets2(item));
+
+    switch (type) {
+      case "cate1":
+        dispatch(setCategoryAssets1(item)); // update cate1
+        break;
+      case "cate2":
+        dispatch(setCategoryAssets2(item)); // update cate2
+        break;
+      default:
+        console.warn(`Unsupported type: ${type}`);
+        break;
     }
+
     setShowModal(false);
   };
 

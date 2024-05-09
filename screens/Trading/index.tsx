@@ -33,9 +33,9 @@ const Trading = () => {
   const [showPopupCate1, setShowPopup1] = useState(false);
   const [showPopupCate2, setShowPopup2] = useState(false);
   // pools
-  const [simplePools, setSimplePools] = useState<any[]>([]);
-  const [stablePools, setStablePools] = useState<any[]>([]);
-  const [stablePoolsDetail, setStablePoolsDetail] = useState<any[]>([]);
+  // const [simplePools, setSimplePools] = useState<any[]>([]);
+  // const [stablePools, setStablePools] = useState<any[]>([]);
+  // const [stablePoolsDetail, setStablePoolsDetail] = useState<any[]>([]);
   //
   const [currentTokenCate1, setCurrentTokenCate1] = useState<any>({});
   const [currentTokenCate2, setCurrentTokenCate2] = useState<any>(categoryAssets2[0]);
@@ -46,9 +46,9 @@ const Trading = () => {
   // deal category1,2
 
   //
-  useEffect(() => {
-    getPoolsData();
-  }, []);
+  // useEffect(() => {
+  //   getPoolsData();
+  // }, []);
 
   // computed currentTokenCate1 dropdown
   useEffect(() => {
@@ -66,7 +66,6 @@ const Trading = () => {
       const { extra_decimals } = config;
 
       setLongAndShortPosition([
-        // deal big int price
         toInternationalCurrencySystem_number(
           shrinkToken(margin_position, decimals + extra_decimals),
         ),
@@ -85,14 +84,14 @@ const Trading = () => {
     setCurrentTokenCate2(ReduxcategoryAssets2);
   }, [ReduxcategoryAssets2]);
 
-  async function getPoolsData() {
-    const { ratedPools, unRatedPools, simplePools: simplePoolsFromSdk } = await fetchAllPools();
-    const stablePoolsFromSdk = unRatedPools.concat(ratedPools);
-    const stablePoolsDetailFromSdk = await getStablePools(stablePools);
-    setSimplePools(simplePoolsFromSdk);
-    setStablePools(stablePoolsFromSdk);
-    setStablePoolsDetail(stablePoolsDetailFromSdk);
-  }
+  // async function getPoolsData() {
+  //   const { ratedPools, unRatedPools, simplePools: simplePoolsFromSdk } = await fetchAllPools();
+  //   const stablePoolsFromSdk = unRatedPools.concat(ratedPools);
+  //   const stablePoolsDetailFromSdk = await getStablePools(stablePools);
+  //   setSimplePools(simplePoolsFromSdk);
+  //   setStablePools(stablePoolsFromSdk);
+  //   setStablePoolsDetail(stablePoolsDetailFromSdk);
+  // }
 
   // mouseenter and leave inter
   const handlePopupToggle = () => {

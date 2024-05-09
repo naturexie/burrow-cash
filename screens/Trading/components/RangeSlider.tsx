@@ -1,8 +1,33 @@
 import React, { useRef, useState, useEffect } from "react";
 import { twMerge } from "tailwind-merge";
+import { useMarginConfigToken } from "../../../hooks/useMarginConfig";
 
 const RangeSlider = ({ defaultValue, action, setRangeMount }) => {
-  const allowedValues = [1, 1.25, 1.5, 1.75, 2];
+  //
+  const generateArithmeticSequence = (start, end, increment) => {
+    const sequence = [];
+
+    const numItems = Math.ceil((end - start) / increment) + 1; //
+
+    for (let i = 0; i < numItems; i++) {
+      // @ts-ignore
+      sequence.push(start + i * increment);
+    }
+
+    if (sequence[sequence.length - 1] > end) {
+      sequence.pop();
+    }
+
+    return sequence;
+  };
+  //
+  const { marginConfigTokens } = useMarginConfigToken();
+
+  const allowedValues = generateArithmeticSequence(
+    1,
+    marginConfigTokens["max_leverage_rate"],
+    2.25,
+  );
   const [value, setValue] = useState(defaultValue);
   const [splitList, setSplitList] = useState(allowedValues);
   const [matchValue, setMatchValue] = useState(value);

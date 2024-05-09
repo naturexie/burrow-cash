@@ -1,16 +1,22 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import _ from "lodash";
+import { fetchAllPools, getStablePools, init_env } from "@ref-finance/ref-sdk";
 import TradingToken from "./tokenbox";
 import { RefLogoIcon, SetUp, ShrinkArrow } from "./TradingIcon";
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
 import RangeSlider from "./RangeSlider";
 import ConfirmMobile from "./ConfirmMobile";
 import { getAccountBalance, getAccountId } from "../../../redux/accountSelectors";
+import { getAssets } from "../../../redux/assetsSelectors";
 import { useMarginConfigToken } from "../../../hooks/useMarginConfig";
+import { getMarginConfig } from "../../../redux/marginConfigSelectors";
 import { setCategoryAssets1, setCategoryAssets2 } from "../../../redux/marginTrading";
-
+import { toInternationalCurrencySystem_number } from "../../../utils/uiNumber";
+import { useEstimateSwap } from "../../../hooks/useEstimateSwap";
 // main components
 const TradingOperate = () => {
+  const assets = useAppSelector(getAssets);
+  const config = useAppSelector(getMarginConfig);
   const { categoryAssets1, categoryAssets2 } = useMarginConfigToken();
   const {
     ReduxcategoryAssets1,
@@ -25,12 +31,20 @@ const TradingOperate = () => {
   const [selectedSetUpOption, setSelectedSetUpOption] = useState("auto");
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [rangeMount, setRangeMount] = useState(1);
+  const [isDisabled, setDisabled] = useState(false);
 
   //
   const [longInput, setLongInput] = useState();
   const [longOutput, setLongOutput] = useState();
   const [shortInput, setShortInput] = useState();
   const [shortOutput, setShortOutput] = useState();
+
+  // amount
+  const [longInputUsd, setLongInputUsd] = useState(0);
+  const [longOutputUsd, setLongOutputUsd] = useState(0);
+  const [shortInputUsd, setShortInputUsd] = useState(0);
+  const [shortOutputUsd, setShortOutputUsd] = useState(0);
+
   //
   const balance = useAppSelector(getAccountBalance);
   const accountId = useAppSelector(getAccountId);
@@ -46,6 +60,7 @@ const TradingOperate = () => {
     return obj[flag](value);
   };
 
+  //
   const handleTabClick = (tabString) => {
     setActiveTab(tabString);
   };
@@ -69,23 +84,110 @@ const TradingOperate = () => {
     setSelectedSetUpOption(option);
   };
   const handleConfirmButtonClick = () => {
+    if (isDisabled) return;
     setIsConfirmModalOpen(true);
   };
-  const [isDisabled, setDisabled] = useState(false);
   // condition btn is disabled
-  useMemo(() => {
+  useEffect(() => {
+    const setDisableBasedOnInputs = () => {
+      const currentBalance1 = Number(ReduxcategoryCurrentBalance1) || 0;
+      const currentBalance2 = Number(ReduxcategoryCurrentBalance2) || 0;
+
+      let inputValue;
+      let outputValue;
+      if (activeTab === "long") {
+        inputValue = longInput;
+        outputValue = longOutput;
+      } else {
+        inputValue = shortInput;
+        outputValue = shortOutput;
+      }
+
+      const isValidInput = isValidDecimalString(inputValue);
+      const isValidOutput = isValidDecimalString(outputValue);
+
+      setDisabled(
+        !isValidInput ||
+          // !isValidOutput ||
+          Number(inputValue) > currentBalance2 ||
+          Number(outputValue) > currentBalance1,
+      );
+    };
+
+    setDisableBasedOnInputs();
+  }, [
+    activeTab,
+    ReduxcategoryCurrentBalance1,
+    ReduxcategoryCurrentBalance2,
+    longInput,
+    longOutput,
+    shortInput,
+    shortOutput,
+  ]);
+
+  //
+  const isValidDecimalString = (str) => {
+    if (str == 0) return false;
+    // const regex = /^(?![0]+$)\d+(\.\d+)?$/;
+    const regex = /^\d+(\.\d+)?$/;
+    return regex.test(str);
+  };
+
+  const [tokenInAmount, setTokenInAmount] = useState(0);
+
+  // get pools detail
+  const [simplePools, setSimplePools] = useState<any[]>([]);
+  const [stablePools, setStablePools] = useState<any[]>([]);
+  const [stablePoolsDetail, setStablePoolsDetail] = useState<any[]>([]);
+  useEffect(() => {
+    getPoolsData();
+  }, []);
+  async function getPoolsData() {
+    const { ratedPools, unRatedPools, simplePools: simplePoolsFromSdk } = await fetchAllPools();
+    const stablePoolsFromSdk = unRatedPools.concat(ratedPools);
+    const stablePoolsDetailFromSdk = await getStablePools(stablePools);
+    setSimplePools(simplePoolsFromSdk);
+    setStablePools(stablePoolsFromSdk);
+    setStablePoolsDetail(stablePoolsDetailFromSdk);
+  }
+  // pools end
+
+  //
+  useEffect(() => {
+    const longInputUsdChar = assets.data[ReduxcategoryAssets2["token_id"]].price?.usd;
+
+    let openFeeAmount;
+    let tknc;
     if (activeTab == "long") {
-      setDisabled(
-        Number(longInput) > Number(ReduxcategoryCurrentBalance2) ||
-          Number(longOutput) > Number(ReduxcategoryCurrentBalance1),
-      );
-    } else {
-      setDisabled(
-        Number(shortInput) > Number(ReduxcategoryCurrentBalance2) ||
-          Number(shortOutput) > Number(ReduxcategoryCurrentBalance1),
-      );
+      if (longInputUsdChar && longInput) {
+        setLongInputUsd(longInputUsdChar * Number(longInput));
+        openFeeAmount = (longInput * config.open_position_fee_rate) / 10000;
+        tknc = (longInput - openFeeAmount) * longInputUsdChar * rangeMount;
+      }
+      setTokenInAmount(tknc);
+    } else if (longInputUsdChar && shortInput) {
+      setLongInputUsd(longInputUsdChar * Number(shortInput));
+      openFeeAmount = (shortInput * config.open_position_fee_rate) / 10000;
+      tknc = (shortInput - openFeeAmount) * longInputUsdChar * rangeMount;
+      setTokenInAmount(tknc);
     }
-  }, [longInput, longOutput, shortInput, shortOutput]);
+
+    //
+  }, [longInput, shortInput]);
+
+  // get cate1 amount
+  const estimateData = useEstimateSwap({
+    tokenIn_id: ReduxcategoryAssets2.token_id,
+    tokenOut_id: ReduxcategoryAssets1.token_id,
+    tokenIn_amount: String(tokenInAmount),
+    account_id: accountId,
+    simplePools,
+    stablePools,
+    stablePoolsDetail,
+    slippageTolerance: 0.05, // test
+  });
+
+  //
 
   return (
     <div className="w-full pt-4 px-4 pb-9">
@@ -151,20 +253,21 @@ const TradingOperate = () => {
             <div className="relative bg-dark-600 border border-dark-500 pt-3 pb-2.5 pr-3 pl-2.5 rounded-md z-30">
               <input
                 onChange={(e) => inputPriceChange(e.target.value, "longInput")}
-                type="text"
+                type="number"
                 value={longInput}
                 placeholder="0"
               />
               <div className="absolute top-2 right-2">
                 <TradingToken tokenList={categoryAssets2} type="cate2" />
               </div>
-              <p className="text-gray-300 mt-2 text-xs">Use: $0.00</p>
+              <p className="text-gray-300 mt-2 text-xs">Usd: ${longInputUsd}</p>
             </div>
             <div className="relative my-2.5 flex justify-end z-0 w-1/2" style={{ zoom: "2" }}>
               <ShrinkArrow />
             </div>
             <div className="relative bg-dark-600 border border-dark-500 pt-3 pb-2.5 pr-3 pl-2.5 rounded-md z-20">
               <input
+                disabled
                 onChange={(e) => inputPriceChange(e.target.value, "longOutput")}
                 type="text"
                 value={longOutput}
@@ -173,7 +276,7 @@ const TradingOperate = () => {
               <div className="absolute top-2 right-2">
                 <TradingToken tokenList={categoryAssets1} type="cate1" />
               </div>
-              <p className="text-gray-300 mt-2 text-xs">Long: $0.00</p>
+              <p className="text-gray-300 mt-2 text-xs">Long: ${longOutputUsd}</p>
             </div>
             <RangeSlider defaultValue={rangeMount} action="Long" setRangeMount={setRangeMount} />
             {accountId && (
@@ -207,7 +310,9 @@ const TradingOperate = () => {
                   </div>
                 </div>
                 <div
-                  className="flex items-center justify-between bg-primary text-dark-200 text-base rounded-md h-12 text-center cursor-pointer"
+                  className={`flex items-center justify-between  text-dark-200 text-base rounded-md h-12 text-center  ${
+                    isDisabled ? "bg-slate-700 cursor-default" : "bg-primary cursor-pointer"
+                  }`}
                   onClick={handleConfirmButtonClick}
                 >
                   <div className="flex-grow">Long NEAR {rangeMount}x</div>
@@ -228,20 +333,21 @@ const TradingOperate = () => {
             <div className="relative bg-dark-600 border border-dark-500 pt-3 pb-2.5 pr-3 pl-2.5 rounded-md z-30">
               <input
                 onChange={(e) => inputPriceChange(e.target.value, "shortInput")}
-                type="text"
+                type="number"
                 value={shortInput}
                 placeholder="0"
               />
               <div className="absolute top-2 right-2">
                 <TradingToken tokenList={categoryAssets2} type="cate2" />
               </div>
-              <p className="text-gray-300 mt-2 text-xs">Use: $0.00</p>
+              <p className="text-gray-300 mt-2 text-xs">Usd: ${shortInputUsd}</p>
             </div>
             <div className="relative my-2.5 flex justify-end z-0 w-1/2" style={{ zoom: "2" }}>
               <ShrinkArrow />
             </div>
             <div className="relative bg-dark-600 border border-dark-500 pt-3 pb-2.5 pr-3 pl-2.5 rounded-md z-20">
               <input
+                disabled
                 onChange={(e) => inputPriceChange(e.target.value, "shortOutput")}
                 type="text"
                 value={shortOutput}
@@ -250,7 +356,7 @@ const TradingOperate = () => {
               <div className="absolute top-2 right-2">
                 <TradingToken tokenList={categoryAssets1} type="cate1" />
               </div>
-              <p className="text-gray-300 mt-2 text-xs">Long: $0.00</p>
+              <p className="text-gray-300 mt-2 text-xs">Long: ${shortOutputUsd}</p>
             </div>
             <RangeSlider defaultValue={rangeMount} action="Short" setRangeMount={setRangeMount} />
             <div className="mt-5">
@@ -282,7 +388,11 @@ const TradingOperate = () => {
                   NEAR &gt; USDT.e &gt; USDC.e
                 </div>
               </div>
-              <div className="flex items-center justify-between bg-red-50 text-dark-200 text-base rounded-md h-12 text-center cursor-pointer">
+              <div
+                className={`flex items-center justify-between  text-dark-200 text-base rounded-md h-12 text-center  ${
+                  isDisabled ? "bg-slate-700 cursor-default" : "bg-red-50 cursor-pointer"
+                }`}
+              >
                 <div className="flex-grow">Short NEAR {rangeMount}x</div>
               </div>
             </div>
