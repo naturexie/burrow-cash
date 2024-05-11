@@ -37,16 +37,33 @@ const ChangeCollateralMobile = ({ open, onClose, rowData, collateralTotal }) => 
     { label: "75%", value: "75" },
     { label: "Max", value: "Max" },
   ];
-  const handleAddChange = (event) => {
+  const calculateChange = (
+    value,
+    isAddition,
+    tokenCInfoBalance,
+    tokenDInfoBalance,
+    priceC,
+    priceD,
+  ) => {
+    const newValue = isAddition ? tokenCInfoBalance + value : tokenCInfoBalance - value;
+    const newNetValue = newValue * priceC;
+    const newLeverage = calculateLeverage(tokenDInfoBalance, priceD, newValue, priceC);
+    return { newNetValue, newLeverage };
+  };
+
+  const handleCollateralChange = (event, isAddition) => {
     const value = parseFloat(event.target.value);
     const tokenCInfoBalance = parseTokenValue(rowData.data.token_c_info.balance, decimalsC);
-    const newNetValue = (tokenCInfoBalance + value) * priceC;
     const tokenDInfoBalance = parseTokenValue(rowData.data.token_d_info.balance, decimalsD);
-    const leverageC = parseTokenValue(rowData.data.token_c_info.balance, decimalsC);
-    const newLeverage = calculateLeverage(tokenDInfoBalance, priceD, leverageC + value, priceC);
-    // if (newLeverage < 1) {
-    //   return;
-    // }
+    const leverage = parseTokenValue(rowData.data.token_c_info.balance, decimalsC);
+    const { newNetValue, newLeverage } = calculateChange(
+      value,
+      isAddition,
+      tokenCInfoBalance,
+      tokenDInfoBalance,
+      priceC,
+      priceD,
+    );
 
     setAddedValue(newNetValue);
     setAddLeverage(newLeverage);
@@ -56,24 +73,13 @@ const ChangeCollateralMobile = ({ open, onClose, rowData, collateralTotal }) => 
       setAddLeverage(0);
     }
   };
-  const handleDeleteChange = (event) => {
-    const value = parseFloat(event.target.value);
-    const tokenCInfoBalance = parseTokenValue(rowData.data.token_c_info.balance, decimalsC);
-    const newNetValue = (tokenCInfoBalance - value) * priceC;
-    const tokenDInfoBalance = parseTokenValue(rowData.data.token_d_info.balance, decimalsD);
-    const leverageC = parseTokenValue(rowData.data.token_c_info.balance, decimalsC);
-    const newLeverage = calculateLeverage(tokenDInfoBalance, priceD, leverageC - value, priceC);
-    // if (newLeverage > marginConfigTokens.max_leverage_rate || newLeverage < 0) {
-    //  return;
-    // }
 
-    setAddedValue(newNetValue);
-    setAddLeverage(newLeverage);
-    setInputValue(value);
-    if (event.target.value === "") {
-      setAddedValue(0);
-      setAddLeverage(0);
-    }
+  const handleAddChange = (event) => {
+    handleCollateralChange(event, true);
+  };
+
+  const handleDeleteChange = (event) => {
+    handleCollateralChange(event, false);
   };
 
   const assetD = getAssetById(rowData.data.token_d_info.token_id);
@@ -104,6 +110,25 @@ const ChangeCollateralMobile = ({ open, onClose, rowData, collateralTotal }) => 
       : sizeValueShort === 0
       ? 0
       : netValue / sizeValueShort;
+  const debt_assets_d = rowData.assets.find(
+    (asset) => asset.token_id === rowData.data.token_d_info.token_id,
+  );
+  const total_cap = leverageC * priceC + sizeValueLong * priceP;
+  const total_debt = leverageD * priceD;
+  const total_hp_fee =
+    (rowData.data.debt_cap *
+      ((debt_assets_d?.unit_acc_hp_interest ?? 0) - rowData.data.uahpi_at_open)) /
+    10 ** 18;
+  const decrease_cap = total_cap * (marginConfigTokens.min_safty_buffer / 10000);
+  const denominator = sizeValueLong * (1 - marginConfigTokens.min_safty_buffer / 10000);
+  const LiqPrice =
+    denominator !== 0
+      ? (total_debt +
+          total_hp_fee +
+          (priceC * leverageC * marginConfigTokens.min_safty_buffer) / 10000 -
+          priceC * leverageC) /
+        denominator
+      : 0;
   const { pos_id } = rowData;
   const token_c_id = rowData.data.token_c_info.token_id;
   const amount = `${inputValue}`;
@@ -124,6 +149,11 @@ const ChangeCollateralMobile = ({ open, onClose, rowData, collateralTotal }) => 
     }
   };
   const handleLeverAddClick = (value) => {
+    if (selectedLever === value) {
+      setSelectedLever(null);
+      setInputValue(NaN);
+      return;
+    }
     setSelectedLever(value);
     if (value === "Max") {
       const maxPercentage = Number(balance) / priceC;
@@ -135,6 +165,11 @@ const ChangeCollateralMobile = ({ open, onClose, rowData, collateralTotal }) => 
     }
   };
   const handleLeverDeleteClick = (value) => {
+    if (selectedLever === value) {
+      setSelectedLever(null);
+      setInputValue(NaN);
+      return;
+    }
     setSelectedLever(value);
     if (value === "Max") {
       const maxPercentage = collateralTotal / priceC;
@@ -305,7 +340,7 @@ const ChangeCollateralMobile = ({ open, onClose, rowData, collateralTotal }) => 
                   </div>
                   <div className="flex items-center justify-between text-sm mb-4">
                     <div className="text-gray-300">Liq. Price</div>
-                    <div>$-</div>
+                    <div>${toInternationalCurrencySystem_number(LiqPrice)}</div>
                   </div>
                   <div
                     className={`flex items-center bg-primary justify-between text-dark-200 text-base rounded-md h-12 text-center cursor-pointer ${
@@ -423,7 +458,7 @@ const ChangeCollateralMobile = ({ open, onClose, rowData, collateralTotal }) => 
                   </div>
                   <div className="flex items-center justify-between text-sm mb-4">
                     <div className="text-gray-300">Liq. Price</div>
-                    <div>$-</div>
+                    <div>${toInternationalCurrencySystem_number(LiqPrice)}</div>
                   </div>
                   <div
                     className={`flex items-center bg-red-50 justify-between text-dark-200 text-base rounded-md h-12 text-center cursor-pointer ${

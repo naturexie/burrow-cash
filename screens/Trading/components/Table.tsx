@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { AddCollateral, Export } from "../../MarginTrading/components/Icon";
 import ClosePositionMobile from "./ClosePositionMobile";
@@ -6,12 +6,15 @@ import ChangeCollateralMobile from "./ChangeCollateralMobile";
 import { useMarginAccount } from "../../../hooks/useMarginAccount";
 import { useMarginConfigToken } from "../../../hooks/useMarginConfig";
 import { toInternationalCurrencySystem_number } from "../../../utils/uiNumber";
+import { getAssets } from "../../../store/assets";
+import { IAssetEntry } from "../../../interfaces";
 
 const TradingTable = ({ positionsList, collateralTotal }) => {
   const [selectedTab, setSelectedTab] = useState("positions");
   const [isClosePositionModalOpen, setIsClosePositionMobileOpen] = useState(false);
   const [isChangeCollateralMobileOpen, setIsChangeCollateralMobileOpen] = useState(false);
   const [selectedRowData, setSelectedRowData] = useState(null);
+  const [assets, setAssets] = useState<IAssetEntry[]>([]);
   const {
     useMarginAccountList,
     parseTokenValue,
@@ -19,7 +22,7 @@ const TradingTable = ({ positionsList, collateralTotal }) => {
     getAssetById,
     calculateLeverage,
   } = useMarginAccount();
-  const { getPositionType } = useMarginConfigToken();
+  const { getPositionType, marginConfigTokens } = useMarginConfigToken();
   const handleTabClick = (tabNumber) => {
     setSelectedTab(tabNumber);
   };
@@ -30,6 +33,17 @@ const TradingTable = ({ positionsList, collateralTotal }) => {
     setSelectedRowData(rowData);
     setIsChangeCollateralMobileOpen(true);
   };
+  const fetchAssets = async () => {
+    try {
+      const fetchedAssets = await getAssets();
+      setAssets(fetchedAssets);
+    } catch (error) {
+      console.error("Error fetching assets:", error);
+    }
+  };
+  useEffect(() => {
+    fetchAssets();
+  }, []);
   return (
     <div className="flex flex-col items-center justify-center w-full">
       <div className="w-full border border-dark-50 bg-gray-800 rounded-md">
@@ -76,6 +90,8 @@ const TradingTable = ({ positionsList, collateralTotal }) => {
                       getAssetDetails={getAssetDetails}
                       parseTokenValue={parseTokenValue}
                       calculateLeverage={calculateLeverage}
+                      marginConfigTokens={marginConfigTokens}
+                      assets={assets}
                     />
                   ))}
                 {isChangeCollateralMobileOpen && (
@@ -166,6 +182,8 @@ const PositionRow = ({
   getAssetDetails,
   parseTokenValue,
   calculateLeverage,
+  assets,
+  marginConfigTokens,
 }) => {
   // console.log(itemKey, item, index);
   const assetD = getAssetById(item.token_d_info.token_id);
@@ -200,9 +218,27 @@ const PositionRow = ({
       ? 0
       : netValue / sizeValueShort;
   const indexPrice = positionType.label === "Long" ? priceP : priceD;
+  const debt_assets_d = assets.find((asset) => asset.token_id === item.token_d_info.token_id);
+  const total_cap = leverageC * priceC + sizeValueLong * priceP;
+  const total_debt = leverageD * priceD;
+  const total_hp_fee =
+    (item.debt_cap * ((debt_assets_d?.unit_acc_hp_interest ?? 0) - item.uahpi_at_open)) / 10 ** 18;
+  const decrease_cap = total_cap * (marginConfigTokens.min_safty_buffer / 10000);
+  const denominator = sizeValueLong * (1 - marginConfigTokens.min_safty_buffer / 10000);
+  total_cap - decrease_cap === total_debt + total_hp_fee;
+  const LiqPrice =
+    denominator !== 0
+      ? (total_debt +
+          total_hp_fee +
+          (priceC * leverageC * marginConfigTokens.min_safty_buffer) / 10000 -
+          priceC * leverageC) /
+        denominator
+      : 0;
   const rowData = {
     pos_id: itemKey,
     data: item,
+    assets,
+    marginConfigTokens,
   };
   return (
     <Link href={`/trading/${item.token_p_id}`} key={index}>
@@ -235,7 +271,7 @@ const PositionRow = ({
         </td>
         <td>${toInternationalCurrencySystem_number(entryPrice)}</td>
         <td>${toInternationalCurrencySystem_number(indexPrice)}</td>
-        <td>$-</td>
+        <td>${toInternationalCurrencySystem_number(LiqPrice)}</td>
         <td>
           <div className="flex items-center">
             <p className="text-gray-1000"> -</p>
