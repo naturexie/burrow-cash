@@ -9,13 +9,14 @@ import { toInternationalCurrencySystem_number } from "../../../utils/uiNumber";
 import { getAssets } from "../../../store/assets";
 import { IAssetEntry } from "../../../interfaces";
 
-const TradingTable = ({ positionsList, collateralTotal }) => {
+const TradingTable = ({ positionsList }) => {
   const [selectedTab, setSelectedTab] = useState("positions");
   const [isClosePositionModalOpen, setIsClosePositionMobileOpen] = useState(false);
   const [isChangeCollateralMobileOpen, setIsChangeCollateralMobileOpen] = useState(false);
   const [selectedRowData, setSelectedRowData] = useState(null);
   const [assets, setAssets] = useState<IAssetEntry[]>([]);
   const [closePositionModalProps, setClosePositionModalProps] = useState(null);
+  const [totalCollateral, setTotalCollateral] = useState(0);
   const {
     useMarginAccountList,
     parseTokenValue,
@@ -46,6 +47,19 @@ const TradingTable = ({ positionsList, collateralTotal }) => {
   useEffect(() => {
     fetchAssets();
   }, []);
+  const calculateTotalSizeValues = () => {;
+    let collateralTotal = 0;
+    Object.values(useMarginAccountList).forEach((item) => {
+      const assetC = getAssetById(item.token_c_info.token_id);
+      const { price: priceC, symbol: symbolC, decimals: decimalsC } = getAssetDetails(assetC);
+      const netValue = parseTokenValue(item.token_c_info.balance, decimalsC) * (priceC || 0);
+      collateralTotal += netValue;
+    });
+    setTotalCollateral(collateralTotal);
+  };
+  useEffect(() => {
+    calculateTotalSizeValues();
+  }, [useMarginAccountList]);
   return (
     <div className="flex flex-col items-center justify-center w-full">
       <div className="w-full border border-dark-50 bg-gray-800 rounded-md">
@@ -105,7 +119,7 @@ const TradingTable = ({ positionsList, collateralTotal }) => {
                       setIsChangeCollateralMobileOpen(false);
                     }}
                     rowData={selectedRowData}
-                    collateralTotal={collateralTotal}
+                    collateralTotal={totalCollateral}
                   />
                 )}
                 {isClosePositionModalOpen && (

@@ -266,7 +266,7 @@ const Trading = () => {
           <TradingOperate />
         </div>
       </div>
-      {/* {accountId && <TradingTable positionsList={useMarginAccountList} />} */}
+      {accountId && <TradingTable positionsList={useMarginAccountList} />}
     </LayoutBox>
   );
 };

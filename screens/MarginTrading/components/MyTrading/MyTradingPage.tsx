@@ -121,7 +121,7 @@ const MyMarginTradingPage = () => {
           </div>
         </div>
       </div>
-      <TradingTable positionsList={useMarginAccountList} collateralTotal={totalCollateral} />
+      <TradingTable positionsList={useMarginAccountList} />
     </div>
   );
 };
