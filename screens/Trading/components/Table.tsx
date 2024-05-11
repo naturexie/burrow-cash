@@ -47,7 +47,7 @@ const TradingTable = ({ positionsList }) => {
   useEffect(() => {
     fetchAssets();
   }, []);
-  const calculateTotalSizeValues = () => {;
+  const calculateTotalSizeValues = () => {
     let collateralTotal = 0;
     Object.values(useMarginAccountList).forEach((item) => {
       const assetC = getAssetById(item.token_c_info.token_id);
