@@ -49,6 +49,7 @@ export const useEstimateSwap = ({
       !isEmpty(stablePoolsDetail) &&
       Number(tokenIn_amount) > 0
     ) {
+      console.log("i am coming");
       getEstimateSwapData();
     }
   }, [
@@ -66,7 +67,6 @@ export const useEstimateSwap = ({
       assets.data[tokenIn_id],
       assets.data[tokenOut_id],
     ]);
-    console.log(typeof tokenIn_amount, "tokenOut_metadata");
     const swapTodos = await estimateSwap({
       tokenIn: tokenIn_metadata,
       tokenOut: tokenOut_metadata,
@@ -81,9 +81,10 @@ export const useEstimateSwap = ({
       return e;
     });
     if (swapTodos.message) {
-      return {
+      setEstimateData({
         swapError: swapTodos.message,
-      };
+      });
+      return;
     }
     console.log(swapTodos, "swapTodos>>>>>>>>81");
     const amountOut: string = getExpectedOutputFromSwapTodos(

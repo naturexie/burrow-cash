@@ -1,20 +1,19 @@
 import React, { useMemo, useState, useEffect } from "react";
 import _ from "lodash";
-import { fetchAllPools, getStablePools, init_env } from "@ref-finance/ref-sdk";
-import { display } from "@mui/system";
 import TradingToken from "./tokenbox";
-import { RefLogoIcon, SetUp, ShrinkArrow } from "./TradingIcon";
+import { RefLogoIcon, SetUp, ShrinkArrow, errorTipsIcon } from "./TradingIcon";
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
 import RangeSlider from "./RangeSlider";
 import ConfirmMobile from "./ConfirmMobile";
 import { getAccountBalance, getAccountId } from "../../../redux/accountSelectors";
 import { getAssets } from "../../../redux/assetsSelectors";
 import { useMarginConfigToken } from "../../../hooks/useMarginConfig";
+import { usePoolsData } from "../../../hooks/useGetPoolsData";
 import { getMarginConfig } from "../../../redux/marginConfigSelectors";
-import { setCategoryAssets1, setCategoryAssets2 } from "../../../redux/marginTrading";
 import { toInternationalCurrencySystem_number, toDecimal } from "../../../utils/uiNumber";
 import { useEstimateSwap } from "../../../hooks/useEstimateSwap";
-import { NearIcon } from "../../MarginTrading/components/Icon";
+import { NearIcon, NearIconMini } from "../../MarginTrading/components/Icon";
+import { setSlippageToleranceFromRedux } from "../../../redux/marginTrading";
 
 // main components
 const TradingOperate = () => {
@@ -26,6 +25,7 @@ const TradingOperate = () => {
     ReduxcategoryAssets2,
     ReduxcategoryCurrentBalance1,
     ReduxcategoryCurrentBalance2,
+    ReduxSlippageTolerance,
   } = useAppSelector((state) => state.category);
 
   const dispatch = useAppDispatch();
@@ -55,7 +55,8 @@ const TradingOperate = () => {
   const balance = useAppSelector(getAccountBalance);
   const accountId = useAppSelector(getAccountId);
 
-  //
+  // pools
+  const { simplePools, stablePools, stablePoolsDetail } = usePoolsData();
 
   const setOwnBanlance = (key) => {
     if (activeTab == "long") {
@@ -69,7 +70,6 @@ const TradingOperate = () => {
   const initCateState = (tabString) => {
     setRangeMount(1);
     if (tabString == "long") {
-      console.log(tabString);
       setShortInput(undefined);
       setShortInputUsd(0);
       setShortOutput(undefined);
@@ -107,15 +107,20 @@ const TradingOperate = () => {
   // };
 
   // slippageTolerance change ecent
+  useEffect(() => {
+    dispatch(setSlippageToleranceFromRedux(0.5));
+  }, []);
   const [slippageTolerance, setSlippageTolerance] = useState(0.5);
   const handleSetUpOptionClick = (option) => {
     setSelectedSetUpOption(option);
     if (option == "auto") {
       setSlippageTolerance(0.5);
+      dispatch(setSlippageToleranceFromRedux(0.5));
     }
   };
   const slippageToleranceChange = (e) => {
     setSlippageTolerance(e);
+    dispatch(setSlippageToleranceFromRedux(e));
   };
 
   // open position btn click eve.
@@ -144,22 +149,6 @@ const TradingOperate = () => {
     const regex = /^\d+(\.\d+)?$/;
     return regex.test(str);
   };
-
-  // get pools detail
-  const [simplePools, setSimplePools] = useState<any[]>([]);
-  const [stablePools, setStablePools] = useState<any[]>([]);
-  const [stablePoolsDetail, setStablePoolsDetail] = useState<any[]>([]);
-  useEffect(() => {
-    getPoolsData();
-  }, []);
-  async function getPoolsData() {
-    const { ratedPools, unRatedPools, simplePools: simplePoolsFromSdk } = await fetchAllPools();
-    const stablePoolsFromSdk = unRatedPools.concat(ratedPools);
-    const stablePoolsDetailFromSdk = await getStablePools(stablePoolsFromSdk);
-    setSimplePools(simplePoolsFromSdk);
-    setStablePools(stablePoolsFromSdk);
-    setStablePoolsDetail(stablePoolsDetailFromSdk);
-  }
   // pools end
 
   // get cate1 amount start
@@ -176,7 +165,6 @@ const TradingOperate = () => {
     stablePoolsDetail,
     slippageTolerance: slippageTolerance / 100,
   });
-
   // long & short input change fn.
   const inputPriceChange = _.debounce((newValue) => {
     // eslint-disable-next-line no-unused-expressions
@@ -370,13 +358,10 @@ const TradingOperate = () => {
                   <div className="flex items-center justify-center">
                     {estimateData?.tokensPerRoute[0].map((item, index) => {
                       return (
-                        <>
-                          <div
-                            key={item.token_id + index}
-                            className="border-r mr-1.5 pr-1.5 border-dark-800"
-                          >
+                        <div key={index} className="flex items-center">
+                          <div className="border-r mr-1.5 pr-1.5 border-dark-800">
                             {item.symbol === "wNEAR" ? (
-                              ""
+                              <NearIconMini />
                             ) : (
                               <img
                                 alt=""
@@ -391,11 +376,12 @@ const TradingOperate = () => {
                           ) : (
                             ""
                           )}
-                        </>
+                        </div>
                       );
                     })}
                   </div>
                 </div>
+                <div className=" text-red-150 text-xs font-normal">{estimateData?.swapError}</div>
                 <div
                   className={`flex items-center justify-between  text-dark-200 text-base rounded-md h-12 text-center  ${
                     isDisabled ? "bg-slate-700 cursor-default" : "bg-primary cursor-pointer"
@@ -486,13 +472,10 @@ const TradingOperate = () => {
                 <div className="flex items-center justify-center">
                   {estimateData?.tokensPerRoute[0].map((item, index) => {
                     return (
-                      <>
-                        <div
-                          key={item.token_id + index}
-                          className="border-r mr-1.5 pr-1.5 border-dark-800"
-                        >
+                      <div key={index} className="flex items-center">
+                        <div className="border-r mr-1.5 pr-1.5 border-dark-800">
                           {item.symbol === "wNEAR" ? (
-                            ""
+                            <NearIconMini />
                           ) : (
                             <img alt="" src={item.icon} style={{ width: "16px", height: "16px" }} />
                           )}
@@ -503,7 +486,7 @@ const TradingOperate = () => {
                         ) : (
                           ""
                         )}
-                      </>
+                      </div>
                     );
                   })}
                 </div>
