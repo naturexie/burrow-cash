@@ -358,8 +358,8 @@ const TradingOperate = () => {
                   <div className="flex items-center justify-center">
                     {estimateData?.tokensPerRoute[0].map((item, index) => {
                       return (
-                        <>
-                          <div key={index} className="border-r mr-1.5 pr-1.5 border-dark-800">
+                        <div key={index} className="flex items-center">
+                          <div className="border-r mr-1.5 pr-1.5 border-dark-800">
                             {item.symbol === "wNEAR" ? (
                               <NearIconMini />
                             ) : (
@@ -376,7 +376,7 @@ const TradingOperate = () => {
                           ) : (
                             ""
                           )}
-                        </>
+                        </div>
                       );
                     })}
                   </div>
@@ -472,8 +472,8 @@ const TradingOperate = () => {
                 <div className="flex items-center justify-center">
                   {estimateData?.tokensPerRoute[0].map((item, index) => {
                     return (
-                      <>
-                        <div key={index} className="border-r mr-1.5 pr-1.5 border-dark-800">
+                      <div key={index} className="flex items-center">
+                        <div className="border-r mr-1.5 pr-1.5 border-dark-800">
                           {item.symbol === "wNEAR" ? (
                             <NearIconMini />
                           ) : (
@@ -486,7 +486,7 @@ const TradingOperate = () => {
                         ) : (
                           ""
                         )}
-                      </>
+                      </div>
                     );
                   })}
                 </div>
