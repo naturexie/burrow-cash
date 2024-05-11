@@ -81,9 +81,10 @@ export const useEstimateSwap = ({
       return e;
     });
     if (swapTodos.message) {
-      return {
+      setEstimateData({
         swapError: swapTodos.message,
-      };
+      });
+      return;
     }
     console.log(swapTodos, "swapTodos>>>>>>>>81");
     const amountOut: string = getExpectedOutputFromSwapTodos(
