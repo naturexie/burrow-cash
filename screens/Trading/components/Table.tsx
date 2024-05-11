@@ -7,7 +7,7 @@ import { useMarginAccount } from "../../../hooks/useMarginAccount";
 import { useMarginConfigToken } from "../../../hooks/useMarginConfig";
 import { toInternationalCurrencySystem_number } from "../../../utils/uiNumber";
 
-const TradingTable = ({ positionsList }) => {
+const TradingTable = ({ positionsList, collateralTotal }) => {
   const [selectedTab, setSelectedTab] = useState("positions");
   const [isClosePositionModalOpen, setIsClosePositionMobileOpen] = useState(false);
   const [isChangeCollateralMobileOpen, setIsChangeCollateralMobileOpen] = useState(false);
@@ -87,6 +87,7 @@ const TradingTable = ({ positionsList }) => {
                       setIsChangeCollateralMobileOpen(false);
                     }}
                     rowData={selectedRowData}
+                    collateralTotal={collateralTotal}
                   />
                 )}
                 {isClosePositionModalOpen && (

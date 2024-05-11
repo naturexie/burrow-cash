@@ -1,4 +1,4 @@
-import { useState, createContext } from "react";
+import { useState, createContext, useEffect } from "react";
 import { Modal as MUIModal, Box, useTheme } from "@mui/material";
 import { Wrapper } from "../../../components/Modal/style";
 import { DEFAULT_POSITION } from "../../../utils/config";
@@ -11,9 +11,10 @@ import { increaseCollateral } from "../../../store/marginActions/increaseCollate
 import { useAppSelector } from "../../../redux/hooks";
 import { getAssets } from "../../../redux/assetsSelectors";
 import { decreaseCollateral } from "../../../store/marginActions/decreaseCollateral";
+import { getAccountBalance } from "../../../redux/accountSelectors";
 
 export const ModalContext = createContext(null) as any;
-const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
+const ChangeCollateralMobile = ({ open, onClose, rowData, collateralTotal }) => {
   // console.log(rowData);
   const { marginConfigTokens, getPositionType } = useMarginConfigToken();
   const { parseTokenValue, getAssetDetails, getAssetById, calculateLeverage } = useMarginAccount();
@@ -23,12 +24,12 @@ const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
   const [inputValue, setInputValue] = useState(0);
   const [addedValue, setAddedValue] = useState(0);
   const [addLeverage, setAddLeverage] = useState(0);
+  const balance = useAppSelector(getAccountBalance);
+  const [selectedLever, setSelectedLever] = useState(null);
   const handleChangeCollateralTabClick = (tab) => {
     setChangeCollateralTab(tab);
-  };
-  const [selectedLever, setSelectedLever] = useState(null);
-  const handleLeverClick = (value) => {
-    setSelectedLever(value);
+    setInputValue(NaN);
+    setSelectedLever(null);
   };
   const leverData = [
     { label: "25%", value: "25" },
@@ -43,9 +44,9 @@ const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
     const tokenDInfoBalance = parseTokenValue(rowData.data.token_d_info.balance, decimalsD);
     const leverageC = parseTokenValue(rowData.data.token_c_info.balance, decimalsC);
     const newLeverage = calculateLeverage(tokenDInfoBalance, priceD, leverageC + value, priceC);
-    if (newLeverage < 1) {
-      return;
-    }
+    // if (newLeverage < 1) {
+    //   return;
+    // }
 
     setAddedValue(newNetValue);
     setAddLeverage(newLeverage);
@@ -62,9 +63,9 @@ const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
     const tokenDInfoBalance = parseTokenValue(rowData.data.token_d_info.balance, decimalsD);
     const leverageC = parseTokenValue(rowData.data.token_c_info.balance, decimalsC);
     const newLeverage = calculateLeverage(tokenDInfoBalance, priceD, leverageC - value, priceC);
-    if (newLeverage > marginConfigTokens.max_leverage_rate) {
-      return;
-    }
+    // if (newLeverage > marginConfigTokens.max_leverage_rate || newLeverage < 0) {
+    //  return;
+    // }
 
     setAddedValue(newNetValue);
     setAddLeverage(newLeverage);
@@ -122,6 +123,29 @@ const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
       console.error("Error deleted collateral:", error);
     }
   };
+  const handleLeverAddClick = (value) => {
+    setSelectedLever(value);
+    if (value === "Max") {
+      const maxPercentage = Number(balance) / priceC;
+      setInputValue(Number(maxPercentage.toFixed(2)));
+    } else {
+      const percentage = parseFloat(value);
+      const selectedPercentage = (Number(balance) * percentage) / 100 / priceC;
+      setInputValue(Number(selectedPercentage.toFixed(2)));
+    }
+  };
+  const handleLeverDeleteClick = (value) => {
+    setSelectedLever(value);
+    if (value === "Max") {
+      const maxPercentage = collateralTotal / priceC;
+      setInputValue(Number(maxPercentage.toFixed(2)));
+    } else {
+      const percentage = parseFloat(value);
+      const selectedPercentage = (collateralTotal * percentage) / 100 / priceC;
+      setInputValue(Number(selectedPercentage.toFixed(2)));
+    }
+  };
+
   return (
     <MUIModal open={open} onClose={onClose}>
       <Wrapper
@@ -187,7 +211,7 @@ const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
                       <input
                         type="number"
                         step="any"
-                        value={inputValue}
+                        value={String(inputValue)}
                         onChange={handleAddChange}
                         placeholder="0"
                       />
@@ -201,7 +225,7 @@ const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
                         <p className="text-base ml-1">{symbolC}</p>
                       </div>
                       <p className="text-xs text-gray-300 mt-1.5">
-                        Max Available: <span className="text-white">-</span>
+                        Max Available: <span className="text-white"> ${balance}</span>
                       </p>
                     </div>
                   </div>
@@ -212,7 +236,7 @@ const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
                         className={`bg-dark-600 border border-dark-500 py-1 px-2 rounded-md text-xs text-gray-300 mr-2 cursor-pointer hover:bg-gray-700 ${
                           selectedLever === item.value ? "bg-gray-700" : ""
                         }`}
-                        onClick={() => handleLeverClick(item.value)}
+                        onClick={() => handleLeverAddClick(item.value)}
                       >
                         {item.label}
                       </div>
@@ -302,7 +326,7 @@ const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
                       <input
                         type="number"
                         step="any"
-                        value={inputValue}
+                        value={String(inputValue)}
                         onChange={handleDeleteChange}
                         placeholder="0"
                       />
@@ -316,7 +340,10 @@ const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
                         <p className="text-base ml-1">{symbolC}</p>
                       </div>
                       <p className="text-xs text-gray-300 mt-1.5">
-                        Max Available: <span className="text-white">-</span>
+                        Max Available:{" "}
+                        <span className="text-white">
+                          ${toInternationalCurrencySystem_number(collateralTotal)}
+                        </span>
                       </p>
                     </div>
                   </div>
@@ -327,7 +354,7 @@ const ChangeCollateralMobile = ({ open, onClose, rowData }) => {
                         className={`bg-dark-600 border border-dark-500 py-1 px-2 rounded-md text-xs text-gray-300 mr-2 cursor-pointer hover:bg-gray-700 ${
                           selectedLever === item.value ? "bg-gray-700" : ""
                         }`}
-                        onClick={() => handleLeverClick(item.value)}
+                        onClick={() => handleLeverDeleteClick(item.value)}
                       >
                         {item.label}
                       </div>
