@@ -19,10 +19,15 @@ import { getMarginConfig } from "../../redux/marginConfigSelectors";
 import { formatWithCommas_usd, toInternationalCurrencySystem_number } from "../../utils/uiNumber";
 import { useMarginConfigToken } from "../../hooks/useMarginConfig";
 import { setCategoryAssets1, setCategoryAssets2 } from "../../redux/marginTrading";
+import { useMarginAccount } from "../../hooks/useMarginAccount";
+import { useAccountId, usePortfolioAssets } from "../../hooks/hooks";
 
 init_env("dev");
 
 const Trading = () => {
+  const accountId = useAccountId();
+  const { useMarginAccountList, parseTokenValue, getAssetDetails, getAssetById } =
+    useMarginAccount();
   const { categoryAssets1, categoryAssets2 } = useMarginConfigToken();
   const { ReduxcategoryAssets1, ReduxcategoryAssets2 } = useAppSelector((state) => state.category);
 
@@ -261,7 +266,7 @@ const Trading = () => {
           <TradingOperate />
         </div>
       </div>
-      {/* <TradingTable /> */}
+      {accountId && <TradingTable positionsList={useMarginAccountList} />}
     </LayoutBox>
   );
 };

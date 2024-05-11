@@ -12,6 +12,7 @@ const TradingTable = ({ positionsList }) => {
   const [isClosePositionModalOpen, setIsClosePositionMobileOpen] = useState(false);
   const [isChangeCollateralMobileOpen, setIsChangeCollateralMobileOpen] = useState(false);
   const [selectedRowData, setSelectedRowData] = useState(null);
+  const [closePositionModalProps, setClosePositionModalProps] = useState(null);
   const {
     useMarginAccountList,
     parseTokenValue,
@@ -23,7 +24,8 @@ const TradingTable = ({ positionsList }) => {
   const handleTabClick = (tabNumber) => {
     setSelectedTab(tabNumber);
   };
-  const handleClosePositionButtonClick = () => {
+  const handleClosePositionButtonClick = (key) => {
+    setClosePositionModalProps(key);
     setIsClosePositionMobileOpen(true);
   };
   const handleChangeCollateralButtonClick = (rowData) => {
@@ -97,7 +99,7 @@ const TradingTable = ({ positionsList }) => {
                       e.stopPropagation();
                       setIsClosePositionMobileOpen(false);
                     }}
-                    action="Long"
+                    extraProps={closePositionModalProps}
                   />
                 )}
               </tbody>
@@ -247,7 +249,16 @@ const PositionRow = ({
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              handleClosePositionButtonClick();
+              handleClosePositionButtonClick({
+                itemKey,
+                index,
+                item,
+                getAssetById,
+                getPositionType,
+                getAssetDetails,
+                parseTokenValue,
+                calculateLeverage,
+              });
             }}
           >
             Close
