@@ -124,7 +124,7 @@ export const getBurrow = async ({
     deposit = "1",
   ) => {
     const { contractId } = contract;
-    const gas = new BN(50000000000000);
+    const gas = new BN(300000000000000);
     const attachedDeposit = new BN(deposit);
 
     return functionCall({
