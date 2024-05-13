@@ -309,6 +309,7 @@ const PositionRow = ({
                 getAssetDetails,
                 parseTokenValue,
                 calculateLeverage,
+                LiqPrice,
               });
             }}
           >

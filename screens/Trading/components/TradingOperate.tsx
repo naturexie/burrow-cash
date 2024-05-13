@@ -14,12 +14,15 @@ import { toInternationalCurrencySystem_number, toDecimal } from "../../../utils/
 import { useEstimateSwap } from "../../../hooks/useEstimateSwap";
 import { NearIcon, NearIconMini } from "../../MarginTrading/components/Icon";
 import { setSlippageToleranceFromRedux } from "../../../redux/marginTrading";
+import { useMarginAccount } from "../../../hooks/useMarginAccount";
 
 // main components
 const TradingOperate = () => {
   const assets = useAppSelector(getAssets);
   const config = useAppSelector(getMarginConfig);
   const { categoryAssets1, categoryAssets2 } = useMarginConfigToken();
+  const { parseTokenValue, getAssetDetails, getAssetById } = useMarginAccount();
+  const { marginConfigTokens } = useMarginConfigToken();
   const {
     ReduxcategoryAssets1,
     ReduxcategoryAssets2,
@@ -153,6 +156,7 @@ const TradingOperate = () => {
 
   // get cate1 amount start
   const [tokenInAmount, setTokenInAmount] = useState(0);
+  const [LiqPrice, setLiqPrice] = useState(0);
   const estimateData = useEstimateSwap({
     tokenIn_id:
       activeTab == "long" ? ReduxcategoryAssets2?.token_id : ReduxcategoryAssets1?.token_id,
@@ -184,6 +188,52 @@ const TradingOperate = () => {
 
     if (inputUsdCharcate2) {
       updateInputAmounts(activeTab, inputUsdCharcate2, inputUsdCharcate1);
+    }
+
+    if (ReduxcategoryAssets2 && ReduxcategoryAssets1) {
+      const assetD =
+        activeTab == "long"
+          ? getAssetById(ReduxcategoryAssets2?.token_id)
+          : getAssetById(ReduxcategoryAssets1?.token_id);
+      const assetC = getAssetById(ReduxcategoryAssets2?.token_id);
+      const assetP =
+        activeTab == "long"
+          ? getAssetById(ReduxcategoryAssets1?.token_id)
+          : getAssetById(ReduxcategoryAssets2?.token_id);
+
+      const { price: priceD, symbol: symbolD, decimals: decimalsD } = getAssetDetails(assetD);
+      const { price: priceC, symbol: symbolC, decimals: decimalsC } = getAssetDetails(assetC);
+      const { price: priceP, symbol: symbolP, decimals: decimalsP } = getAssetDetails(assetP);
+
+      const leverageD =
+        activeTab == "long" ? ReduxcategoryCurrentBalance2 : ReduxcategoryCurrentBalance1;
+
+      const leverageC = ReduxcategoryCurrentBalance2;
+
+      const sizeValueLong = tokenInAmount;
+
+      const total_debt = leverageD * priceD;
+      const total_hp_fee = 0;
+      const denominator = sizeValueLong * (1 - marginConfigTokens.min_safty_buffer / 10000);
+      //
+      console.log(
+        leverageD,
+        priceD,
+        0,
+        priceC,
+        leverageC,
+        marginConfigTokens.min_safty_buffer,
+        "setliq",
+      );
+      setLiqPrice(
+        denominator !== 0
+          ? (total_debt +
+              total_hp_fee +
+              (priceC * leverageC * marginConfigTokens.min_safty_buffer) / 10000 -
+              priceC * leverageC) /
+              denominator
+          : 0,
+      );
     }
   }, [longInput, shortInput, rangeMount, estimateData, slippageTolerance]);
 
@@ -343,7 +393,7 @@ const TradingOperate = () => {
                 </div>
                 <div className="flex items-center justify-between text-sm mb-4">
                   <div className="text-gray-300">Liq. Price</div>
-                  <div>$1.23</div>
+                  <div>${toInternationalCurrencySystem_number(LiqPrice)}</div>
                 </div>
                 <div className="flex items-center justify-between text-sm mb-4">
                   <div className="text-gray-300">Fee</div>

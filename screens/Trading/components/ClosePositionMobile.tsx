@@ -24,6 +24,7 @@ const ClosePositionMobile = ({ open, onClose, extraProps }) => {
     getAssetDetails,
     parseTokenValue,
     calculateLeverage,
+    LiqPrice,
   } = extraProps;
   //
   const accountId = useAccountId();
@@ -159,7 +160,9 @@ const ClosePositionMobile = ({ open, onClose, extraProps }) => {
             <div className="flex items-center justify-between text-sm mb-4">
               <div className="text-gray-300">Liq. Price</div>
               <div className="flex items-center justify-center">
-                <span className="text-gray-300 mr-2 line-through">$1.23</span>
+                <span className="text-gray-300 mr-2 line-through">
+                  ${toInternationalCurrencySystem_number(LiqPrice)}
+                </span>
                 <RightArrow />
                 <p className="ml-2"> $0.00</p>
               </div>
@@ -178,8 +181,9 @@ const ClosePositionMobile = ({ open, onClose, extraProps }) => {
             <div className="flex items-center justify-between text-sm mb-4">
               <div className="text-gray-300">Current Total PNL</div>
               <div className="flex items-center justify-center">
-                <span className="text-red-50">-$0.0689</span>
-                <span className="text-xs text-gray-300 ml-1.5">(-2.01%)</span>
+                {/* <span className="text-red-50">-$0.0689</span> */}
+                {/* <span className="text-xs text-gray-300 ml-1.5">(-2.01%)</span> */}
+                <span className="text-xs text-gray-300 ml-1.5">-</span>
               </div>
             </div>
             <div
