@@ -31,6 +31,7 @@ export const incentiveTokens = [
   "853d955acef822db058eb8505911ed77f175b99e.factory.bridge.near",
   "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1",
   "usdt.tether-token.near",
+  "aurora",
 ];
 const getConfig = (env: string = defaultNetwork) => {
   const RPC_LIST = getRpcList();
@@ -66,6 +67,7 @@ const getConfig = (env: string = defaultNetwork) => {
           "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1",
           "853d955acef822db058eb8505911ed77f175b99e.factory.bridge.near",
           "a663b02cf0a4b149d2ad41910cb81e23e1c41c32.factory.bridge.near",
+          "aurora",
         ],
         PYTH_ORACLE_CONTRACT_ID: "pyth-oracle.near",
       } as unknown as ConnectConfig & {

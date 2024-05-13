@@ -22,6 +22,7 @@ import { fetchConfig } from "../redux/appSlice";
 import { ToastMessage } from "../components/ToastMessage";
 import Popup from "../components/popup";
 import RpcList from "../components/Rpc";
+import PubTestModal from "../components/PubTestModal";
 
 ModalReact.defaultStyles = {
   overlay: {
@@ -117,6 +118,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
             <Component {...pageProps} />
             <Popup className="xsm:hidden" />
             <RpcList />
+            <PubTestModal />
           </Layout>
         </PersistGate>
       </Provider>
