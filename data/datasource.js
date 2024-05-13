@@ -13,14 +13,15 @@ class DataSource {
   }
 
   // eslint-disable-next-line class-methods-use-this,default-param-last
-  async callAPI(endPoint, method = "GET", queryObject, requestBody, host) {
+  async callAPI(endPoint, method = "GET", queryObject, requestBody, host, authentication) {
     const url = URLForEndpoint(endPoint, queryObject, host);
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
     headers.append("pragma", "no-cache");
     headers.append("cache-control", "no-cache");
-    headers.append("Authentication", getAuthenticationHeaders(endPoint));
-
+    if (authentication) {
+      headers.append("Authentication", getAuthenticationHeaders(endPoint));
+    }
     const request = {
       headers,
       method,
@@ -74,7 +75,7 @@ class DataSource {
       page_number: pageNumber,
       page_size: pageSize,
     };
-    return this.callAPI(`/get-burrow-records`, "GET", qryObj, null, config?.recordsUrl);
+    return this.callAPI(`/get-burrow-records`, "GET", qryObj, null, config?.recordsUrl, true);
   }
 
   getTokenDetails(tokenId, period = 1) {
