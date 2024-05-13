@@ -42,7 +42,7 @@ const TradingToken: React.FC<TradingTokenInter> = ({ tokenList, type, setOwnBanl
   //
   useEffect(() => {
     let selectedAsset: any = null;
-    let setReduxcategoryCurrentBalance: any = null;
+    let setReduxcategoryCurrentBalance;
 
     if (type === "cate1" && ReduxcategoryAssets1) {
       selectedAsset = ReduxcategoryAssets1;
@@ -59,7 +59,6 @@ const TradingToken: React.FC<TradingTokenInter> = ({ tokenList, type, setOwnBanl
       setOwnBalance("-");
       return;
     }
-
     const tokenId = selectedAsset.metadata["token_id"];
     if (!tokenId || !account.balances[tokenId]) {
       setOwnBalance("-");

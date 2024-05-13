@@ -191,11 +191,11 @@ const TradingOperate = () => {
     }
 
     if (ReduxcategoryAssets2 && ReduxcategoryAssets1) {
+      const assetC = getAssetById(ReduxcategoryAssets2?.token_id);
       const assetD =
         activeTab == "long"
           ? getAssetById(ReduxcategoryAssets2?.token_id)
           : getAssetById(ReduxcategoryAssets1?.token_id);
-      const assetC = getAssetById(ReduxcategoryAssets2?.token_id);
       const assetP =
         activeTab == "long"
           ? getAssetById(ReduxcategoryAssets1?.token_id)
@@ -205,26 +205,20 @@ const TradingOperate = () => {
       const { price: priceC, symbol: symbolC, decimals: decimalsC } = getAssetDetails(assetC);
       const { price: priceP, symbol: symbolP, decimals: decimalsP } = getAssetDetails(assetP);
 
+      const leverageC = parseTokenValue(ReduxcategoryAssets2.margin_debt.balance, decimalsC);
       const leverageD =
-        activeTab == "long" ? ReduxcategoryCurrentBalance2 : ReduxcategoryCurrentBalance1;
+        activeTab == "long"
+          ? parseTokenValue(ReduxcategoryAssets2.margin_debt.balance, decimalsD)
+          : parseTokenValue(ReduxcategoryAssets1.margin_debt.balance, decimalsD);
 
-      const leverageC = ReduxcategoryCurrentBalance2;
-
-      const sizeValueLong = tokenInAmount;
-
+      const sizeValueLong = inputUsdCharcate1
+        ? inputUsdCharcate1 * (estimateData?.amount_out || 0)
+        : 0;
       const total_debt = leverageD * priceD;
       const total_hp_fee = 0;
       const denominator = sizeValueLong * (1 - marginConfigTokens.min_safty_buffer / 10000);
       //
-      console.log(
-        leverageD,
-        priceD,
-        0,
-        priceC,
-        leverageC,
-        marginConfigTokens.min_safty_buffer,
-        "setliq",
-      );
+
       setLiqPrice(
         denominator !== 0
           ? (total_debt +
@@ -380,88 +374,83 @@ const TradingOperate = () => {
               <p className="text-gray-300 mt-2 text-xs">Long: ${longOutputUsd}</p>
             </div>
             <RangeSlider defaultValue={rangeMount} action="Long" setRangeMount={setRangeMount} />
-            {accountId && (
-              <div className="mt-5">
-                <div className="flex items-center justify-between text-sm mb-4">
-                  <div className="text-gray-300">Position Size</div>
-                  <div className="text-right">
-                    {toInternationalCurrencySystem_number(longOutput)} NEAR
-                    <span className="text-xs text-gray-300 ml-1.5">
-                      (${toInternationalCurrencySystem_number(longOutputUsd)})
-                    </span>
-                  </div>
+            <div className="mt-5">
+              <div className="flex items-center justify-between text-sm mb-4">
+                <div className="text-gray-300">Position Size</div>
+                <div className="text-right">
+                  {toInternationalCurrencySystem_number(longOutput)} NEAR
+                  <span className="text-xs text-gray-300 ml-1.5">
+                    (${toInternationalCurrencySystem_number(longOutputUsd)})
+                  </span>
                 </div>
-                <div className="flex items-center justify-between text-sm mb-4">
-                  <div className="text-gray-300">Liq. Price</div>
-                  <div>${toInternationalCurrencySystem_number(LiqPrice)}</div>
+              </div>
+              <div className="flex items-center justify-between text-sm mb-4">
+                <div className="text-gray-300">Liq. Price</div>
+                <div>${toInternationalCurrencySystem_number(LiqPrice)}</div>
+              </div>
+              <div className="flex items-center justify-between text-sm mb-4">
+                <div className="text-gray-300">Fee</div>
+                <div className="flex items-center justify-center">
+                  <p className="border-b border-dashed border-dark-800">0.26</p>
+                  NEAR
+                  <span className="text-xs text-gray-300 ml-1.5">($0.89)</span>
                 </div>
-                <div className="flex items-center justify-between text-sm mb-4">
-                  <div className="text-gray-300">Fee</div>
-                  <div className="flex items-center justify-center">
-                    <p className="border-b border-dashed border-dark-800">0.26</p>
-                    NEAR
-                    <span className="text-xs text-gray-300 ml-1.5">($0.89)</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between text-sm mb-4">
-                  <div className="text-gray-300">Route</div>
-                  <div className="flex items-center justify-center">
-                    {estimateData?.tokensPerRoute[0].map((item, index) => {
-                      return (
-                        <div key={index} className="flex items-center">
-                          <div className="border-r mr-1.5 pr-1.5 border-dark-800">
-                            {item.symbol === "wNEAR" ? (
-                              <NearIconMini />
-                            ) : (
-                              <img
-                                alt=""
-                                src={item.icon}
-                                style={{ width: "16px", height: "16px" }}
-                              />
-                            )}
-                          </div>
-                          <span>{item.symbol == "wNEAR" ? "NEAR" : item.symbol}</span>
-                          {index + 1 < estimateData?.tokensPerRoute[0].length ? (
-                            <span className="mx-2">&gt;</span>
+              </div>
+              <div className="flex items-center justify-between text-sm mb-4">
+                <div className="text-gray-300">Route</div>
+                <div className="flex items-center justify-center">
+                  {estimateData?.tokensPerRoute[0].map((item, index) => {
+                    return (
+                      <div key={index} className="flex items-center">
+                        <div className="border-r mr-1.5 pr-1.5 border-dark-800">
+                          {item.symbol === "wNEAR" ? (
+                            <NearIconMini />
                           ) : (
-                            ""
+                            <img alt="" src={item.icon} style={{ width: "16px", height: "16px" }} />
                           )}
                         </div>
-                      );
-                    })}
-                  </div>
+                        <span>{item.symbol == "wNEAR" ? "NEAR" : item.symbol}</span>
+                        {index + 1 < estimateData?.tokensPerRoute[0].length ? (
+                          <span className="mx-2">&gt;</span>
+                        ) : (
+                          ""
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-                <div className=" text-red-150 text-xs font-normal">{estimateData?.swapError}</div>
-                <div
-                  className={`flex items-center justify-between  text-dark-200 text-base rounded-md h-12 text-center  ${
-                    isDisabled ? "bg-slate-700 cursor-default" : "bg-primary cursor-pointer"
-                  }`}
-                  onClick={handleConfirmButtonClick}
-                >
-                  <div className="flex-grow">Long NEAR {rangeMount}x</div>
-                </div>
-                {isConfirmModalOpen && (
-                  <ConfirmMobile
-                    open={isConfirmModalOpen}
-                    onClose={() => setIsConfirmModalOpen(false)}
-                    action="Long"
-                    confirmInfo={{
-                      longInput,
-                      longInputUsd,
-                      longOutput,
-                      longOutputUsd,
-                      rangeMount,
-                      estimateData,
-                      indexPrice: assets.data[ReduxcategoryAssets1["token_id"]].price?.usd,
-                      longInputName: ReduxcategoryAssets2,
-                      longOutputName: ReduxcategoryAssets1,
-                      assets,
-                      tokenInAmount,
-                    }}
-                  />
-                )}
               </div>
-            )}
+              <div className=" text-red-150 text-xs font-normal">{estimateData?.swapError}</div>
+              <div
+                className={`flex items-center justify-between  text-dark-200 text-base rounded-md h-12 text-center  ${
+                  isDisabled ? "bg-slate-700 cursor-default" : "bg-primary cursor-pointer"
+                }`}
+                onClick={handleConfirmButtonClick}
+              >
+                <div className="flex-grow">Long NEAR {rangeMount}x</div>
+              </div>
+              {isConfirmModalOpen && (
+                <ConfirmMobile
+                  open={isConfirmModalOpen}
+                  onClose={() => setIsConfirmModalOpen(false)}
+                  action="Long"
+                  confirmInfo={{
+                    longInput,
+                    longInputUsd,
+                    longOutput,
+                    longOutputUsd,
+                    rangeMount,
+                    estimateData,
+                    indexPrice: assets.data[ReduxcategoryAssets1["token_id"]].price?.usd,
+                    longInputName: ReduxcategoryAssets2,
+                    longOutputName: ReduxcategoryAssets1,
+                    assets,
+                    tokenInAmount,
+                    LiqPrice,
+                  }}
+                />
+              )}
+            </div>
           </>
         )}
         {activeTab === "short" && (
@@ -507,7 +496,7 @@ const TradingOperate = () => {
               </div>
               <div className="flex items-center justify-between text-sm mb-4">
                 <div className="text-gray-300">Liq. Price</div>
-                <div>$1.23</div>
+                <div>${toInternationalCurrencySystem_number(LiqPrice)}</div>
               </div>
               <div className="flex items-center justify-between text-sm mb-4">
                 <div className="text-gray-300">Fee</div>
@@ -566,6 +555,7 @@ const TradingOperate = () => {
                     longOutputName: ReduxcategoryAssets1,
                     assets,
                     tokenInAmount,
+                    LiqPrice,
                   }}
                 />
               )}

@@ -60,7 +60,7 @@ const Trading = () => {
     if (id) {
       setCurrentTokenCate1(assets.data[id]);
       dispatch(setCategoryAssets1(assets.data[id]));
-      dispatch(setCategoryAssets2(currentTokenCate2));
+      dispatch(setCategoryAssets2(currentTokenCate2 || categoryAssets2[0]));
     }
 
     // deal long & short position
@@ -216,7 +216,7 @@ const Trading = () => {
                     className="flex justify-center items-center"
                   >
                     <p className="mr-1">
-                      {currentTokenCate2?.metadata?.symbol || categoryAssets2[0].metadata.symbol}
+                      {currentTokenCate2?.metadata?.symbol || categoryAssets2[0]?.metadata.symbol}
                     </p>
                     <TokenArrow />
                   </div>

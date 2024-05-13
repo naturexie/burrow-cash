@@ -7,6 +7,7 @@ import { CloseIcon } from "../../../components/Modal/svg";
 import { RefLogoIcon, RightShoulder } from "./TradingIcon";
 import { toInternationalCurrencySystem_number, toDecimal } from "../../../utils/uiNumber";
 import { openPosition } from "../../../store/marginActions/openPosition";
+import { NearIcon, NearIconMini } from "../../MarginTrading/components/Icon";
 
 export const ModalContext = createContext(null) as any;
 const ConfirmMobile = ({ open, onClose, action, confirmInfo }) => {
@@ -122,20 +123,17 @@ const ConfirmMobile = ({ open, onClose, action, confirmInfo }) => {
             </div>
             <div className="flex items-center justify-between text-sm mb-4">
               <div className="text-gray-300">Liq. Price</div>
-              <div>$1.23</div>
+              <div>${confirmInfo.LiqPrice}</div>
             </div>
             <div className="flex items-center justify-between text-sm mb-4">
               <div className="text-gray-300">Route</div>
               <div className="flex items-center justify-center">
                 {confirmInfo.estimateData?.tokensPerRoute[0].map((item, index) => {
                   return (
-                    <>
-                      <div
-                        key={item.token_id + index}
-                        className="border-r mr-1.5 pr-1.5 border-dark-800"
-                      >
+                    <div key={item.token_id + index} className="flex items-center">
+                      <div className="border-r mr-1.5 pr-1.5 border-dark-800">
                         {item.symbol === "wNEAR" ? (
-                          ""
+                          <NearIconMini />
                         ) : (
                           <img alt="" src={item.icon} style={{ width: "16px", height: "16px" }} />
                         )}
@@ -146,7 +144,7 @@ const ConfirmMobile = ({ open, onClose, action, confirmInfo }) => {
                       ) : (
                         ""
                       )}
-                    </>
+                    </div>
                   );
                 })}
               </div>
