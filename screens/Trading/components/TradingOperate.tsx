@@ -15,6 +15,7 @@ import { useEstimateSwap } from "../../../hooks/useEstimateSwap";
 import { NearIcon, NearIconMini } from "../../MarginTrading/components/Icon";
 import { setSlippageToleranceFromRedux } from "../../../redux/marginTrading";
 import { useMarginAccount } from "../../../hooks/useMarginAccount";
+import { expandTokenDecimal, expandToken } from "../../../store/helper";
 
 // main components
 const TradingOperate = () => {
@@ -43,10 +44,10 @@ const TradingOperate = () => {
   const [isDisabled, setIsDisabled] = useState(false);
 
   //
-  const [longInput, setLongInput] = useState();
-  const [shortInput, setShortInput] = useState();
-  const [longOutput, setLongOutput] = useState();
-  const [shortOutput, setShortOutput] = useState();
+  const [longInput, setLongInput] = useState(0);
+  const [shortInput, setShortInput] = useState(0);
+  const [longOutput, setLongOutput] = useState(0);
+  const [shortOutput, setShortOutput] = useState(0);
 
   // amount
   const [longInputUsd, setLongInputUsd] = useState(0);
@@ -71,16 +72,17 @@ const TradingOperate = () => {
 
   // for tab change
   const initCateState = (tabString) => {
+    setLiqPrice(0);
     setRangeMount(1);
     if (tabString == "long") {
-      setShortInput(undefined);
+      setShortInput(0);
       setShortInputUsd(0);
-      setShortOutput(undefined);
+      setShortOutput(0);
       setShortOutputUsd(0);
     } else {
-      setLongInput(undefined);
+      setLongInput(0);
       setLongInputUsd(0);
-      setLongOutput(undefined);
+      setLongOutput(0);
       setLongOutputUsd(0);
     }
   };
@@ -169,6 +171,7 @@ const TradingOperate = () => {
     stablePoolsDetail,
     slippageTolerance: slippageTolerance / 100,
   });
+
   // long & short input change fn.
   const inputPriceChange = _.debounce((newValue) => {
     // eslint-disable-next-line no-unused-expressions
@@ -190,7 +193,13 @@ const TradingOperate = () => {
       updateInputAmounts(activeTab, inputUsdCharcate2, inputUsdCharcate1);
     }
 
-    if (ReduxcategoryAssets2 && ReduxcategoryAssets1) {
+    if (
+      ReduxcategoryAssets2 &&
+      ReduxcategoryAssets1 &&
+      inputUsdCharcate1 &&
+      inputUsdCharcate2 &&
+      estimateData
+    ) {
       const assetC = getAssetById(ReduxcategoryAssets2?.token_id);
       const assetD =
         activeTab == "long"
@@ -210,13 +219,18 @@ const TradingOperate = () => {
         activeTab == "long"
           ? parseTokenValue(ReduxcategoryAssets2.margin_debt.balance, decimalsD)
           : parseTokenValue(ReduxcategoryAssets1.margin_debt.balance, decimalsD);
+      // const sizeValue = inputUsdCharcate1
+      //   ? inputUsdCharcate1 * expandTokenDecimal(estimateData?.amount_out, decimalsP)
+      //   : 0;
 
-      const sizeValueLong = inputUsdCharcate1
-        ? inputUsdCharcate1 * (estimateData?.amount_out || 0)
-        : 0;
+      const sizeValue =
+        activeTab == "long"
+          ? inputUsdCharcate2 * (expandToken(estimateData.amount_out, decimalsD) as any)
+          : inputUsdCharcate1 * (expandToken(estimateData.amount_out, decimalsP) as any);
+
       const total_debt = leverageD * priceD;
       const total_hp_fee = 0;
-      const denominator = sizeValueLong * (1 - marginConfigTokens.min_safty_buffer / 10000);
+      const denominator = sizeValue * (1 - marginConfigTokens.min_safty_buffer / 10000);
       //
 
       setLiqPrice(
@@ -246,9 +260,10 @@ const TradingOperate = () => {
     // set output usd
     const outputUsdSetter = tab === "long" ? setLongOutputUsd : setShortOutputUsd;
     //
-    if (input == undefined || inputUsd == 0) {
-      outputSetter(undefined);
+    if (input == undefined || inputUsd == 0 || !input) {
+      outputSetter(0);
       outputUsdSetter(0);
+      setLiqPrice(0);
     } else if (tab == "long") {
       outputSetter(estimateData?.amount_out || 0);
       outputUsdSetter(inputUsdCharcate * (estimateData.amount_out || 0));
