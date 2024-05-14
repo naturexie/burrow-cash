@@ -21,6 +21,7 @@ import { useMarginConfigToken } from "../../hooks/useMarginConfig";
 import { setCategoryAssets1, setCategoryAssets2 } from "../../redux/marginTrading";
 import { useMarginAccount } from "../../hooks/useMarginAccount";
 import { useAccountId, usePortfolioAssets } from "../../hooks/hooks";
+import ModalWithCountdown from "./components/positionResultTips";
 
 init_env("dev");
 
@@ -37,23 +38,26 @@ const Trading = () => {
   const assets = useAppSelector(getAssets);
   const [showPopupCate1, setShowPopup1] = useState(false);
   const [showPopupCate2, setShowPopup2] = useState(false);
-  // pools
-  // const [simplePools, setSimplePools] = useState<any[]>([]);
-  // const [stablePools, setStablePools] = useState<any[]>([]);
-  // const [stablePoolsDetail, setStablePoolsDetail] = useState<any[]>([]);
+
   //
   const [currentTokenCate1, setCurrentTokenCate1] = useState<any>({});
   const [currentTokenCate2, setCurrentTokenCate2] = useState<any>(categoryAssets2[0]);
 
   const [longAndShortPosition, setLongAndShortPosition] = useState<any>([]);
+
+  const [showModal, setShowModal] = useState(false);
+
+  const handleClose = () => {
+    setShowModal(false);
+  };
   let timer;
 
-  // deal category1,2
-
   //
-  // useEffect(() => {
-  //   getPoolsData();
-  // }, []);
+  useEffect(() => {
+    if (router.query.transactionHashes) {
+      setShowModal(true);
+    }
+  }, [router]);
 
   // computed currentTokenCate1 dropdown
   useEffect(() => {
@@ -267,6 +271,8 @@ const Trading = () => {
         </div>
       </div>
       {accountId && <TradingTable positionsList={useMarginAccountList} />}
+
+      <ModalWithCountdown show={showModal} onClose={handleClose} />
     </LayoutBox>
   );
 };

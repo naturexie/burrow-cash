@@ -1,4 +1,6 @@
 /** @type {import("tailwindcss").Config} */
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const plugin = require("tailwindcss/plugin");
 
 const getStyleMapping = (max, min) => {
   if (!max) {
@@ -16,6 +18,16 @@ module.exports = {
     "./screens/**/*.{js,ts,jsx,tsx,mdx}",
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  plugins: [
+    plugin(function ({ addUtilities }) {
+      addUtilities({
+        ".fc": {
+          display: "flex",
+          alignItems: "center",
+        },
+      });
+    }),
   ],
   theme: {
     screens: {
@@ -124,5 +136,4 @@ module.exports = {
     opacity: [],
     backgroundColor: ["responsive", "hover", "focus", "group-hover"],
   },
-  plugins: [],
 };
