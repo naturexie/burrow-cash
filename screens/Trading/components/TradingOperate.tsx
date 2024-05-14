@@ -176,7 +176,20 @@ const TradingOperate = () => {
   const inputPriceChange = _.debounce((newValue) => {
     // eslint-disable-next-line no-unused-expressions
     activeTab === "long" ? setLongInput(newValue) : setShortInput(newValue);
-  }, 50);
+  }, 100);
+  let lastValue = "";
+  const tokenChange = (value) => {
+    if (value.includes(".") && !lastValue.includes(".")) {
+      inputPriceChange.cancel(); //
+      setTimeout(() => {
+        inputPriceChange(value);
+      }, 50);
+    } else {
+      inputPriceChange(value);
+    }
+
+    lastValue = value;
+  };
 
   /**
    * longInput shortInput deal start
@@ -210,9 +223,9 @@ const TradingOperate = () => {
           ? getAssetById(ReduxcategoryAssets1?.token_id)
           : getAssetById(ReduxcategoryAssets2?.token_id);
 
-      const { price: priceD, symbol: symbolD, decimals: decimalsD } = getAssetDetails(assetD);
-      const { price: priceC, symbol: symbolC, decimals: decimalsC } = getAssetDetails(assetC);
-      const { price: priceP, symbol: symbolP, decimals: decimalsP } = getAssetDetails(assetP);
+      const { price: priceD, decimals: decimalsD } = getAssetDetails(assetD);
+      const { price: priceC, decimals: decimalsC } = getAssetDetails(assetC);
+      const { price: priceP, decimals: decimalsP } = getAssetDetails(assetP);
 
       const leverageC = parseTokenValue(ReduxcategoryAssets2.margin_debt.balance, decimalsC);
       const leverageD =
@@ -362,7 +375,7 @@ const TradingOperate = () => {
           <>
             <div className="relative bg-dark-600 border border-dark-500 pt-3 pb-2.5 pr-3 pl-2.5 rounded-md z-30">
               <input
-                onChange={(e) => inputPriceChange(e.target.value)}
+                onChange={(e) => tokenChange(e.target.value)}
                 type="number"
                 value={longInput}
                 placeholder="0"
@@ -472,7 +485,7 @@ const TradingOperate = () => {
           <>
             <div className="relative bg-dark-600 border border-dark-500 pt-3 pb-2.5 pr-3 pl-2.5 rounded-md z-30">
               <input
-                onChange={(e) => inputPriceChange(e.target.value)}
+                onChange={(e) => tokenChange(e.target.value)}
                 type="number"
                 value={shortInput}
                 placeholder="0"
