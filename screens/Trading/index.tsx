@@ -259,7 +259,7 @@ const Trading = () => {
             <div className="text-sm">
               <p className="text-gray-300 mb-1.5">Long / Short Positions</p>
               <span>
-                ${longAndShortPosition[0]}K / ${longAndShortPosition[1]}K
+                ${longAndShortPosition[0]} / ${longAndShortPosition[1]}
               </span>
             </div>
           </div>
