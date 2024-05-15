@@ -1,5 +1,8 @@
 import { useState, useMemo, useEffect } from "react";
+import { Box, Typography, Switch, Tooltip, Alert, useTheme } from "@mui/material";
+import LoadingButton from "@mui/lab/LoadingButton";
 import Decimal from "decimal.js";
+import { FcInfo } from "@react-icons/all-files/fc/FcInfo";
 import { nearTokenId } from "../../utils";
 import { toggleUseAsCollateral, hideModal } from "../../redux/appSlice";
 import { getModalData } from "./utils";
@@ -9,21 +12,24 @@ import { supply } from "../../store/actions/supply";
 import { deposit } from "../../store/actions/deposit";
 import { borrow } from "../../store/actions/borrow";
 import { withdraw } from "../../store/actions/withdraw";
+import { shadow_action_supply } from "../../store/actions/shadow";
 import { adjustCollateral } from "../../store/actions/adjustCollateral";
 import { useAppSelector, useAppDispatch } from "../../redux/hooks";
 import { getSelectedValues, getAssetData, getConfig } from "../../redux/appSelectors";
 import { trackActionButton } from "../../utils/telemetry";
 import { useDegenMode } from "../../hooks/hooks";
-import { SubmitButton } from "./components";
+import { SubmitButton, AlertWarning } from "./components";
+import { getAccountPortfolio } from "../../redux/accountSelectors";
+import getShadowRecords from "../../api/get-shadows";
 import { expandToken } from "../../store";
 
-export default function Action({ maxBorrowAmount, healthFactor, poolAsset }) {
+export default function Action({ maxBorrowAmount, healthFactor, collateralType, poolAsset }) {
   const [loading, setLoading] = useState(false);
   const { amount, useAsCollateral, isMax } = useAppSelector(getSelectedValues);
   const { enable_pyth_oracle } = useAppSelector(getConfig);
   const dispatch = useAppDispatch();
   const asset = useAppSelector(getAssetData);
-  const { action = "Deposit", tokenId, borrowApy, price, borrowed } = asset;
+  const { action = "Deposit", tokenId, borrowApy, price, borrowed, isLpToken } = asset;
   const { isRepayFromDeposits } = useDegenMode();
   const { available, canUseAsCollateral, extraDecimals, collateral, disabled, decimals } =
     getModalData({
@@ -56,6 +62,17 @@ export default function Action({ maxBorrowAmount, healthFactor, poolAsset }) {
       case "Supply":
         if (tokenId === nearTokenId) {
           await deposit({ amount, useAsCollateral, isMax });
+        } else if (isLpToken) {
+          const shadowRecords = await getShadowRecords();
+          const pool_id = tokenId.split("-")[1];
+          await shadow_action_supply({
+            tokenId,
+            decimals: +(decimals || 0) + +extraDecimals,
+            useAsCollateral,
+            amount,
+            isMax,
+            isRegistered: !!shadowRecords?.[pool_id],
+          });
         } else {
           await supply({
             tokenId,
@@ -67,7 +84,7 @@ export default function Action({ maxBorrowAmount, healthFactor, poolAsset }) {
         }
         break;
       case "Borrow": {
-        await borrow({ tokenId, extraDecimals, amount, enable_pyth_oracle });
+        await borrow({ tokenId, extraDecimals, amount, collateralType, enable_pyth_oracle });
         break;
       }
       case "Withdraw": {
@@ -117,6 +134,7 @@ export default function Action({ maxBorrowAmount, healthFactor, poolAsset }) {
             tokenId,
             amount,
             extraDecimals,
+            position: collateralType,
             isMax,
             enable_pyth_oracle,
           });
@@ -125,9 +143,8 @@ export default function Action({ maxBorrowAmount, healthFactor, poolAsset }) {
             tokenId,
             amount,
             extraDecimals,
+            position: collateralType,
             isMax,
-            minRepay,
-            interestChargedIn1min,
           });
         }
         break;

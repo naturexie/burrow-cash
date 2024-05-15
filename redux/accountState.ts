@@ -24,7 +24,16 @@ export interface FarmData {
 export interface Farm {
   [reward_token_id: string]: FarmData;
 }
-
+export interface IPositions {
+  [shadow_id: string]: {
+    collateral: {
+      [tokenId: string]: PortfolioAsset;
+    };
+    borrowed: {
+      [tokenId: string]: PortfolioAsset;
+    };
+  };
+}
 export interface Portfolio {
   supplied: {
     [tokenId: string]: PortfolioAsset;
@@ -32,9 +41,16 @@ export interface Portfolio {
   collateral: {
     [tokenId: string]: PortfolioAsset;
   };
+  collateralAll: {
+    [tokenId: string]: PortfolioAsset;
+  };
   borrowed: {
     [tokenId: string]: PortfolioAsset;
   };
+  supplies: any[];
+  collaterals: any[];
+  borrows: any[];
+  positions: IPositions;
   farms: {
     supplied: {
       [tokenId: string]: Farm;
@@ -70,9 +86,14 @@ export const initialState: AccountState = {
   accountId: "",
   balances: {},
   portfolio: {
+    supplies: [],
+    borrows: [],
+    collaterals: [],
     supplied: {},
     collateral: {},
+    collateralAll: {},
     borrowed: {},
+    positions: {},
     farms: {
       supplied: {},
       borrowed: {},

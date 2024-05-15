@@ -10,6 +10,8 @@ import {
   ChangeMethodsOracle,
   ViewMethodsLogic,
   ViewMethodsOracle,
+  ViewMethodsREFV1,
+  ChangeMethodsREFV1,
   ViewMethodsPyth,
   ChangeMethodsPyth,
 } from "../interfaces/contract-methods";
@@ -142,7 +144,6 @@ export const getBurrow = async ({
     ViewMethodsLogic,
     ChangeMethodsLogic,
   );
-
   // get oracle address from
   const config = (await view(
     logicContract,
@@ -154,6 +155,12 @@ export const getBurrow = async ({
     config.oracle_account_id,
     ViewMethodsOracle,
     ChangeMethodsOracle,
+  );
+  const refv1Contract: Contract = await getContract(
+    account,
+    config.ref_exchange_id,
+    ViewMethodsREFV1,
+    ChangeMethodsREFV1,
   );
   const pythContract: Contract = await getContract(
     account,
@@ -181,6 +188,7 @@ export const getBurrow = async ({
     account,
     logicContract,
     oracleContract,
+    refv1Contract,
     pythContract,
     view,
     call,

@@ -166,3 +166,54 @@ const Label = ({ children, tooltip = "", bgcolor = "rgba(172, 255, 255, 0.1)", .
     </Stack>
   </Tooltip>
 );
+
+export const StatLabel = ({
+  title,
+  row,
+  wrapStyle,
+  titleClass = "",
+  titleWrapClass = "",
+}: {
+  title: {
+    text: string;
+    textStyle?: any;
+  };
+  wrapStyle?: any;
+  titleClass?: string;
+  titleWrapClass?: string;
+  row?: [{ value: string; icon?: string; valueStyle?: any; valueClass?: string }];
+}) => {
+  return (
+    <div className="flex gap-1 items-start flex-col md:flex-row md:flex-wrap">
+      <div
+        className={`flex md:items-center gap-2 h6 rounded md:rounded-[21px] bg-dark-100 truncate ${titleWrapClass}`}
+        style={wrapStyle || { padding: "3px 6px 5px" }}
+      >
+        <div style={title?.textStyle} className={`h6 text-gray-300 ${titleClass}`}>
+          {title.text}
+        </div>
+        <div className="flex flex-col gap-1 md:flex-row">
+          {row?.map((d, i) => {
+            if (!d.value) {
+              return null;
+            }
+            return (
+              <div
+                style={d.valueStyle}
+                className={`flex items-center gap-1 ${d.valueClass || ""}`}
+                key={`${d.value}${i}`}
+              >
+                {d.icon && (
+                  <div>
+                    <TokenIcon width={15} height={15} icon={d.icon} />
+                  </div>
+                )}
+                {d.value}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};

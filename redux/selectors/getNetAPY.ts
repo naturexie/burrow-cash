@@ -4,9 +4,8 @@ import Decimal from "decimal.js";
 import { RootState } from "../store";
 import { hasAssets } from "../utils";
 import { getExtraDailyTotals } from "./getExtraDailyTotals";
-import { getAccountRewards, getGains } from "./getAccountRewards";
+import { getAccountRewards, getGains, getGainsArr } from "./getAccountRewards";
 import { getProtocolRewards } from "./getProtocolRewards";
-import { getTotalBalance } from "./getTotalBalance";
 import { shrinkToken } from "../../store/helper";
 
 export const getNetAPY = ({ isStaking = false }: { isStaking: boolean }) =>

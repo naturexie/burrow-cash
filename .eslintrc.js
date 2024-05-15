@@ -65,6 +65,7 @@ module.exports = {
     "jsx-a11y/no-noninteractive-tabindex": "off",
     "@typescript-eslint/no-explicit-any": ["off"],
     "react/destructuring-assignment": ["off"],
+    "@typescript-eslint/no-inferrable-types": ["off"],
   },
   settings: {
     react: {

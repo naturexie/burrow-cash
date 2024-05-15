@@ -836,3 +836,20 @@ options-list::-webkit-scrollbar {
   border-radius: 50%;
   background: #d2ff3a;
 }
+.health-tab {
+  border-radius: 4px;
+}
+.health-tab:hover,
+.health-tab-active {
+  background: #2e304b;
+}
+
+.health-tab .arrow-left {
+  position: absolute;
+  right: 100%;
+  width: 0;
+  height: 0;
+  border-top: 16px solid transparent;
+  border-bottom: 15px solid transparent;
+  border-right: 10px solid #2e304b;
+}

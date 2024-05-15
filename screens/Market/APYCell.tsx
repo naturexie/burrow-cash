@@ -94,7 +94,6 @@ const ToolTip = ({
             ]}
           {list.map(({ rewards, metadata, price, config }) => {
             const { symbol, icon } = metadata;
-
             const rewardAPY = computeRewardAPY(
               metadata.token_id,
               rewards.reward_per_day,

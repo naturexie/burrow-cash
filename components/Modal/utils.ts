@@ -122,7 +122,7 @@ export const getModalData = (asset): UIAsset & Props & { disabled: boolean } => 
       data.rates = [];
       break;
     case "Repay": {
-      // TODO
+      // TODO available
       let minRepay = "0";
       if (poolAsset?.supplied?.shares) {
         minRepay = shrinkToken(
@@ -142,7 +142,7 @@ export const getModalData = (asset): UIAsset & Props & { disabled: boolean } => 
           .toFixed(decimals, 2);
       }
       const repayAmount = Decimal.max(
-        new Decimal(borrowed).plus(interestChargedIn1min),
+        new Decimal(borrowed || 0).plus(interestChargedIn1min),
         minRepay,
       ).toNumber();
       data.totalTitle = `Repay Borrow Amount`;
@@ -160,8 +160,8 @@ export const getModalData = (asset): UIAsset & Props & { disabled: boolean } => 
       data.rates = [
         {
           label: "Remaining Borrow",
-          value: (borrowed - amount).toFixed(PERCENT_DIGITS),
-          value$: new Decimal(borrowed - amount).mul(price).toFixed(),
+          value: decimalMax(0, (borrowed - amount).toFixed(PERCENT_DIGITS)).toFixed(PERCENT_DIGITS),
+          value$: decimalMax(0, new Decimal(borrowed - amount).mul(price)).toFixed(),
         },
       ];
       if (isRepayFromDeposits) {
