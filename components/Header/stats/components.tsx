@@ -86,8 +86,7 @@ export const Stat = ({
   onClick?: () => void;
 }) => {
   return (
-    <div onClick={() => onClick && onClick()} style={{ minHeight: 81 }}>
-      {/* <div onClick={() => onClick && onClick()} style={{ minHeight: 81 }} className="md:w-[351px]"> */}
+    <div onClick={() => onClick && onClick()} style={{ minHeight: 81 }} className="md:w-[351px]">
       <div className="flex items-center gap-1">
         {typeof title === "string" ? <div className="h6 text-gray-300">{title}</div> : title}
         {titleTooltip && <TagToolTip title={titleTooltip} />}
@@ -103,7 +102,45 @@ export const Stat = ({
             labels?.map((row, i) => {
               const firstData = row[0];
               if (!firstData) return null;
-              return <StatLabel title={firstData} row={row} key={i} />;
+              if (firstData.type === "component") {
+                return firstData.content;
+              }
+              return (
+                <div
+                  className="flex gap-1 items-start flex-col md:flex-row md:flex-wrap"
+                  key={`${firstData.text}${i}`}
+                >
+                  <div
+                    className="flex md:items-center gap-2 h6 rounded md:rounded-[21px] bg-dark-100 truncate"
+                    style={{ padding: "3px 6px 5px" }}
+                  >
+                    <div style={firstData.textStyle} className="h6 text-gray-300">
+                      {firstData.text}
+                    </div>
+                    <div className="flex flex-col gap-1 md:flex-row">
+                      {row?.map((d) => {
+                        if (!d.value) {
+                          return null;
+                        }
+                        return (
+                          <div
+                            style={d.valueStyle}
+                            className="flex items-center gap-1"
+                            key={`${d.text}${d.value}`}
+                          >
+                            {d.icon && (
+                              <div>
+                                <TokenIcon width={15} height={15} icon={d.icon} />
+                              </div>
+                            )}
+                            {d.value}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              );
             })
           )}
         </Stack>

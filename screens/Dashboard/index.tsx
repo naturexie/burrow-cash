@@ -92,8 +92,8 @@ const yourSuppliedColumns = [
     header: "Assets",
     size: 160,
     cell: ({ originalData }) => {
-      const { metadata } = originalData || {};
-      const { icon, tokens, symbol } = metadata || {};
+      const { metadata, icon } = originalData || {};
+      const { tokens, symbol } = metadata || {};
       let iconImg;
       let symbolNode = symbol;
       if (icon) {

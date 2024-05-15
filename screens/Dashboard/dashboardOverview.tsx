@@ -4,7 +4,7 @@ import { twMerge } from "tailwind-merge";
 import { Modal, Box, useTheme } from "@mui/material";
 import SemiCircleProgressBar from "../../components/SemiCircleProgressBar/SemiCircleProgressBar";
 import { useUserHealth } from "../../hooks/useUserHealth";
-import { formatTokenValue, formatUSDValue, isMobileDevice } from "../../helpers/helpers";
+import { formatTokenValue, isMobileDevice } from "../../helpers/helpers";
 import CustomButton from "../../components/CustomButton/CustomButton";
 import { useRewards } from "../../hooks/useRewards";
 import ClaimAllRewards from "../../components/ClaimAllRewards";
@@ -17,7 +17,6 @@ import { UserDailyRewards } from "../../components/Header/stats/rewards";
 import { UserLiquidity } from "../../components/Header/stats/liquidity";
 import { APY } from "../../components/Header/stats/apy";
 import { ContentBox } from "../../components/ContentBox/ContentBox";
-import ToolTip from "../../components/ToolTip";
 import { StatLabel } from "../../components/Header/stats/components";
 import { TagToolTip } from "../../components/ToolTip";
 import { Wrapper } from "../../components/Modal/style";
@@ -375,34 +374,6 @@ const HealthFactor = ({ userHealth }) => {
         </div>
       </div>
     </SemiCircleProgressBar>
-  );
-};
-
-type OverviewItemProps = {
-  title: string;
-  value?: any;
-  labels?: any;
-};
-const OverviewItem = ({ title, value, labels }: OverviewItemProps) => {
-  return (
-    <div>
-      <div className="h6 text-gray-300">{title}</div>
-      <div className="h2">{value}</div>
-      {labels?.map((row, i) => (
-        <div className="flex gap-2" key={i}>
-          {row?.map((d) => (
-            <div
-              key={d.text}
-              className="flex items-center gap-2 h5 rounded-[21px] bg-dark-100"
-              style={{ padding: "1px 8px" }}
-            >
-              <div style={d.textStyle}>{d.text}</div>
-              <div style={d.valueStyle}>{d.value}</div>
-            </div>
-          ))}
-        </div>
-      ))}
-    </div>
   );
 };
 
