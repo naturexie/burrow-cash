@@ -15,7 +15,7 @@ import { useEstimateSwap } from "../../../hooks/useEstimateSwap";
 import { NearIcon, NearIconMini } from "../../MarginTrading/components/Icon";
 import { setSlippageToleranceFromRedux } from "../../../redux/marginTrading";
 import { useMarginAccount } from "../../../hooks/useMarginAccount";
-import { expandTokenDecimal, expandToken } from "../../../store/helper";
+import { expandTokenDecimal, expandToken, shrinkToken } from "../../../store/helper";
 
 // main components
 const TradingOperate = () => {
@@ -205,14 +205,10 @@ const TradingOperate = () => {
     if (inputUsdCharcate2) {
       updateInputAmounts(activeTab, inputUsdCharcate2, inputUsdCharcate1);
     }
+  }, [longInput, shortInput, rangeMount, estimateData, slippageTolerance]);
 
-    if (
-      ReduxcategoryAssets2 &&
-      ReduxcategoryAssets1 &&
-      inputUsdCharcate1 &&
-      inputUsdCharcate2 &&
-      estimateData
-    ) {
+  useEffect(() => {
+    if (ReduxcategoryAssets2 && ReduxcategoryAssets1 && estimateData) {
       const assetC = getAssetById(ReduxcategoryAssets2?.token_id);
       const assetD =
         activeTab == "long"
@@ -227,36 +223,26 @@ const TradingOperate = () => {
       const { price: priceC, decimals: decimalsC } = getAssetDetails(assetC);
       const { price: priceP, decimals: decimalsP } = getAssetDetails(assetP);
 
-      const leverageC = parseTokenValue(ReduxcategoryAssets2.margin_debt.balance, decimalsC);
-      const leverageD =
-        activeTab == "long"
-          ? parseTokenValue(ReduxcategoryAssets2.margin_debt.balance, decimalsD)
-          : parseTokenValue(ReduxcategoryAssets1.margin_debt.balance, decimalsD);
-      // const sizeValue = inputUsdCharcate1
-      //   ? inputUsdCharcate1 * expandTokenDecimal(estimateData?.amount_out, decimalsP)
-      //   : 0;
+      let liqPriceX = 0;
+      if (rangeMount > 1) {
+        if (activeTab == "long") {
+          const k1 = longInput * rangeMount * (getAssetPrice(ReduxcategoryAssets2) as any);
+          const k2 = 1 - marginConfigTokens.min_safty_buffer / 10000;
+          liqPriceX = (k1 / k2 - longInput) / longOutput;
+        } else {
+          liqPriceX =
+            (((Number(shortInput) +
+              Number(shrinkToken(estimateData?.min_amount_out, decimalsC))) as any) *
+              rangeMount *
+              (getAssetPrice(ReduxcategoryAssets2) as any) *
+              (1 - marginConfigTokens.min_safty_buffer / 10000)) /
+            shortOutput;
+        }
+      }
 
-      const sizeValue =
-        activeTab == "long"
-          ? inputUsdCharcate2 * (expandToken(estimateData.amount_out, decimalsD) as any)
-          : inputUsdCharcate1 * (expandToken(estimateData.amount_out, decimalsP) as any);
-
-      const total_debt = leverageD * priceD;
-      const total_hp_fee = 0;
-      const denominator = sizeValue * (1 - marginConfigTokens.min_safty_buffer / 10000);
-      //
-
-      setLiqPrice(
-        denominator !== 0
-          ? (total_debt +
-              total_hp_fee +
-              (priceC * leverageC * marginConfigTokens.min_safty_buffer) / 10000 -
-              priceC * leverageC) /
-              denominator
-          : 0,
-      );
+      setLiqPrice(liqPriceX);
     }
-  }, [longInput, shortInput, rangeMount, estimateData, slippageTolerance]);
+  }, [longOutput, shortOutput]);
 
   function getAssetPrice(categoryId) {
     return categoryId ? assets.data[categoryId["token_id"]].price?.usd : 0;
