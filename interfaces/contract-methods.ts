@@ -15,6 +15,7 @@ export enum ViewMethodsLogic {
   get_asset_farms_paged,
   storage_balance_of,
   check_registration,
+  get_all_token_pyth_infos,
 }
 
 // Change methods can modify the state. But you don't receive the returned value when called.
@@ -22,6 +23,7 @@ export enum ChangeMethodsLogic {
   // init
   new,
   execute,
+  execute_with_pyth,
   // register
   storage_deposit,
   // config
@@ -59,6 +61,9 @@ export enum ViewMethodsToken {
   ft_balance_of,
   storage_balance_of,
   check_registration,
+  get_st_near_price,
+  get_nearx_price,
+  ft_price,
 }
 
 export enum ChangeMethodsToken {
@@ -77,3 +82,8 @@ export enum ViewMethodsREFV1 {
 export enum ChangeMethodsREFV1 {
   shadow_action,
 }
+export enum ViewMethodsPyth {
+  get_price,
+}
+
+export enum ChangeMethodsPyth {}

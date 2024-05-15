@@ -129,6 +129,8 @@ export const initialState: AppState = {
     ref_exchange_id: "",
     owner_id: "",
     x_booster_multiplier_at_maximum_staking_duration: 0,
+    enable_price_oracle: false,
+    enable_pyth_oracle: true,
   },
 };
 

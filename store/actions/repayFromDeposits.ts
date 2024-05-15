@@ -1,6 +1,7 @@
+import BN from "bn.js";
 import Decimal from "decimal.js";
 import { decimalMax, getBurrow } from "../../utils";
-import { expandTokenDecimal, expandToken } from "../helper";
+import { expandTokenDecimal } from "../helper";
 import { ChangeMethodsOracle, ChangeMethodsLogic } from "../../interfaces";
 import { getMetadata, prepareAndExecuteTransactions } from "../tokens";
 import { Transaction } from "../wallet";
@@ -15,12 +16,14 @@ export async function repayFromDeposits({
   extraDecimals,
   position,
   isMax,
+  enable_pyth_oracle,
 }: {
   tokenId: string;
   amount: string;
   extraDecimals: number;
   position: string;
   isMax: boolean;
+  enable_pyth_oracle: boolean;
 }) {
   // TODO repay from supplied
   const { logicContract, oracleContract } = await getBurrow();
@@ -65,31 +68,38 @@ export async function repayFromDeposits({
             position,
           },
         };
+  const decreaseCollateralTemplate = {
+    DecreaseCollateral: {
+      token_id: tokenId,
+      amount: decreaseCollateralAmount.toFixed(0),
+    },
+  };
   transactions.push({
-    receiverId: oracleContract.contractId,
+    receiverId: enable_pyth_oracle ? logicContract.contractId : oracleContract.contractId,
     functionCalls: [
       {
-        methodName: ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
-        args: {
-          receiver_id: logicContract.contractId,
-          msg: JSON.stringify({
-            Execute: {
+        methodName: enable_pyth_oracle
+          ? ChangeMethodsLogic[ChangeMethodsLogic.execute_with_pyth]
+          : ChangeMethodsOracle[ChangeMethodsOracle.oracle_call],
+        gas: new BN("300000000000000"),
+        args: enable_pyth_oracle
+          ? {
               actions: [
-                ...(decreaseCollateralAmount.gt(0)
-                  ? [
-                      {
-                        DecreaseCollateral: {
-                          token_id: tokenId,
-                          amount: decreaseCollateralAmount.toFixed(0),
-                        },
-                      },
-                    ]
-                  : []),
+                ...(decreaseCollateralAmount.gt(0) ? [decreaseCollateralTemplate] : []),
                 repayTemplate,
               ],
+            }
+          : {
+              receiver_id: logicContract.contractId,
+              msg: JSON.stringify({
+                Execute: {
+                  actions: [
+                    ...(decreaseCollateralAmount.gt(0) ? [decreaseCollateralTemplate] : []),
+                    repayTemplate,
+                  ],
+                },
+              }),
             },
-          }),
-        },
       },
     ],
   });

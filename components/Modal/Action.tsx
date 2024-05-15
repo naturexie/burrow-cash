@@ -15,29 +15,37 @@ import { withdraw } from "../../store/actions/withdraw";
 import { shadow_action_supply } from "../../store/actions/shadow";
 import { adjustCollateral } from "../../store/actions/adjustCollateral";
 import { useAppSelector, useAppDispatch } from "../../redux/hooks";
-import { getSelectedValues, getAssetData } from "../../redux/appSelectors";
+import { getSelectedValues, getAssetData, getConfig } from "../../redux/appSelectors";
 import { trackActionButton, trackUseAsCollateral } from "../../utils/telemetry";
 import { useDegenMode } from "../../hooks/hooks";
 import { SubmitButton, AlertWarning } from "./components";
 import { getAccountPortfolio } from "../../redux/accountSelectors";
 import getShadowRecords from "../../api/get-shadows";
 import { expandToken } from "../../store";
+import { getContractConfig } from "../../store/helper";
 
-export default function Action({ maxBorrowAmount, healthFactor, collateralType }) {
+export default function Action({ maxBorrowAmount, healthFactor, collateralType, poolAsset }) {
   const [loading, setLoading] = useState(false);
+  const [enable_pyth_oracle, set_enable_pyth_oracle] = useState<boolean>(false);
   const { amount, useAsCollateral, isMax } = useAppSelector(getSelectedValues);
+  // const { enable_pyth_oracle } = useAppSelector(getConfig);
   const dispatch = useAppDispatch();
   const asset = useAppSelector(getAssetData);
-  const { action = "Deposit", tokenId, isLpToken, decimals } = asset;
+  const { action = "Deposit", tokenId, borrowApy, price, borrowed, isLpToken } = asset;
   const { isRepayFromDeposits } = useDegenMode();
-
-  const { available, canUseAsCollateral, extraDecimals, collateral, disabled } = getModalData({
-    ...asset,
-    maxBorrowAmount,
-    healthFactor,
-    amount,
-    isRepayFromDeposits,
-  });
+  useEffect(() => {
+    getContractConfig().then((c) => {
+      set_enable_pyth_oracle(c.enable_pyth_oracle);
+    });
+  }, []);
+  const { available, canUseAsCollateral, extraDecimals, collateral, disabled, decimals } =
+    getModalData({
+      ...asset,
+      maxBorrowAmount,
+      healthFactor,
+      amount,
+      isRepayFromDeposits,
+    });
 
   useEffect(() => {
     if (!canUseAsCollateral) {
@@ -83,7 +91,7 @@ export default function Action({ maxBorrowAmount, healthFactor, collateralType }
         }
         break;
       case "Borrow": {
-        await borrow({ tokenId, extraDecimals, amount, collateralType });
+        await borrow({ tokenId, extraDecimals, amount, collateralType, enable_pyth_oracle });
         break;
       }
       case "Withdraw": {
@@ -92,6 +100,7 @@ export default function Action({ maxBorrowAmount, healthFactor, collateralType }
           extraDecimals,
           amount,
           isMax,
+          enable_pyth_oracle,
         });
         break;
       }
@@ -101,9 +110,32 @@ export default function Action({ maxBorrowAmount, healthFactor, collateralType }
           extraDecimals,
           amount,
           isMax,
+          enable_pyth_oracle,
         });
         break;
       case "Repay": {
+        let minRepay = "0";
+        let interestChargedIn1min = "0";
+        if (borrowApy && price && borrowed) {
+          interestChargedIn1min = expandToken(
+            new Decimal(borrowApy)
+              .div(365 * 24 * 60)
+              .div(100)
+              .mul(borrowed)
+              .toFixed(),
+            decimals,
+            0,
+          );
+          if (+interestChargedIn1min === 0) {
+            interestChargedIn1min = "1";
+          }
+        }
+        if (poolAsset?.supplied?.shares) {
+          minRepay = new Decimal(poolAsset?.supplied?.balance)
+            .div(poolAsset?.supplied?.shares)
+            .mul(2)
+            .toFixed(0, 2);
+        }
         if (isRepayFromDeposits) {
           await repayFromDeposits({
             tokenId,
@@ -111,6 +143,7 @@ export default function Action({ maxBorrowAmount, healthFactor, collateralType }
             extraDecimals,
             position: collateralType,
             isMax,
+            enable_pyth_oracle,
           });
         } else {
           await repay({

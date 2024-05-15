@@ -1,6 +1,6 @@
 import { createSelector } from "@reduxjs/toolkit";
 
-import { NEAR_LOGO_SVG, shrinkToken } from "../../store";
+import { shrinkToken } from "../../store";
 import { RootState } from "../store";
 import { INetTvlFarmReward } from "../../interfaces/asset";
 
@@ -26,7 +26,7 @@ export const getProtocolRewards = createSelector(
         const dailyAmount = Number(shrinkToken(farm.reward_per_day, assetDecimals));
         const remainingAmount = Number(shrinkToken(farm.remaining_rewards, assetDecimals));
         return {
-          icon: icon || `data:image/svg+xml,${NEAR_LOGO_SVG}`,
+          icon,
           name,
           symbol,
           tokenId,

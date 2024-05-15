@@ -188,6 +188,7 @@ const Modal = () => {
               maxBorrowAmount={maxBorrowAmount}
               healthFactor={healthFactor}
               collateralType={selectedCollateralType}
+              poolAsset={assets[tokenId]}
             />
           </Box>
         </ModalContext.Provider>

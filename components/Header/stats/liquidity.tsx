@@ -9,6 +9,8 @@ import { trackFullDigits } from "../../../utils/telemetry";
 import { Stat } from "./components";
 import { getWeightedNetLiquidity } from "../../../redux/selectors/getAccountRewards";
 import { useProtocolNetLiquidity } from "../../../hooks/useNetLiquidity";
+import { DoubtIcon } from "../../Icons/Icons";
+import CustomTooltips from "../../CustomTooltips/CustomTooltips";
 
 export const ProtocolLiquidity = () => {
   const { fullDigits, setDigits } = useFullDigits();
@@ -52,8 +54,11 @@ export const UserLiquidity = () => {
   const userBorrowed = useAppSelector(getTotalAccountBalance("borrowed"));
   const userNetLiquidity = new Decimal(userDeposited).minus(userBorrowed).toNumber();
   const weightedNetLiquidity = useAppSelector(getWeightedNetLiquidity);
-  const userNetLiquidityValue = `$${m(userNetLiquidity)}`;
 
+  // const userNetLiquidityValue = fullDigits?.user
+  //   ? userNetLiquidity.toLocaleString(undefined, COMPACT_USD_FORMAT)
+  //   : `$${m(userNetLiquidity)}`;
+  const userNetLiquidityValue = userNetLiquidity > 0 ? `$${m(userNetLiquidity)}` : `$0`;
   const userWeightedNetLiquidityValue =
     weightedNetLiquidity > 0 ? `$${m(weightedNetLiquidity)}` : "$0";
 
@@ -89,12 +94,14 @@ export const UserLiquidity = () => {
   };
 
   return (
-    <Stat
-      title="Weighted Net Liquidity"
-      titleTooltip={`Your unweighted net liquidity is: ${userNetLiquidityValue}`}
-      amount={userWeightedNetLiquidityValue}
-      labels={showLabels ? netLiquidityLabels : []}
-      onClick={toggleValues}
-    />
+    <div className="relative">
+      <Stat
+        title="Net Liquidity"
+        titleTooltip="Net Liquidity = Your total Supplied - Your total Borrowed"
+        amount={userNetLiquidityValue}
+        labels={showLabels ? netLiquidityLabels : []}
+        onClick={toggleValues}
+      />
+    </div>
   );
 };

@@ -75,7 +75,7 @@ export const computeWithdrawMaxAmount = (tokenId: string, assets: Assets, portfo
   //   ? new Decimal(asset.price.multiplier).div(new Decimal(10).pow(asset.price.decimals))
   //   : new Decimal(0);
   const position = asset.isLpToken ? tokenId : DEFAULT_POSITION;
-  const assetPrice = asset.price ? new Decimal(asset.price.usd) : new Decimal(0);
+  const assetPrice = asset.price ? new Decimal(asset.price.usd || "0") : new Decimal(0);
   const suppliedBalance = new Decimal(portfolio.supplied[tokenId]?.balance || 0);
   const collateralBalance = new Decimal(
     portfolio.positions[position]?.collateral?.[tokenId]?.balance || 0,

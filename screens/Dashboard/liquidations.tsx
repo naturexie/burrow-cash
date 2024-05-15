@@ -4,7 +4,7 @@ import { useAccountId, useUnreadLiquidation } from "../../hooks/hooks";
 import { shrinkToken, TOKEN_FORMAT } from "../../store";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { getAssets } from "../../redux/assetsSelectors";
-import { getDateString, maskMiddleString } from "../../helpers/helpers";
+import { formatTokenValueWithMilify, getDateString } from "../../helpers/helpers";
 import { getLiquidations } from "../../api/get-liquidations";
 import { setUnreadLiquidation } from "../../redux/appSlice";
 
@@ -98,7 +98,10 @@ const columns = [
       </div>
     ),
     cell: ({ originalData }) => {
-      const { healthFactor_before } = originalData || {};
+      const { healthFactor_before, liquidation_type } = originalData || {};
+      if (liquidation_type === "ForceClose") {
+        return "-";
+      }
       return <div>{(Number(healthFactor_before) * 100).toFixed(2)}%</div>;
     },
   },
@@ -110,6 +113,10 @@ const columns = [
     ),
     cell: ({ originalData }) => {
       const { RepaidAssets } = originalData || {};
+      if (!RepaidAssets?.length) {
+        return "-";
+      }
+
       const node = RepaidAssets?.map((d, i) => {
         const isLast = RepaidAssets.length === i + 1;
         const { metadata, config } = d.data || {};
@@ -119,9 +126,14 @@ const columns = [
         const tokenAmount = Number(
           shrinkToken(d.amount, (metadata?.decimals || 0) + (extra_decimals || 0)),
         );
+
         return (
-          <div key={d.token_id} className="whitespace-normal">
-            {tokenAmount.toLocaleString(undefined, TOKEN_FORMAT)} {tokenSymbol}
+          <div
+            key={d.token_id}
+            className="whitespace-normal"
+            title={`${tokenAmount.toLocaleString(undefined, TOKEN_FORMAT)} ${tokenSymbol}`}
+          >
+            {formatTokenValueWithMilify(tokenAmount, 4)} {tokenSymbol}
           </div>
         );
       });
@@ -133,6 +145,10 @@ const columns = [
     header: () => <div style={{ whiteSpace: "normal" }}>Liquidated Assets</div>,
     cell: ({ originalData }) => {
       const { LiquidatedAssets } = originalData || {};
+      if (!LiquidatedAssets?.length) {
+        return "-";
+      }
+
       const node = LiquidatedAssets?.map((d) => {
         const { metadata, config } = d.data || {};
         const { extra_decimals } = config || {};
@@ -150,12 +166,14 @@ const columns = [
         const tokenAmount = Number(
           shrinkToken(d.amount, (metadata?.decimals || 0) + (extra_decimals || 0)),
         );
+
         return (
-          <div key={d.token_id} className="truncate">
-            {tokenAmount.toLocaleString(undefined, TOKEN_FORMAT)}{" "}
-            <span className="h6 text-gray-300 truncate" title={tokenSymbol}>
-              {tokenSymbol}
-            </span>
+          <div
+            key={d.token_id}
+            className="whitespace-normal"
+            title={`${tokenAmount.toLocaleString(undefined, TOKEN_FORMAT)} ${tokenSymbol}`}
+          >
+            {formatTokenValueWithMilify(tokenAmount, 4)} {tokenSymbol}
           </div>
         );
       });
@@ -165,12 +183,17 @@ const columns = [
   },
   {
     header: () => (
-      <div style={{ whiteSpace: "normal", textAlign: "right" }}>
-        Health Factor<div>after Liquidate</div>
+      <div style={{ whiteSpace: "normal" }}>
+        Health Factor
+        <div>after Liquidate</div>
       </div>
     ),
     cell: ({ originalData }) => {
-      const { healthFactor_after } = originalData || {};
+      const { healthFactor_after, liquidation_type } = originalData || {};
+      if (liquidation_type === "ForceClose") {
+        return <div style={{ textAlign: "right" }}>-</div>;
+      }
+
       return (
         <div style={{ textAlign: "right" }}>{(Number(healthFactor_after) * 100).toFixed(2)}%</div>
       );

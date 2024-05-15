@@ -30,15 +30,17 @@ export function useExtraAPY({
   const { hasNegativeNetLiquidity } = useNonFarmedAssets();
 
   const hasNetTvlFarms = Object.keys(portfolio.farms.netTvl).length > 0;
-
-  const netLiquidityAPY = hasNegativeNetLiquidity
-    ? 0
-    : hasNetTvlFarms && !onlyMarket
-    ? userNetTvlAPY
-    : totalNetTvlApy;
-
+  let netLiquidityAPY;
+  if (onlyMarket) {
+    netLiquidityAPY = totalNetTvlApy;
+  } else if (hasNegativeNetLiquidity) {
+    netLiquidityAPY = 0;
+  } else if (hasNetTvlFarms) {
+    netLiquidityAPY = userNetTvlAPY;
+  } else {
+    netLiquidityAPY = totalNetTvlApy;
+  }
   const asset = assets.data[assetId];
-
   const assetDecimals = asset.metadata.decimals + asset.config.extra_decimals;
   const assetPrice = assets.data[assetId].price?.usd || 0;
   const position = assetId.indexOf(lpTokenPrefix) > -1 ? assetId : DEFAULT_POSITION;

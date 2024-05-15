@@ -2,8 +2,8 @@ import { Contract } from "near-api-js";
 import BN from "bn.js";
 import Decimal from "decimal.js";
 
-import { defaultNetwork, LOGIC_CONTRACT_NAME } from "./config";
-import { nearMetadata, wooMetadata } from "../components/Assets";
+import getConfig, { defaultNetwork, LOGIC_CONTRACT_NAME } from "./config";
+import { nearMetadata, wooMetadata, sfraxMetadata, fraxMetadata } from "../components/Assets";
 
 import {
   ChangeMethodsLogic,
@@ -12,17 +12,22 @@ import {
   ViewMethodsOracle,
   ViewMethodsREFV1,
   ChangeMethodsREFV1,
+  ViewMethodsPyth,
+  ChangeMethodsPyth,
 } from "../interfaces/contract-methods";
 import { IBurrow, IConfig } from "../interfaces/burrow";
 import { getContract } from "../store";
 
 import { getWalletSelector, getAccount, functionCall } from "./wallet-selector-compat";
-import { UIAsset } from "../interfaces";
 
 export const getViewAs = () => {
-  const url = new URL(window.location.href.replace("/#", ""));
-  const searchParams = new URLSearchParams(url.search);
-  return searchParams.get("viewAs");
+  if (window.location.href.includes("#instant-url")) {
+    return null;
+  } else {
+    const url = new URL(window.location.href.replace("/#", ""));
+    const searchParams = new URLSearchParams(url.search);
+    return searchParams.get("viewAs");
+  }
 };
 
 interface GetBurrowArgs {
@@ -121,7 +126,7 @@ export const getBurrow = async ({
     deposit = "1",
   ) => {
     const { contractId } = contract;
-    const gas = new BN(50000000000000);
+    const gas = new BN(300000000000000);
     const attachedDeposit = new BN(deposit);
 
     return functionCall({
@@ -157,6 +162,12 @@ export const getBurrow = async ({
     ViewMethodsREFV1,
     ChangeMethodsREFV1,
   );
+  const pythContract: Contract = await getContract(
+    account,
+    getConfig().PYTH_ORACLE_CONTRACT_ID,
+    ViewMethodsPyth,
+    ChangeMethodsPyth,
+  );
 
   if (localStorage.getItem("near-wallet-selector:selectedWalletId") == null) {
     if (
@@ -178,6 +189,7 @@ export const getBurrow = async ({
     logicContract,
     oracleContract,
     refv1Contract,
+    pythContract,
     view,
     call,
     config,
@@ -221,21 +233,20 @@ export function decimalMin(a: string | number | Decimal, b: string | number | De
   b = new Decimal(b);
   return a.lt(b) ? a : b;
 }
+
 export function standardizeAsset(asset) {
-  const serializationAsset = JSON.parse(JSON.stringify(asset || {}));
-  if (serializationAsset.symbol === "wNEAR") {
-    serializationAsset.symbol = nearMetadata.symbol;
-    serializationAsset.icon = nearMetadata.icon;
+  if (asset.symbol === "wNEAR") {
+    asset.symbol = nearMetadata.symbol;
+    asset.icon = nearMetadata.icon;
   }
-  if (serializationAsset.metadata?.symbol === "wNEAR") {
-    serializationAsset.metadata.symbol = nearMetadata.symbol;
-    serializationAsset.metadata.icon = nearMetadata.icon;
+  if (asset.symbol === "WOO") {
+    asset.icon = wooMetadata.icon;
   }
-  if (serializationAsset.symbol === "WOO") {
-    serializationAsset.icon = wooMetadata.icon;
+  if (asset.symbol === "sFRAX") {
+    asset.icon = sfraxMetadata.icon;
   }
-  if (serializationAsset.metadata?.symbol === "WOO") {
-    serializationAsset.metadata.icon = wooMetadata.icon;
+  if (asset.symbol === "FRAX") {
+    asset.icon = fraxMetadata.icon;
   }
-  return serializationAsset;
+  return asset;
 }

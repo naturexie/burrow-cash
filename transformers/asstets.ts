@@ -2,6 +2,8 @@ import { omit } from "lodash";
 import { IAssetDetailed, IMetadata } from "../interfaces/asset";
 import { transformAssetFarms } from "./farms";
 import { Assets } from "../redux/assetState";
+import { nearMetadata } from "../components/Assets";
+import { nearNativeTokens } from "../utils";
 
 export function transformAssets({
   assets,
@@ -16,6 +18,9 @@ export function transformAssets({
     if (asset.isLpToken) {
       asset.config.can_deposit = true;
       asset.config.can_withdraw = true;
+    }
+    if (!assetMetadata?.icon && nearNativeTokens.includes(assetMetadata?.token_id)) {
+      assetMetadata.icon = nearMetadata.icon;
     }
     map[asset.token_id] = omit(
       {
