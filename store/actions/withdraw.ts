@@ -162,6 +162,20 @@ export async function withdraw({
         ],
       });
     }
+    // 10 yocto is for rounding errors.
+    if (isNEAR && expandedAmount.gt(10)) {
+      transactions.push({
+        receiverId: tokenContract.contractId,
+        functionCalls: [
+          {
+            methodName: ChangeMethodsNearToken[ChangeMethodsNearToken.near_withdraw],
+            args: {
+              amount: expandedAmount.sub(10).toFixed(0),
+            },
+          },
+        ],
+      });
+    }
     await prepareAndExecuteTransactions(transactions);
   }
 }
