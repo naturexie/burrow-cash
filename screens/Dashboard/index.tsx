@@ -200,6 +200,7 @@ const YourSupplied = ({ suppliedRows, accountId, total }) => {
         </div>
         <div className="h3">{total > 0 ? formatUSDValue(total) : "$0"}</div>
       </div>
+      {/* dashboard test */}
       <StyledCustomTable
         data={suppliedRows}
         columns={yourSuppliedColumns}
