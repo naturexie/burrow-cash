@@ -29,7 +29,7 @@ const Popup = ({ className }) => {
       <div
         className={twMerge(
           className || "",
-          "lg:fixed lg:bottom-10 lg:right-0 z-50 xsm:relative cursor-pointer",
+          "lg:fixed lg:bottom-3 lg:right-0 z-50 xsm:relative cursor-pointer",
         )}
         style={{ width: "416px" }}
       >
@@ -42,7 +42,7 @@ const Popup = ({ className }) => {
               delay: 10000,
               disableOnInteraction: false,
             }}
-            loop={false}
+            loop
           >
             <SwiperSlide>
               <>
