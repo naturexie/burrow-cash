@@ -162,5 +162,6 @@ export async function withdraw({
         ],
       });
     }
+    await prepareAndExecuteTransactions(transactions);
   }
 }
