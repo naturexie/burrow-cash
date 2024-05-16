@@ -26,7 +26,7 @@ const RangeSlider = ({ defaultValue, action, setRangeMount }) => {
   const allowedValues = generateArithmeticSequence(
     1,
     marginConfigTokens["max_leverage_rate"],
-    2.25,
+    (marginConfigTokens["max_leverage_rate"] + 1) / 5,
   );
   const [value, setValue] = useState(defaultValue);
   const [splitList, setSplitList] = useState(allowedValues);
