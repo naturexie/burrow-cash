@@ -58,6 +58,7 @@ export const getPortfolioAssets = createSelector(
     const supplied = Object.keys(portfolioAssets)
       .map((tokenId) => {
         const asset = assets.data[tokenId];
+        // console.log('99999999999999');
         const collateral = shrinkToken(
           account.portfolio.collateral[tokenId]?.balance || 0,
           asset.metadata.decimals + asset.config.extra_decimals,
