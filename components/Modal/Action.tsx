@@ -152,6 +152,8 @@ export default function Action({ maxBorrowAmount, healthFactor, collateralType, 
             extraDecimals,
             position: collateralType,
             isMax,
+            minRepay,
+            interestChargedIn1min,
           });
         }
         break;
