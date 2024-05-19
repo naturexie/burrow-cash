@@ -21,7 +21,7 @@ import { useDegenMode } from "../../hooks/hooks";
 import { SubmitButton, AlertWarning } from "./components";
 import { getAccountPortfolio } from "../../redux/accountSelectors";
 import getShadowRecords from "../../api/get-shadows";
-import { expandToken } from "../../store";
+import { expandToken, shrinkToken } from "../../store";
 import { getContractConfig } from "../../store/helper";
 
 export default function Action({ maxBorrowAmount, healthFactor, collateralType, poolAsset }) {
@@ -31,7 +31,7 @@ export default function Action({ maxBorrowAmount, healthFactor, collateralType, 
   // const { enable_pyth_oracle } = useAppSelector(getConfig);
   const dispatch = useAppDispatch();
   const asset = useAppSelector(getAssetData);
-  const { action = "Deposit", tokenId, borrowApy, price, borrowed, isLpToken } = asset;
+  const { action = "Deposit", tokenId, borrowApy, price, portfolio, isLpToken, position } = asset;
   const { isRepayFromDeposits } = useDegenMode();
   useEffect(() => {
     getContractConfig().then((c) => {
@@ -46,7 +46,10 @@ export default function Action({ maxBorrowAmount, healthFactor, collateralType, 
       amount,
       isRepayFromDeposits,
     });
-
+  const borrowed = shrinkToken(
+    portfolio?.positions?.[position || ""]?.borrowed?.[tokenId]?.balance || "0",
+    (extraDecimals || 0) + (decimals || 0),
+  );
   useEffect(() => {
     if (!canUseAsCollateral) {
       dispatch(toggleUseAsCollateral({ useAsCollateral: false }));
