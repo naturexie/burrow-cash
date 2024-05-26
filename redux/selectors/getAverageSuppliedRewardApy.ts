@@ -9,7 +9,7 @@ export const getAverageSupplyRewardApy = () =>
     (state: RootState) => state.assets,
     (state: RootState) => state.account,
     (assets, account) => {
-      const { supplied, collateral, farms } = account.portfolio;
+      const { supplied, collateralAll, farms } = account.portfolio;
       const supplyFarms = farms.supplied || {};
       const [dailyTotalSupplyProfit, totalSupply] = Object.entries(supplyFarms)
         .map(([tokenId, farm]: [string, Farm]) => {
@@ -37,7 +37,7 @@ export const getAverageSupplyRewardApy = () =>
           const balance = Number(
             shrinkToken(
               new Decimal(supplied[tokenId]?.balance || 0)
-                .plus(collateral[tokenId]?.balance || 0)
+                .plus(collateralAll[tokenId]?.balance || 0)
                 .toNumber(),
               assetDecimals,
             ),
